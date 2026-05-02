@@ -5,12 +5,12 @@ import { NotificationToggle } from "@/components/NotificationToggle";
 import { LogOut, Menu } from "lucide-react";
 
 const pageTitles: Record<string, { title: string; description: string }> = {
-  "/": { title: "Dashboard", description: "Visao geral das suas operacoes" },
-  "/trades/new": { title: "Nova Operacao", description: "Registrar uma nova operacao no WIN" },
-  "/trades": { title: "Historico", description: "Todas as operacoes realizadas" },
-  "/diary": { title: "Diario de Trade", description: "Registros e analises pessoais" },
-  "/reports": { title: "Relatorios", description: "Relatorios da corretora" },
-  "/insights": { title: "Insights", description: "Analise semanal e mensal dos seus resultados" },
+  "/": { title: "Dashboard", description: "Visão geral das suas operações" },
+  "/trades/new": { title: "Nova Operação", description: "Registrar uma nova operação no WIN" },
+  "/trades": { title: "Histórico", description: "Todas as operações realizadas" },
+  "/diary": { title: "Diário de Trade", description: "Registros e análises pessoais" },
+  "/reports": { title: "Relatórios", description: "Relatórios da corretora" },
+  "/insights": { title: "Insights", description: "Análise semanal e mensal dos seus resultados" },
   "/mentor": { title: "Mentor", description: "Seu mentor pessoal de trading" },
 };
 

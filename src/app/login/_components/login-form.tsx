@@ -133,7 +133,7 @@ export function LoginForm() {
                 autoComplete={isRegister ? 'new-password' : 'current-password'}
                 required
                 minLength={6}
-                placeholder={isRegister ? 'Minimo 6 caracteres' : 'Digite sua senha'}
+                placeholder={isRegister ? 'Mínimo 6 caracteres' : 'Digite sua senha'}
                 className="block w-full rounded-lg border border-white/10 bg-white/5 px-4 py-2.5 pr-10 text-sm text-white placeholder:text-white/30 focus:outline-none focus:ring-2 focus:ring-amber-500/40 focus:border-amber-500/50 transition-colors"
               />
               <button

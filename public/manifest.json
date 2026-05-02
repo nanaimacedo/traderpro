@@ -1,7 +1,7 @@
 {
   "name": "TraderPro",
   "short_name": "TraderPro",
-  "description": "Gestao de Operacoes WIN - Day Trade Mini Indice",
+  "description": "Gestão de Operações WIN - Day Trade Mini Índice",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#ffffff",

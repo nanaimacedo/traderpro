@@ -42,8 +42,8 @@ type Indicator = "saldo" | "operacoes" | "gains" | "losses" | "winrate" | "ponto
 type Period = "mes" | "semana";
 
 const indicators: { key: Indicator; label: string; icon: typeof TrendingUp; shortLabel: string }[] = [
-  { key: "saldo", label: "Evolucao do Saldo", icon: DollarSign, shortLabel: "Saldo" },
-  { key: "operacoes", label: "Qtd Operacoes", icon: BarChart3, shortLabel: "Operacoes" },
+  { key: "saldo", label: "Evolução do Saldo", icon: DollarSign, shortLabel: "Saldo" },
+  { key: "operacoes", label: "Qtd Operações", icon: BarChart3, shortLabel: "Operações" },
   { key: "gains", label: "Gains Acumulados", icon: TrendingUp, shortLabel: "Gains" },
   { key: "losses", label: "Losses Acumulados", icon: Activity, shortLabel: "Losses" },
   { key: "winrate", label: "Win Rate Evolutivo", icon: Target, shortLabel: "Win Rate" },
@@ -208,7 +208,7 @@ export function EvolutionChart({ trades }: EvolutionChartProps) {
                     : "text-zinc-500 hover:text-zinc-700"
                 )}
               >
-                {p === "mes" ? "Diario" : "Semanal"}
+                {p === "mes" ? "Diário" : "Semanal"}
               </button>
             ))}
           </div>
@@ -238,7 +238,7 @@ export function EvolutionChart({ trades }: EvolutionChartProps) {
         <div className="h-64 lg:h-72">
           {chartData.length === 0 ? (
             <div className="flex h-full items-center justify-center">
-              <p className="text-sm text-zinc-400">Sem dados no periodo</p>
+              <p className="text-sm text-zinc-400">Sem dados no período</p>
             </div>
           ) : indicator === "operacoes" ? (
             <ResponsiveContainer width="100%" height="100%">
@@ -246,7 +246,7 @@ export function EvolutionChart({ trades }: EvolutionChartProps) {
                 <CartesianGrid strokeDasharray="3 3" stroke="#f4f4f5" vertical={false} />
                 <XAxis dataKey="label" tick={{ fontSize: 10, fill: "#a1a1aa" }} axisLine={{ stroke: "#f4f4f5" }} tickLine={false} />
                 <YAxis tick={{ fontSize: 10, fill: "#a1a1aa" }} tickFormatter={formatAxis} axisLine={false} tickLine={false} allowDecimals={false} />
-                <Tooltip contentStyle={tooltipStyle} formatter={(v) => [v, "Operacoes"]} />
+                <Tooltip contentStyle={tooltipStyle} formatter={(v) => [v, "Operações"]} />
                 <Bar dataKey="operacoes" fill={color} radius={[6, 6, 0, 0]} />
               </BarChart>
             </ResponsiveContainer>

@@ -25,7 +25,7 @@ export default function NewTradePage() {
     <div className="max-w-2xl mx-auto px-0">
       <Card>
         <CardHeader>
-          <CardTitle>Registrar Operacao</CardTitle>
+          <CardTitle>Registrar Operação</CardTitle>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-6">
@@ -41,14 +41,14 @@ export default function NewTradePage() {
                 />
               </div>
               <div className="space-y-2">
-                <label className="text-sm font-medium text-zinc-700">Horario</label>
+                <label className="text-sm font-medium text-zinc-700">Horário</label>
                 <Input type="time" name="time" required defaultValue="09:00" />
               </div>
             </div>
 
             {/* Direction */}
             <div className="space-y-2">
-              <label className="text-sm font-medium text-zinc-700">Direcao</label>
+              <label className="text-sm font-medium text-zinc-700">Direção</label>
               <div className="grid grid-cols-2 gap-3">
                 <label className="relative flex cursor-pointer">
                   <input
@@ -79,7 +79,7 @@ export default function NewTradePage() {
             {/* Prices */}
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
-                <label className="text-sm font-medium text-zinc-700">Preco Entrada</label>
+                <label className="text-sm font-medium text-zinc-700">Preço Entrada</label>
                 <Input
                   type="number"
                   name="entryPrice"
@@ -89,7 +89,7 @@ export default function NewTradePage() {
                 />
               </div>
               <div className="space-y-2">
-                <label className="text-sm font-medium text-zinc-700">Preco Saida</label>
+                <label className="text-sm font-medium text-zinc-700">Preço Saída</label>
                 <Input
                   type="number"
                   name="exitPrice"
@@ -113,7 +113,7 @@ export default function NewTradePage() {
                 />
               </div>
               <div className="space-y-2">
-                <label className="text-sm font-medium text-zinc-700">Duracao (min)</label>
+                <label className="text-sm font-medium text-zinc-700">Duração (min)</label>
                 <Input
                   type="number"
                   name="durationMinutes"
@@ -125,10 +125,10 @@ export default function NewTradePage() {
 
             {/* Notes */}
             <div className="space-y-2">
-              <label className="text-sm font-medium text-zinc-700">Observacoes</label>
+              <label className="text-sm font-medium text-zinc-700">Observações</label>
               <Textarea
                 name="notes"
-                placeholder="Setup utilizado, emocional, observacoes..."
+                placeholder="Setup utilizado, emocional, observações..."
                 rows={3}
               />
             </div>
@@ -138,7 +138,7 @@ export default function NewTradePage() {
               <p className="text-xs font-medium text-zinc-500 uppercase tracking-wider mb-1">
                 Ativo
               </p>
-              <p className="text-sm font-bold text-zinc-900">WIN - Mini Indice</p>
+              <p className="text-sm font-bold text-zinc-900">WIN - Mini Índice</p>
               <p className="text-xs text-zinc-400 mt-1">
                 1 ponto = R$ 0,20 por contrato
               </p>
@@ -147,7 +147,7 @@ export default function NewTradePage() {
             {/* Actions */}
             <div className="flex gap-3 pt-2">
               <Button type="submit" disabled={loading} className="flex-1">
-                {loading ? "Salvando..." : "Registrar Operacao"}
+                {loading ? "Salvando..." : "Registrar Operação"}
               </Button>
               <Button
                 type="button"

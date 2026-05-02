@@ -239,11 +239,8 @@ export function ReportPrintView({ data }: { data: ReportData }) {
         {/* Header */}
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", paddingBottom: 16, borderBottom: "2px solid #18181b" }}>
           <div>
-            <div style={{ display: "flex", alignItems: "baseline", gap: 2 }}>
-              <span style={{ fontSize: 28, fontWeight: 800, color: "#18181b" }}>Trader</span>
-              <span style={{ fontSize: 28, fontWeight: 800, color: "#f59e0b" }}>Pro</span>
-            </div>
-            <p style={{ fontSize: 10, color: "#a1a1aa", marginTop: 2, letterSpacing: 1, textTransform: "uppercase" }}>Relatorio de Performance</p>
+            <img src="/logo.png" alt="TraderPro" style={{ height: 40, objectFit: "contain" }} />
+            <p style={{ fontSize: 10, color: "#a1a1aa", marginTop: 4, letterSpacing: 1, textTransform: "uppercase" }}>Relatório de Performance</p>
           </div>
           <div style={{ textAlign: "right" }}>
             <p style={{ fontSize: 16, fontWeight: 700, color: "#18181b" }}>{data.period}</p>
@@ -252,11 +249,11 @@ export function ReportPrintView({ data }: { data: ReportData }) {
         </div>
 
         {/* KPIs */}
-        <div className="section-title">Metricas Principais</div>
+        <div className="section-title">Métricas Principais</div>
         <div className="kpi-grid">
           <div className="kpi-card">
             <div className="accent" style={{ background: m.netResult >= 0 ? "#059669" : "#f43f5e" }} />
-            <div className="kpi-label">Resultado Liquido</div>
+            <div className="kpi-label">Resultado Líquido</div>
             <div className="kpi-value" style={{ color: m.netResult >= 0 ? "#059669" : "#f43f5e" }}>{formatCurrency(m.netResult)}</div>
             <div className="kpi-sub">{m.totalPoints > 0 ? "+" : ""}{m.totalPoints.toFixed(1)} pontos</div>
           </div>
@@ -276,7 +273,7 @@ export function ReportPrintView({ data }: { data: ReportData }) {
             <div className="accent" style={{ background: data.payoffRatio >= 1.5 ? "#059669" : "#f59e0b" }} />
             <div className="kpi-label">Payoff Ratio</div>
             <div className="kpi-value">{data.payoffRatio > 0 ? data.payoffRatio.toFixed(2) : "—"}</div>
-            <div className="kpi-sub">Media {m.avgPointsPerTrade > 0 ? "+" : ""}{m.avgPointsPerTrade.toFixed(1)} pts/trade</div>
+            <div className="kpi-sub">Média {m.avgPointsPerTrade > 0 ? "+" : ""}{m.avgPointsPerTrade.toFixed(1)} pts/trade</div>
           </div>
         </div>
 
@@ -301,7 +298,7 @@ export function ReportPrintView({ data }: { data: ReportData }) {
         </div>
 
         {/* Charts */}
-        <div className="section-title">Visualizacao</div>
+        <div className="section-title">Visualização</div>
         <div className="charts-row">
           <div className="chart-box">
             <GaugeSVG value={m.winRate} />
@@ -309,7 +306,7 @@ export function ReportPrintView({ data }: { data: ReportData }) {
           </div>
           <div className="chart-box">
             <DonutSVG gains={m.gains} losses={m.losses} zeros={m.zeros} />
-            <div className="chart-label">Distribuicao</div>
+            <div className="chart-label">Distribuição</div>
           </div>
           <div className="chart-box">
             <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
@@ -341,12 +338,12 @@ export function ReportPrintView({ data }: { data: ReportData }) {
                 </div>
               </div>
             </div>
-            <div className="chart-label">Composicao</div>
+            <div className="chart-label">Composição</div>
           </div>
         </div>
 
         {/* Daily Bar Chart */}
-        <div className="section-title">Resultado Diario</div>
+        <div className="section-title">Resultado Diário</div>
         <div style={{ border: "1px solid #e4e4e7", borderRadius: 10, padding: 16, marginBottom: 8 }}>
           <BarChartSVG data={data.dailyResults} />
           <div style={{ display: "flex", gap: 16, justifyContent: "center", marginTop: 8 }}>
@@ -362,15 +359,15 @@ export function ReportPrintView({ data }: { data: ReportData }) {
         </div>
 
         {/* Trades Table */}
-        <div className="section-title">Operacoes Detalhadas</div>
+        <div className="section-title">Operações Detalhadas</div>
         <table className="trades-table">
           <thead>
             <tr>
               <th>Data</th>
               <th>Hora</th>
-              <th>Direcao</th>
+              <th>Direção</th>
               <th className="text-right">Entrada</th>
-              <th className="text-right">Saida</th>
+              <th className="text-right">Saída</th>
               <th className="text-center">Cts</th>
               <th className="text-center">Resultado</th>
               <th className="text-right">Pontos</th>
@@ -408,12 +405,9 @@ export function ReportPrintView({ data }: { data: ReportData }) {
 
         {/* Footer */}
         <div style={{ marginTop: 32, paddingTop: 12, borderTop: "1px solid #e4e4e7", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-          <div style={{ display: "flex", alignItems: "baseline", gap: 2 }}>
-            <span style={{ fontSize: 12, fontWeight: 800, color: "#18181b" }}>Trader</span>
-            <span style={{ fontSize: 12, fontWeight: 800, color: "#f59e0b" }}>Pro</span>
-          </div>
+          <img src="/logo.png" alt="TraderPro" style={{ height: 20, objectFit: "contain" }} />
           <p style={{ fontSize: 8, color: "#a1a1aa" }}>
-            Documento gerado automaticamente — WIN Mini Indice — B3 Bovespa
+            Documento gerado automaticamente — WIN Mini Índice — B3 Bovespa
           </p>
         </div>
       </div>

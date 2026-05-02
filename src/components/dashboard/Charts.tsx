@@ -48,13 +48,13 @@ export function DailyResultChart({ data }: { data: DailyData[] }) {
     <Card className="group overflow-hidden">
       <CardHeader className="flex flex-row items-center gap-2">
         <BarChart3 className="h-4 w-4 text-zinc-400" />
-        <CardTitle className="text-base">Resultado Diario</CardTitle>
+        <CardTitle className="text-base">Resultado Diário</CardTitle>
       </CardHeader>
       <CardContent>
         <div className="h-64 lg:h-72">
           {formatted.length === 0 ? (
             <div className="flex h-full items-center justify-center">
-              <p className="text-sm text-zinc-400">Sem dados no periodo</p>
+              <p className="text-sm text-zinc-400">Sem dados no período</p>
             </div>
           ) : (
             <ResponsiveContainer width="100%" height="100%">
@@ -99,13 +99,13 @@ export function CumulativeChart({ data }: { data: CumulativeData[] }) {
     <Card className="group overflow-hidden">
       <CardHeader className="flex flex-row items-center gap-2">
         <TrendingUp className="h-4 w-4 text-zinc-400" />
-        <CardTitle className="text-base">Evolucao do Saldo</CardTitle>
+        <CardTitle className="text-base">Evolução do Saldo</CardTitle>
       </CardHeader>
       <CardContent>
         <div className="h-64 lg:h-72">
           {data.length === 0 ? (
             <div className="flex h-full items-center justify-center">
-              <p className="text-sm text-zinc-400">Sem dados no periodo</p>
+              <p className="text-sm text-zinc-400">Sem dados no período</p>
             </div>
           ) : (
             <ResponsiveContainer width="100%" height="100%">

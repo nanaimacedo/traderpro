@@ -30,9 +30,9 @@ export default async function DiaryPage() {
           <Card>
             <CardContent className="flex flex-col items-center justify-center py-16">
               <BookOpen className="h-12 w-12 text-zinc-200 mb-4" />
-              <p className="text-sm text-zinc-500">Nenhuma entrada no diario</p>
+              <p className="text-sm text-zinc-500">Nenhuma entrada no diário</p>
               <p className="text-xs text-zinc-400 mt-1">
-                Registre suas analises e aprendizados
+                Registre suas análises e aprendizados
               </p>
             </CardContent>
           </Card>

@@ -198,13 +198,13 @@ export function MentorChat({ tradesContext }: MentorChatProps) {
                 Seu Mentor de Trading
               </h3>
               <p className="mt-2 max-w-md text-sm text-zinc-500">
-                Pergunte sobre setups, psicologia, gestao de risco, analise dos seus trades,
-                ou qualquer duvida sobre o operacional.
+                Pergunte sobre setups, psicologia, gestão de risco, análise dos seus trades,
+                ou qualquer dúvida sobre o operacional.
               </p>
               <div className="mt-6 flex flex-wrap justify-center gap-2">
                 {[
-                  "Analise meus trades recentes",
-                  "Como lidar com sequencia de loss?",
+                  "Análise meus trades recentes",
+                  "Como lidar com sequência de loss?",
                   "Quais setups do Oliver Velez usar?",
                   "Estou em tilt, me ajuda",
                 ].map((suggestion) => (

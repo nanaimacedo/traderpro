@@ -28,7 +28,7 @@ export function StreakIndicator({ maxWinStreak, maxLossStreak, currentStreak }: 
             <Minus className="h-4 w-4 text-zinc-400" />
           )}
           <span className="text-xs font-semibold text-zinc-500 uppercase tracking-wider">
-            Sequencia Atual
+            Sequência Atual
           </span>
         </div>
         <span className={cn(

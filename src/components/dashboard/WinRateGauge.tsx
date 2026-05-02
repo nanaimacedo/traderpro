@@ -16,7 +16,7 @@ export function WinRateGauge({ winRate, gains, losses, zeros }: WinRateGaugeProp
     return (
       <div className="flex flex-col items-center justify-center py-4">
         <div className="text-3xl font-bold text-zinc-300">—</div>
-        <p className="text-xs text-zinc-400 mt-1">Sem operacoes</p>
+        <p className="text-xs text-zinc-400 mt-1">Sem operações</p>
       </div>
     );
   }

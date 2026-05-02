@@ -16,16 +16,16 @@ export default async function ReportsPage() {
 
       <div className="space-y-4">
         <h3 className="text-sm font-medium text-zinc-500 uppercase tracking-wider">
-          Relatorios Anteriores
+          Relatórios Anteriores
         </h3>
 
         {reports.length === 0 ? (
           <Card>
             <CardContent className="flex flex-col items-center justify-center py-16">
               <FileBarChart className="h-12 w-12 text-zinc-200 mb-4" />
-              <p className="text-sm text-zinc-500">Nenhum relatorio enviado</p>
+              <p className="text-sm text-zinc-500">Nenhum relatório enviado</p>
               <p className="text-xs text-zinc-400 mt-1">
-                Envie os PDFs da sua corretora para manter o historico
+                Envie os PDFs da sua corretora para manter o histórico
               </p>
             </CardContent>
           </Card>
@@ -72,7 +72,7 @@ export default async function ReportsPage() {
                       )}
                       {report.netResult !== null && (
                         <div className="text-center">
-                          <p className="text-xs text-zinc-400">Liquido</p>
+                          <p className="text-xs text-zinc-400">Líquido</p>
                           <p className={`text-sm font-bold ${report.netResult >= 0 ? "text-emerald-600" : "text-rose-500"}`}>
                             {formatCurrency(report.netResult)}
                           </p>

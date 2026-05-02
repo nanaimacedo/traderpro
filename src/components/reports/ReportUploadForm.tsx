@@ -59,7 +59,7 @@ export function ReportUploadForm() {
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <FileBarChart className="h-5 w-5 text-zinc-400" />
-          Enviar Relatorio da Corretora
+          Enviar Relatório da Corretora
         </CardTitle>
       </CardHeader>
       <CardContent>
@@ -81,7 +81,7 @@ export function ReportUploadForm() {
                     ? "Enviando..."
                     : fileName
                     ? fileName
-                    : "Clique para selecionar o PDF do relatorio"}
+                    : "Clique para selecionar o PDF do relatório"}
                 </span>
               </div>
             </label>
@@ -89,7 +89,7 @@ export function ReportUploadForm() {
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div className="space-y-2">
-              <label className="text-sm font-medium text-zinc-700">Data do Relatorio</label>
+              <label className="text-sm font-medium text-zinc-700">Data do Relatório</label>
               <Input
                 type="date"
                 name="date"
@@ -117,13 +117,13 @@ export function ReportUploadForm() {
               <Input type="number" name="totalLoss" placeholder="R$ 0,00" step="0.01" />
             </div>
             <div className="space-y-2">
-              <label className="text-sm font-medium text-zinc-700">Resultado Liquido (R$)</label>
+              <label className="text-sm font-medium text-zinc-700">Resultado Líquido (R$)</label>
               <Input type="number" name="netResult" placeholder="R$ 0,00" step="0.01" />
             </div>
           </div>
 
           <Button type="submit" disabled={loading || !uploadedFile}>
-            {loading ? "Salvando..." : "Salvar Relatorio"}
+            {loading ? "Salvando..." : "Salvar Relatório"}
           </Button>
         </form>
       </CardContent>

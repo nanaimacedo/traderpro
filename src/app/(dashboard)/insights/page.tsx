@@ -61,7 +61,7 @@ export default async function InsightsPage() {
             <CardTitle className="text-base">{title}</CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-sm text-zinc-400 text-center py-6">Sem operacoes neste periodo</p>
+            <p className="text-sm text-zinc-400 text-center py-6">Sem operações neste período</p>
           </CardContent>
         </Card>
       );
@@ -122,7 +122,7 @@ export default async function InsightsPage() {
                 <div className="flex-1 rounded-lg border border-emerald-100 bg-emerald-50/50 p-3">
                   <div className="flex items-center gap-1.5">
                     <Clock className="h-3 w-3 text-emerald-600" />
-                    <span className="text-[10px] font-semibold text-emerald-700 uppercase">Melhor Horario</span>
+                    <span className="text-[10px] font-semibold text-emerald-700 uppercase">Melhor Horário</span>
                   </div>
                   <p className="text-sm font-bold text-emerald-700 mt-1">{insights.bestHour.hour}</p>
                   <p className="text-[10px] text-emerald-600">{formatCurrency(insights.bestHour.result)}</p>
@@ -132,7 +132,7 @@ export default async function InsightsPage() {
                 <div className="flex-1 rounded-lg border border-rose-100 bg-rose-50/50 p-3">
                   <div className="flex items-center gap-1.5">
                     <Clock className="h-3 w-3 text-rose-500" />
-                    <span className="text-[10px] font-semibold text-rose-600 uppercase">Pior Horario</span>
+                    <span className="text-[10px] font-semibold text-rose-600 uppercase">Pior Horário</span>
                   </div>
                   <p className="text-sm font-bold text-rose-600 mt-1">{insights.worstHour.hour}</p>
                   <p className="text-[10px] text-rose-500">{formatCurrency(insights.worstHour.result)}</p>
@@ -147,9 +147,9 @@ export default async function InsightsPage() {
               let icon = <Target className="h-3.5 w-3.5 text-zinc-400 shrink-0 mt-0.5" />;
               if (text.includes("positiva") || text.includes("excelente")) icon = <TrendingUp className="h-3.5 w-3.5 text-emerald-500 shrink-0 mt-0.5" />;
               if (text.includes("negativa") || text.includes("abaixo")) icon = <TrendingDown className="h-3.5 w-3.5 text-rose-500 shrink-0 mt-0.5" />;
-              if (text.includes("horario")) icon = <Clock className="h-3.5 w-3.5 text-blue-500 shrink-0 mt-0.5" />;
-              if (text.includes("gains") && text.includes("Sequencia")) icon = <Flame className="h-3.5 w-3.5 text-emerald-500 shrink-0 mt-0.5" />;
-              if (text.includes("losses") && text.includes("Sequencia")) icon = <AlertTriangle className="h-3.5 w-3.5 text-rose-500 shrink-0 mt-0.5" />;
+              if (text.includes("horário")) icon = <Clock className="h-3.5 w-3.5 text-blue-500 shrink-0 mt-0.5" />;
+              if (text.includes("gains") && text.includes("Sequência")) icon = <Flame className="h-3.5 w-3.5 text-emerald-500 shrink-0 mt-0.5" />;
+              if (text.includes("losses") && text.includes("Sequência")) icon = <AlertTriangle className="h-3.5 w-3.5 text-rose-500 shrink-0 mt-0.5" />;
 
               return (
                 <div key={idx} className="flex items-start gap-2 rounded-lg bg-zinc-50/50 px-3 py-2">

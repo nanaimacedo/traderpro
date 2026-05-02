@@ -57,43 +57,43 @@ export function generateWeeklyInsights(trades: TradeForInsight[]) {
 
   // Performance geral
   if (netResult > 0) {
-    insights.push(`Semana positiva: +R$ ${netResult.toFixed(2)} com ${total} operacoes.`);
+    insights.push(`Semana positiva: +R$ ${netResult.toFixed(2)} com ${total} operações.`);
   } else {
-    insights.push(`Semana negativa: R$ ${netResult.toFixed(2)} com ${total} operacoes. Revise os pontos de atencao.`);
+    insights.push(`Semana negativa: R$ ${netResult.toFixed(2)} com ${total} operações. Revise os pontos de atenção.`);
   }
 
   // Win rate
   if (winRate >= 60) {
-    insights.push(`Win rate excelente: ${winRate.toFixed(0)}% — sua seletividade esta afiada.`);
+    insights.push(`Win rate excelente: ${winRate.toFixed(0)}% — sua seletividade está afiada.`);
   } else if (winRate >= 45) {
-    insights.push(`Win rate adequado: ${winRate.toFixed(0)}% — foque em melhorar a localizacao das entradas.`);
+    insights.push(`Win rate adequado: ${winRate.toFixed(0)}% — foque em melhorar a localização das entradas.`);
   } else {
-    insights.push(`Win rate abaixo do ideal: ${winRate.toFixed(0)}% — revise se esta respeitando a M8 como guarda.`);
+    insights.push(`Win rate abaixo do ideal: ${winRate.toFixed(0)}% — revise se está respeitando a M8 como guarda.`);
   }
 
   // Payoff
   if (payoff >= 2) {
-    insights.push(`Payoff ratio de ${payoff.toFixed(2)} — excelente gestao de gain vs loss.`);
+    insights.push(`Payoff ratio de ${payoff.toFixed(2)} — excelente gestão de gain vs loss.`);
   } else if (payoff >= 1) {
     insights.push(`Payoff ratio de ${payoff.toFixed(2)} — adequado, mas busque gains maiores ou losses menores.`);
   } else if (payoff > 0) {
-    insights.push(`Payoff ratio de ${payoff.toFixed(2)} — seus losses medios sao maiores que seus gains. Revise o stop.`);
+    insights.push(`Payoff ratio de ${payoff.toFixed(2)} — seus losses médios são maiores que seus gains. Revise o stop.`);
   }
 
   // Streaks
   if (maxLoss >= 3) {
-    insights.push(`Sequencia de ${maxLoss} losses detectada — sinal de possivel tilt ou falta de seletividade.`);
+    insights.push(`Sequência de ${maxLoss} losses detectada — sinal de possível tilt ou falta de seletividade.`);
   }
   if (maxWin >= 3) {
-    insights.push(`Sequencia de ${maxWin} gains — cuidado com excesso de confianca. Mantenha o processo.`);
+    insights.push(`Sequência de ${maxWin} gains — cuidado com excesso de confiança. Mantenha o processo.`);
   }
 
   // Horarios
   if (bestHour) {
-    insights.push(`Melhor horario: ${bestHour[0]} (R$ ${bestHour[1].result.toFixed(2)}). Considere concentrar operacoes nesse periodo.`);
+    insights.push(`Melhor horário: ${bestHour[0]} (R$ ${bestHour[1].result.toFixed(2)}). Considere concentrar operações nesse período.`);
   }
   if (worstHour && worstHour[1].result < 0) {
-    insights.push(`Pior horario: ${worstHour[0]} (R$ ${worstHour[1].result.toFixed(2)}). Avalie se vale operar nesse periodo.`);
+    insights.push(`Pior horário: ${worstHour[0]} (R$ ${worstHour[1].result.toFixed(2)}). Avalie se vale operar nesse período.`);
   }
 
   // Dias

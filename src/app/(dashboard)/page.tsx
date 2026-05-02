@@ -62,7 +62,7 @@ export default async function Dashboard({ searchParams }: PageProps) {
         {/* Key Metrics 2x2 */}
         <div className="lg:col-span-5 grid grid-cols-2 gap-4">
           <MetricCard
-            title="Resultado Liquido"
+            title="Resultado Líquido"
             value={formatCurrency(metrics.netResult)}
             subtitle={`${metrics.totalPoints > 0 ? "+" : ""}${metrics.totalPoints.toFixed(1)} pontos`}
             icon={metrics.netResult >= 0 ? TrendingUp : TrendingDown}
@@ -71,13 +71,13 @@ export default async function Dashboard({ searchParams }: PageProps) {
           <MetricCard
             title="Total de Trades"
             value={metrics.totalTrades.toString()}
-            subtitle={`Media ${metrics.avgPointsPerTrade > 0 ? "+" : ""}${metrics.avgPointsPerTrade.toFixed(1)} pts`}
+            subtitle={`Média ${metrics.avgPointsPerTrade > 0 ? "+" : ""}${metrics.avgPointsPerTrade.toFixed(1)} pts`}
             icon={BarChart3}
           />
           <MetricCard
             title="Contratos"
             value={metrics.totalContracts.toString()}
-            subtitle="Operados no mes"
+            subtitle="Operados no mês"
             icon={Layers}
           />
           <MetricCard
@@ -157,13 +157,13 @@ export default async function Dashboard({ searchParams }: PageProps) {
       {/* Recent trades */}
       <Card>
         <CardHeader>
-          <CardTitle>Ultimas Operacoes</CardTitle>
+          <CardTitle>Últimas Operações</CardTitle>
         </CardHeader>
         <CardContent>
           {trades.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-12 text-center">
               <BarChart3 className="h-10 w-10 text-zinc-300 mb-3" />
-              <p className="text-sm text-zinc-500">Nenhuma operacao neste periodo</p>
+              <p className="text-sm text-zinc-500">Nenhuma operação neste período</p>
               <p className="text-xs text-zinc-400 mt-1">Use as setas para navegar entre os meses</p>
             </div>
           ) : (

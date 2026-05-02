@@ -5,7 +5,7 @@ import { ChevronLeft, ChevronRight, FileDown } from "lucide-react";
 import Link from "next/link";
 
 const monthNames = [
-  "Janeiro", "Fevereiro", "Marco", "Abril", "Maio", "Junho",
+  "Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho",
   "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro",
 ];
 
@@ -62,7 +62,7 @@ export function PeriodFilter() {
         className="ml-auto flex items-center gap-1.5 rounded-lg border border-zinc-200 bg-white px-3 py-1.5 text-xs font-medium text-zinc-600 hover:bg-zinc-50 hover:text-zinc-900 transition-colors"
       >
         <FileDown className="h-3.5 w-3.5" />
-        <span className="hidden sm:inline">Gerar Relatorio</span>
+        <span className="hidden sm:inline">Gerar Relatório</span>
         <span className="sm:hidden">PDF</span>
       </Link>
     </div>

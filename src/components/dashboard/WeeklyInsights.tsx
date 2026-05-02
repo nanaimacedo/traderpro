@@ -57,7 +57,7 @@ export function WeeklyInsights() {
           <CardTitle className="text-base">Insights da Semana</CardTitle>
         </CardHeader>
         <CardContent>
-          <p className="text-sm text-zinc-400 text-center py-4">Sem operacoes nesta semana</p>
+          <p className="text-sm text-zinc-400 text-center py-4">Sem operações nesta semana</p>
         </CardContent>
       </Card>
     );

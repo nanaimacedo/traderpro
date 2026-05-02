@@ -8,14 +8,14 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { ImageUpload } from "./ImageUpload";
-import { BookOpen } from "lucide-react";
+import { BookOpen, TrendingUp, Minus, TrendingDown, Target, Activity, type LucideIcon } from "lucide-react";
 
-const moods = [
-  { value: "OTIMISTA", label: "Otimista", emoji: "😊" },
-  { value: "NEUTRO", label: "Neutro", emoji: "😐" },
-  { value: "FRUSTRADO", label: "Frustrado", emoji: "😤" },
-  { value: "DISCIPLINADO", label: "Disciplinado", emoji: "🎯" },
-  { value: "ANSIOSO", label: "Ansioso", emoji: "😰" },
+const moods: { value: string; label: string; icon: LucideIcon }[] = [
+  { value: "OTIMISTA", label: "Otimista", icon: TrendingUp },
+  { value: "NEUTRO", label: "Neutro", icon: Minus },
+  { value: "FRUSTRADO", label: "Frustrado", icon: TrendingDown },
+  { value: "DISCIPLINADO", label: "Disciplinado", icon: Target },
+  { value: "ANSIOSO", label: "Ansioso", icon: Activity },
 ];
 
 export function NewDiaryForm() {
@@ -64,7 +64,7 @@ export function NewDiaryForm() {
                 />
               </div>
               <div className="space-y-2">
-                <label className="text-sm font-medium text-zinc-700">Titulo</label>
+                <label className="text-sm font-medium text-zinc-700">Título</label>
                 <Input name="title" placeholder="Ex: Setup de rompimento no WIN" required />
               </div>
             </div>
@@ -84,7 +84,7 @@ export function NewDiaryForm() {
                       className="sr-only peer"
                     />
                     <div className="flex items-center gap-1.5 rounded-full border-2 border-zinc-200 px-3 py-1.5 text-sm transition-all peer-checked:border-zinc-900 peer-checked:bg-zinc-900 peer-checked:text-white">
-                      <span>{mood.emoji}</span>
+                      <mood.icon className="h-3.5 w-3.5" />
                       <span>{mood.label}</span>
                     </div>
                   </label>
@@ -93,10 +93,10 @@ export function NewDiaryForm() {
             </div>
 
             <div className="space-y-2">
-              <label className="text-sm font-medium text-zinc-700">Conteudo</label>
+              <label className="text-sm font-medium text-zinc-700">Conteúdo</label>
               <Textarea
                 name="content"
-                placeholder="Descreva o dia de operacao, setups utilizados, erros, acertos, emocional..."
+                placeholder="Descreva o dia de operação, setups utilizados, erros, acertos, emocional..."
                 rows={6}
                 required
               />
@@ -109,7 +109,7 @@ export function NewDiaryForm() {
         ) : (
           <div className="space-y-4">
             <p className="text-sm text-zinc-600">
-              Entrada salva! Agora voce pode adicionar prints do mercado.
+              Entrada salva! Agora você pode adicionar prints do mercado.
             </p>
             <ImageUpload diaryEntryId={diaryId!} />
             <Button onClick={handleDone} variant="outline">

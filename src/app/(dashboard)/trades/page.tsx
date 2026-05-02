@@ -17,12 +17,12 @@ export default async function TradesPage() {
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
           <History className="h-5 w-5 text-zinc-400" />
-          <span className="text-sm text-zinc-500">{trades.length} operacoes registradas</span>
+          <span className="text-sm text-zinc-500">{trades.length} operações registradas</span>
         </div>
         <Link href="/trades/new">
           <Button size="sm">
             <Plus className="h-4 w-4 mr-1" />
-            <span className="hidden sm:inline">Nova Operacao</span>
+            <span className="hidden sm:inline">Nova Operação</span>
             <span className="sm:hidden">Nova</span>
           </Button>
         </Link>
@@ -33,11 +33,11 @@ export default async function TradesPage() {
           {trades.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-16 text-center">
               <History className="h-12 w-12 text-zinc-200 mb-4" />
-              <p className="text-sm text-zinc-500">Nenhuma operacao registrada</p>
+              <p className="text-sm text-zinc-500">Nenhuma operação registrada</p>
               <Link href="/trades/new" className="mt-4">
                 <Button variant="outline" size="sm">
                   <Plus className="h-4 w-4 mr-1" />
-                  Registrar primeira operacao
+                  Registrar primeira operação
                 </Button>
               </Link>
             </div>
@@ -50,9 +50,9 @@ export default async function TradesPage() {
                     <tr className="border-b border-zinc-100">
                       <th className="px-4 py-3 text-left text-xs font-medium text-zinc-500 uppercase tracking-wider">Data</th>
                       <th className="px-4 py-3 text-left text-xs font-medium text-zinc-500 uppercase tracking-wider">Hora</th>
-                      <th className="px-4 py-3 text-left text-xs font-medium text-zinc-500 uppercase tracking-wider">Direcao</th>
+                      <th className="px-4 py-3 text-left text-xs font-medium text-zinc-500 uppercase tracking-wider">Direção</th>
                       <th className="px-4 py-3 text-right text-xs font-medium text-zinc-500 uppercase tracking-wider">Entrada</th>
-                      <th className="px-4 py-3 text-right text-xs font-medium text-zinc-500 uppercase tracking-wider">Saida</th>
+                      <th className="px-4 py-3 text-right text-xs font-medium text-zinc-500 uppercase tracking-wider">Saída</th>
                       <th className="px-4 py-3 text-center text-xs font-medium text-zinc-500 uppercase tracking-wider">Cts</th>
                       <th className="px-4 py-3 text-center text-xs font-medium text-zinc-500 uppercase tracking-wider">Resultado</th>
                       <th className="px-4 py-3 text-right text-xs font-medium text-zinc-500 uppercase tracking-wider">Pontos</th>

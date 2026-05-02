@@ -17,10 +17,10 @@ import {
 
 const navigation = [
   { name: "Dashboard", href: "/", icon: LayoutDashboard },
-  { name: "Nova Operacao", href: "/trades/new", icon: Plus },
-  { name: "Historico", href: "/trades", icon: History },
-  { name: "Diario", href: "/diary", icon: BookOpen },
-  { name: "Relatorios", href: "/reports", icon: FileBarChart },
+  { name: "Nova Operação", href: "/trades/new", icon: Plus },
+  { name: "Histórico", href: "/trades", icon: History },
+  { name: "Diário", href: "/diary", icon: BookOpen },
+  { name: "Relatórios", href: "/reports", icon: FileBarChart },
   { name: "Insights", href: "/insights", icon: Lightbulb },
   { name: "Mentor", href: "/mentor", icon: Brain },
 ];
@@ -97,7 +97,7 @@ export function Sidebar({ open, onClose }: SidebarProps) {
         <div className="border-t border-zinc-100 p-4">
           <div className="rounded-lg bg-zinc-50 p-3">
             <p className="text-xs font-medium text-zinc-500">Ativo Operado</p>
-            <p className="text-sm font-bold text-zinc-900">WIN - Mini Indice</p>
+            <p className="text-sm font-bold text-zinc-900">WIN - Mini Índice</p>
             <p className="text-[10px] text-zinc-400 mt-1">B3 - Bovespa</p>
           </div>
         </div>

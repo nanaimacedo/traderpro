@@ -8,8 +8,8 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "TraderPro - Gestao de Operacoes WIN",
-  description: "Sistema de gestao pessoal para operacoes de day trade no mini indice (WIN)",
+  title: "TraderPro - Gestão de Operações WIN",
+  description: "Sistema de gestão pessoal para operações de day trade no mini índice (WIN)",
   manifest: "/manifest.json",
   appleWebApp: {
     capable: true,

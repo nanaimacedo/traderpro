@@ -3,7 +3,7 @@ import { LoginForm } from './_components/login-form';
 
 export const metadata: Metadata = {
   title: 'Login — TraderPro',
-  description: 'Sistema de gestao profissional para operacoes de day trade no mini indice',
+  description: 'Sistema de gestão profissional para operações de day trade no mini índice',
 };
 
 export default function LoginPage() {
@@ -28,7 +28,7 @@ export default function LoginPage() {
               <span className="text-amber-500 drop-shadow-lg">Pro</span>
             </h1>
             <p className="mt-2 text-sm text-white/60">
-              Onde disciplina vira metodo e gestao vira resultado
+              Onde disciplina vira método e gestão vira resultado
             </p>
           </div>
 
