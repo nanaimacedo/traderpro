@@ -49,14 +49,16 @@ export function Sidebar({ open, onClose }: SidebarProps) {
       >
         {/* Logo + close button */}
         <div className="flex h-16 items-center justify-between border-b border-zinc-100 px-4">
-          <Image
-            src="/logo.png"
-            alt="TraderPro"
-            width={180}
-            height={48}
-            className="object-contain"
-            priority
-          />
+          <Link href="/" onClick={onClose}>
+            <Image
+              src="/logo.png"
+              alt="TraderPro"
+              width={180}
+              height={48}
+              className="object-contain cursor-pointer"
+              priority
+            />
+          </Link>
           <button
             onClick={onClose}
             className="flex h-8 w-8 items-center justify-center rounded-lg text-zinc-400 hover:bg-zinc-100 hover:text-zinc-600 lg:hidden cursor-pointer"

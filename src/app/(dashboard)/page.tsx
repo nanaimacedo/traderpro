@@ -10,6 +10,7 @@ import { WinRateGauge } from "@/components/dashboard/WinRateGauge";
 import { DistributionDonut } from "@/components/dashboard/DistributionDonut";
 import { PeriodFilter } from "@/components/dashboard/PeriodFilter";
 import { StreakIndicator } from "@/components/dashboard/StreakIndicator";
+import { WeeklyInsights } from "@/components/dashboard/WeeklyInsights";
 import {
   TrendingUp,
   TrendingDown,
@@ -149,6 +150,9 @@ export default async function Dashboard({ searchParams }: PageProps) {
           }))}
         />
       </div>
+
+      {/* Weekly Insights */}
+      <WeeklyInsights />
 
       {/* Recent trades */}
       <Card>
