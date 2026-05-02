@@ -91,9 +91,7 @@ export default async function ReportsPage() {
                     {/* Actions */}
                     <div className="flex items-center gap-3 sm:shrink-0">
                       <a
-                        href={`/reports/${report.filename}`}
-                        target="_blank"
-                        rel="noopener noreferrer"
+                        href={`/reports/pdf?month=${new Date(report.date).getMonth()}&year=${new Date(report.date).getFullYear()}`}
                         className="text-xs text-zinc-500 hover:text-zinc-700 underline"
                       >
                         Ver PDF
