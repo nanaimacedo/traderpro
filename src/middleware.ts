@@ -5,7 +5,7 @@ const SECRET = new TextEncoder().encode(
   process.env.JWT_SECRET || "traderpro-jwt-secret-change-in-production"
 );
 
-const PUBLIC_PATHS = ["/login", "/api/auth"];
+const PUBLIC_PATHS = ["/login", "/api/auth", "/api/cron", "/api/notifications"];
 
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
