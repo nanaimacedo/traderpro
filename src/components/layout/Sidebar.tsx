@@ -52,8 +52,8 @@ export function Sidebar({ open, onClose }: SidebarProps) {
           <Image
             src="/logo.png"
             alt="TraderPro"
-            width={130}
-            height={34}
+            width={180}
+            height={48}
             className="object-contain"
             priority
           />
