@@ -97,13 +97,12 @@ export function NotificationToggle() {
     return null;
   }
 
-  // Permissao negada permanentemente
+  // Permissão negada permanentemente
   if (permission === 'denied') {
     return (
-      <div className="flex items-center gap-2 rounded-lg border border-red-800/30 bg-red-950/20 px-3 py-2 text-sm text-red-400">
+      <button className="relative flex h-9 w-9 items-center justify-center rounded-lg text-rose-400 cursor-not-allowed" title="Notificações bloqueadas no navegador">
         <BellOff className="h-4 w-4" />
-        <span>Notificacoes bloqueadas no navegador</span>
-      </div>
+      </button>
     );
   }
 
@@ -111,20 +110,23 @@ export function NotificationToggle() {
     <button
       onClick={isSubscribed ? unsubscribePush : subscribePush}
       disabled={loading}
-      className={`flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium transition-all ${
+      className={`relative flex h-9 w-9 items-center justify-center rounded-lg transition-colors cursor-pointer disabled:opacity-50 ${
         isSubscribed
-          ? 'border border-green-800/30 bg-green-950/20 text-green-400 hover:bg-green-950/40'
-          : 'border border-zinc-700 bg-zinc-800 text-zinc-300 hover:bg-zinc-700'
-      } disabled:opacity-50`}
+          ? 'text-emerald-600 hover:bg-emerald-50'
+          : 'text-zinc-400 hover:bg-zinc-100 hover:text-zinc-600'
+      }`}
+      title={isSubscribed ? 'Notificações ativas' : 'Ativar notificações'}
     >
       {loading ? (
         <div className="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
       ) : isSubscribed ? (
-        <Bell className="h-4 w-4" />
+        <>
+          <Bell className="h-4 w-4" />
+          <span className="absolute top-1.5 right-1.5 h-2 w-2 rounded-full bg-emerald-500" />
+        </>
       ) : (
         <BellOff className="h-4 w-4" />
       )}
-      <span>{isSubscribed ? 'Notificacoes ativas' : 'Ativar notificacoes'}</span>
     </button>
   );
 }
