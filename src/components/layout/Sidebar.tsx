@@ -11,6 +11,7 @@ import {
   BookOpen,
   FileBarChart,
   Brain,
+  Lightbulb,
   X,
 } from "lucide-react";
 
@@ -20,6 +21,7 @@ const navigation = [
   { name: "Historico", href: "/trades", icon: History },
   { name: "Diario", href: "/diary", icon: BookOpen },
   { name: "Relatorios", href: "/reports", icon: FileBarChart },
+  { name: "Insights", href: "/insights", icon: Lightbulb },
   { name: "Mentor", href: "/mentor", icon: Brain },
 ];
 
