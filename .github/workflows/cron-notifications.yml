@@ -1,0 +1,42 @@
+name: TraderPro Scheduled Notifications
+
+on:
+  schedule:
+    # Morning notification: seg-sex 10:30 UTC (7:30 BRT)
+    - cron: '30 10 * * 1-5'
+    # Weekly insights: sexta 18:00 UTC (15:00 BRT)
+    - cron: '0 18 * * 5'
+  workflow_dispatch: # permite rodar manualmente
+
+jobs:
+  notify:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Determine endpoint
+        id: endpoint
+        run: |
+          CRON_EXPR="${{ github.event.schedule }}"
+          if [ "$CRON_EXPR" = "0 18 * * 5" ]; then
+            echo "path=/api/cron/weekly-insights" >> $GITHUB_OUTPUT
+            echo "name=Weekly Insights" >> $GITHUB_OUTPUT
+          else
+            echo "path=/api/cron/morning-notification" >> $GITHUB_OUTPUT
+            echo "name=Morning Notification" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Send ${{ steps.endpoint.outputs.name }}
+        run: |
+          response=$(curl -s -w "\n%{http_code}" \
+            -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}" \
+            "https://traderpro-app.netlify.app${{ steps.endpoint.outputs.path }}")
+
+          http_code=$(echo "$response" | tail -1)
+          body=$(echo "$response" | head -n -1)
+
+          echo "Status: $http_code"
+          echo "Response: $body"
+
+          if [ "$http_code" -ge 400 ]; then
+            echo "::error::Request failed with status $http_code"
+            exit 1
+          fi
