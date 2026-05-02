@@ -1,10 +1,11 @@
 export const dynamic = "force-dynamic";
 
 import { getTrades } from "@/lib/actions";
-import { calculateMetrics, getDailyResults, getCumulativeResults } from "@/lib/calculations";
+import { calculateMetrics, getDailyResults } from "@/lib/calculations";
 import { formatCurrency } from "@/lib/utils";
 import { MetricCard } from "@/components/dashboard/MetricCard";
-import { DailyResultChart, CumulativeChart } from "@/components/dashboard/Charts";
+import { DailyResultChart } from "@/components/dashboard/Charts";
+import { EvolutionChart } from "@/components/dashboard/EvolutionChart";
 import { WinRateGauge } from "@/components/dashboard/WinRateGauge";
 import { DistributionDonut } from "@/components/dashboard/DistributionDonut";
 import { PeriodFilter } from "@/components/dashboard/PeriodFilter";
@@ -35,7 +36,6 @@ export default async function Dashboard({ searchParams }: PageProps) {
   const trades = await getTrades(month, year);
   const metrics = calculateMetrics(trades);
   const dailyResults = getDailyResults(trades);
-  const cumulativeResults = getCumulativeResults(trades);
 
   const payoffRatio = metrics.losses > 0 && metrics.gains > 0
     ? Math.abs(metrics.totalGain / metrics.gains) / Math.abs(metrics.totalLoss / metrics.losses)
@@ -138,7 +138,16 @@ export default async function Dashboard({ searchParams }: PageProps) {
       {/* Charts */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <DailyResultChart data={dailyResults} />
-        <CumulativeChart data={cumulativeResults} />
+        <EvolutionChart
+          trades={trades.map((t: any) => ({
+            date: new Date(t.date).toISOString(),
+            time: t.time,
+            result: t.result,
+            points: t.points,
+            financialResult: t.financialResult,
+            contracts: t.contracts,
+          }))}
+        />
       </div>
 
       {/* Recent trades */}
