@@ -1,0 +1,34 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(tasklist)",
+      "Bash(netstat -aon)",
+      "Bash(taskkill //PID 3028 //F)",
+      "Bash(rm -f prisma/dev.db prisma/dev.db-journal)",
+      "Bash(taskkill //PID 16940 //F)",
+      "Bash(rm -f dev.db)",
+      "Bash(ls \"c:\\\\Users\\\\Nanai Macedo\\\\Desktop\"/*.png \"c:\\\\Users\\\\Nanai Macedo\\\\Desktop\"/*.jpg \"c:\\\\Users\\\\Nanai Macedo\\\\Desktop\"/*.svg \"c:\\\\Users\\\\Nanai Macedo\\\\Desktop\"/*.webp)",
+      "Bash(cp \"c:\\\\Users\\\\Nanai Macedo\\\\Desktop\\\\logotraderpro.png\" \"c:\\\\Users\\\\Nanai Macedo\\\\Desktop\\\\TraderPro\\\\public\\\\logo.png\")",
+      "Bash(cp \"c:\\\\Users\\\\Nanai Macedo\\\\Desktop\\\\TraderPro_log2.png\" \"c:\\\\Users\\\\Nanai Macedo\\\\Desktop\\\\TraderPro\\\\public\\\\logo2.png\")",
+      "Bash(mkdir -p \"\\(dashboard\\)\")",
+      "Bash(mv page.tsx \"\\(dashboard\\)/\")",
+      "Bash(mv trades:*)",
+      "Bash(mv diary:*)",
+      "Bash(mv reports:*)",
+      "Bash(mkdir -p \"\\(dashboard\\)/trades/new\" \"\\(dashboard\\)/diary\" \"\\(dashboard\\)/reports\")",
+      "Bash(cp page.tsx \"\\(dashboard\\)/\")",
+      "Bash(cp actions.ts \"\\(dashboard\\)/\")",
+      "Bash(cp -r trades/new/page.tsx \"\\(dashboard\\)/trades/new/\")",
+      "Bash(cp trades/page.tsx \"\\(dashboard\\)/trades/\")",
+      "Bash(cp trades/new/page.tsx \"\\(dashboard\\)/trades/new/\")",
+      "Bash(cp diary/page.tsx \"\\(dashboard\\)/diary/\")",
+      "Bash(cp reports/page.tsx \"\\(dashboard\\)/reports/\")",
+      "Bash(rm -rf trades diary reports)",
+      "Bash(rm -f actions.ts)",
+      "Bash(while read:*)",
+      "Bash(do sed:*)",
+      "Bash(done)",
+      "Bash(grep -r \"keyframes\\\\|@keyframe\\\\|animation:\" 'c:\\\\Users\\\\Nanai Macedo\\\\Desktop\\\\HumanCareOS\\\\apps\\\\web\\\\src' --include=*.css --include=*.tsx --include=*.ts)"
+    ]
+  }
+}

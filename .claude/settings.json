@@ -1,0 +1,27 @@
+{
+  "permissions": {
+    "allow": [
+      "WebSearch",
+      "Bash(npx create-next-app@latest . --typescript --tailwind --eslint --app --src-dir --import-alias \"@/*\" --use-npm --no-turbopack)",
+      "Bash(npx create-next-app@latest trader-pro --typescript --tailwind --eslint --app --src-dir --import-alias \"@/*\" --use-npm --no-turbopack)",
+      "Bash(cp -r trader-pro/* .)",
+      "Bash(cp -r trader-pro/.* .)",
+      "Bash(rm -rf trader-pro)",
+      "Bash(mv trader-pro/node_modules .)",
+      "Bash(mv trader-pro/package.json .)",
+      "Bash(mv trader-pro/package-lock.json .)",
+      "Bash(mv trader-pro/tsconfig.json .)",
+      "Bash(mv trader-pro/next.config.ts .)",
+      "Bash(npx prisma:*)",
+      "Bash(node -e \"const { Prisma } = require\\(''''./src/generated/prisma/client''''\\); console.log\\(Object.keys\\(Prisma\\)\\)\")",
+      "mcp__playwright__browser_navigate",
+      "mcp__playwright__browser_take_screenshot",
+      "Bash(taskkill //PID 17232 //F)",
+      "Bash(taskkill //PID 15960 //F)",
+      "Bash(PRISMA_USER_CONSENT_FOR_DANGEROUS_AI_ACTION=\"entao reset\" npx prisma migrate reset --force)",
+      "Bash(node -e \"const path = require\\(''path''\\); console.log\\(path.join\\(process.cwd\\(\\), ''prisma'', ''dev.db''\\)\\)\")",
+      "Bash(rm -f prisma/dev.db)",
+      "Bash(rm -rf prisma/migrations)"
+    ]
+  }
+}

@@ -1,0 +1,6 @@
+node_modules
+.next
+.env
+.playwright-mcp
+/src/generated/prisma
+prisma/dev.db

@@ -1,0 +1,68 @@
+generator client {
+  provider = "prisma-client-js"
+  output   = "../node_modules/.prisma/client"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model Trade {
+  id              String   @id @default(cuid())
+  date            DateTime
+  time            String // horario da operacao HH:mm
+  asset           String   @default("WIN")
+  direction       String // COMPRA | VENDA
+  entryPrice      Float
+  exitPrice       Float
+  contracts       Int
+  result          String // GAIN | LOSS | ZERO
+  points          Float // pontos ganhos/perdidos
+  financialResult Float // resultado em R$ (pontos * 0.20 * contratos)
+  durationMinutes Int?
+  notes           String?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  diaryEntry   DiaryEntry? @relation(fields: [diaryEntryId], references: [id])
+  diaryEntryId String?
+}
+
+model DiaryEntry {
+  id        String   @id @default(cuid())
+  date      DateTime
+  title     String
+  content   String // texto do diario
+  mood      String? // OTIMISTA | NEUTRO | FRUSTRADO | DISCIPLINADO | ANSIOSO
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  trades Trade[]
+  images DiaryImage[]
+}
+
+model DiaryImage {
+  id           String     @id @default(cuid())
+  filename     String
+  originalName String
+  path         String
+  createdAt    DateTime   @default(now())
+
+  diaryEntry   DiaryEntry @relation(fields: [diaryEntryId], references: [id], onDelete: Cascade)
+  diaryEntryId String
+}
+
+model BrokerReport {
+  id           String   @id @default(cuid())
+  date         DateTime
+  filename     String
+  originalName String
+  totalTrades  Int?
+  totalGain    Float?
+  totalLoss    Float?
+  netResult    Float?
+  fees         Float? // taxas e emolumentos
+  rawData      String? // dados brutos extraidos do PDF
+  createdAt    DateTime @default(now())
+}
