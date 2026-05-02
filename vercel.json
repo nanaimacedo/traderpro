@@ -1,0 +1,10 @@
+{
+  "buildCommand": "npx prisma generate && next build",
+  "framework": "nextjs",
+  "crons": [
+    {
+      "path": "/api/cron/morning-notification",
+      "schedule": "30 10 * * 1-5"
+    }
+  ]
+}

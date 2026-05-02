@@ -1,3 +1,6 @@
+"use client";
+
+import { useState } from "react";
 import { Sidebar } from "@/components/layout/Sidebar";
 import { Header } from "@/components/layout/Header";
 
@@ -6,12 +9,14 @@ export default function DashboardLayout({
 }: {
   children: React.ReactNode;
 }) {
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+
   return (
     <>
-      <Sidebar />
-      <div className="pl-64 min-h-full">
-        <Header />
-        <main className="p-8">{children}</main>
+      <Sidebar open={sidebarOpen} onClose={() => setSidebarOpen(false)} />
+      <div className="lg:pl-64 min-h-full">
+        <Header onMenuClick={() => setSidebarOpen(true)} />
+        <main className="p-4 lg:p-8">{children}</main>
       </div>
     </>
   );

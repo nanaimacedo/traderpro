@@ -1,10 +1,9 @@
 export const dynamic = "force-dynamic";
 
 import { getBrokerReports } from "@/lib/actions";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
+import { Card, CardContent } from "@/components/ui/card";
 import { formatCurrency, formatDate } from "@/lib/utils";
-import { FileBarChart, Upload } from "lucide-react";
+import { FileBarChart } from "lucide-react";
 import { ReportUploadForm } from "@/components/reports/ReportUploadForm";
 import { DeleteReportButton } from "@/components/reports/DeleteReportButton";
 
@@ -13,10 +12,8 @@ export default async function ReportsPage() {
 
   return (
     <div className="space-y-8">
-      {/* Upload form */}
       <ReportUploadForm />
 
-      {/* Reports list */}
       <div className="space-y-4">
         <h3 className="text-sm font-medium text-zinc-500 uppercase tracking-wider">
           Relatorios Anteriores
@@ -36,19 +33,21 @@ export default async function ReportsPage() {
           <div className="grid gap-4">
             {reports.map((report: any) => (
               <Card key={report.id}>
-                <CardContent className="p-5">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-4">
-                      <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-zinc-50">
+                <CardContent className="p-4 lg:p-5">
+                  <div className="flex flex-col sm:flex-row sm:items-center gap-4">
+                    {/* File info */}
+                    <div className="flex items-center gap-3 flex-1 min-w-0">
+                      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-zinc-50">
                         <FileBarChart className="h-5 w-5 text-zinc-400" />
                       </div>
-                      <div>
-                        <p className="text-sm font-semibold text-zinc-900">{report.originalName}</p>
+                      <div className="min-w-0">
+                        <p className="text-sm font-semibold text-zinc-900 truncate">{report.originalName}</p>
                         <p className="text-xs text-zinc-400">{formatDate(report.date)}</p>
                       </div>
                     </div>
 
-                    <div className="flex items-center gap-6">
+                    {/* Metrics */}
+                    <div className="flex flex-wrap items-center gap-4 sm:gap-6">
                       {report.totalTrades && (
                         <div className="text-center">
                           <p className="text-xs text-zinc-400">Trades</p>
@@ -87,7 +86,10 @@ export default async function ReportsPage() {
                           </p>
                         </div>
                       )}
+                    </div>
 
+                    {/* Actions */}
+                    <div className="flex items-center gap-3 sm:shrink-0">
                       <a
                         href={`/reports/${report.filename}`}
                         target="_blank"
@@ -96,7 +98,6 @@ export default async function ReportsPage() {
                       >
                         Ver PDF
                       </a>
-
                       <DeleteReportButton id={report.id} />
                     </div>
                   </div>

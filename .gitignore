@@ -4,3 +4,5 @@ node_modules
 .playwright-mcp
 /src/generated/prisma
 prisma/dev.db
+
+.vercel

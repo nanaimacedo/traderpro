@@ -1,7 +1,5 @@
 import type { Metadata } from 'next';
 import { LoginForm } from './_components/login-form';
-import { LoginHero } from './_components/login-hero';
-import { MobileSplash } from './_components/mobile-splash';
 
 export const metadata: Metadata = {
   title: 'Login — TraderPro',
@@ -10,36 +8,44 @@ export const metadata: Metadata = {
 
 export default function LoginPage() {
   return (
-    <div className="flex min-h-screen">
-      {/* LEFT PANEL — Animated brand hero (desktop) */}
-      <div className="relative hidden lg:flex lg:w-[55%]">
-        <LoginHero />
-      </div>
+    <div className="relative min-h-screen w-full">
+      {/* Background image — full screen */}
+      <div
+        className="absolute inset-0 bg-cover bg-center bg-no-repeat"
+        style={{ backgroundImage: "url('/login-bg.png')" }}
+      />
 
-      {/* RIGHT PANEL — Form */}
-      <div className="flex flex-1 flex-col items-center justify-center px-6 py-12 bg-gradient-to-b from-zinc-50 to-white">
-        {/* Mobile splash */}
-        <MobileSplash />
+      {/* Dark overlay for readability */}
+      <div className="absolute inset-0 bg-black/30" />
 
-        {/* Desktop heading */}
-        <div className="hidden lg:block mb-8 text-center">
-          <h2 className="text-2xl font-bold tracking-tight text-zinc-900">Bem-vindo de volta</h2>
-          <p className="mt-1 text-sm text-zinc-500">Acesse sua conta para gerenciar suas operacoes</p>
-        </div>
+      {/* Content */}
+      <div className="relative z-10 flex min-h-screen items-center justify-end px-6 py-12 lg:px-20 xl:px-32">
+        <div className="w-full max-w-[420px]">
+          {/* Logo */}
+          <div className="mb-8 text-center">
+            <h1 className="text-4xl font-extrabold tracking-tight">
+              <span className="text-white drop-shadow-lg">Trader</span>
+              <span className="text-amber-500 drop-shadow-lg">Pro</span>
+            </h1>
+            <p className="mt-2 text-sm text-white/60">
+              Onde disciplina vira metodo e gestao vira resultado
+            </p>
+          </div>
 
-        {/* Form */}
-        <div className="w-full max-w-[400px]">
+          {/* Form */}
           <LoginForm />
-        </div>
 
-        {/* Mobile trust badges */}
-        <div className="mt-8 flex items-center gap-4 lg:hidden">
-          {['Dados Locais', 'SQLite', 'Offline'].map((label) => (
-            <span key={label} className="flex items-center gap-1 text-[10px] text-zinc-400">
-              <span className="w-1 h-1 rounded-full bg-amber-500" />
-              {label}
-            </span>
-          ))}
+          {/* Trust badges */}
+          <div className="mt-6 flex items-center justify-center gap-4">
+            {['Dados Locais', 'SQLite Seguro', 'Sem Cloud'].map((label) => (
+              <div key={label} className="flex items-center gap-1.5">
+                <div className="h-1.5 w-1.5 rounded-full bg-amber-500/60" />
+                <span className="text-[10px] font-medium uppercase tracking-wider text-white/40">
+                  {label}
+                </span>
+              </div>
+            ))}
+          </div>
         </div>
       </div>
     </div>
