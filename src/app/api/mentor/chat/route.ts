@@ -90,7 +90,7 @@ export async function POST(request: NextRequest) {
       });
     }
 
-    const model = "gemini-2.5-flash";
+    const model = "gemini-2.0-flash";
     const convId = conversation.id;
 
     // Use streaming endpoint
@@ -105,7 +105,6 @@ export async function POST(request: NextRequest) {
           generationConfig: {
             temperature: 0.7,
             maxOutputTokens: 4096,
-            thinkingConfig: { thinkingBudget: 2048 },
           },
         }),
       }
