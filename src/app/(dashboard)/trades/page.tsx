@@ -1,23 +1,29 @@
-export const dynamic = "force-dynamic";
+export const revalidate = 0;
 
 import { getAllTrades } from "@/lib/actions";
 import { formatCurrency, formatDate } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Plus, History } from "lucide-react";
+import { Plus, History, ChevronLeft, ChevronRight } from "lucide-react";
 import Link from "next/link";
 import { DeleteTradeButton } from "@/components/trades/DeleteTradeButton";
 
-export default async function TradesPage() {
-  const trades = await getAllTrades();
+interface PageProps {
+  searchParams: Promise<{ page?: string }>;
+}
+
+export default async function TradesPage({ searchParams }: PageProps) {
+  const params = await searchParams;
+  const page = Math.max(1, parseInt(params.page || "1"));
+  const { trades, total, pages } = await getAllTrades(page, 50);
 
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
           <History className="h-5 w-5 text-zinc-400" />
-          <span className="text-sm text-zinc-500">{trades.length} operações registradas</span>
+          <span className="text-sm text-zinc-500">{total} operações registradas</span>
         </div>
         <Link href="/trades/new">
           <Button size="sm">
@@ -153,6 +159,31 @@ export default async function TradesPage() {
           )}
         </CardContent>
       </Card>
+
+      {/* Pagination */}
+      {pages > 1 && (
+        <div className="flex items-center justify-center gap-2">
+          {page > 1 && (
+            <Link href={`/trades?page=${page - 1}`}>
+              <Button variant="outline" size="sm">
+                <ChevronLeft className="h-4 w-4 mr-1" />
+                Anterior
+              </Button>
+            </Link>
+          )}
+          <span className="text-sm text-zinc-500 dark:text-zinc-400 px-3">
+            Página {page} de {pages}
+          </span>
+          {page < pages && (
+            <Link href={`/trades?page=${page + 1}`}>
+              <Button variant="outline" size="sm">
+                Próxima
+                <ChevronRight className="h-4 w-4 ml-1" />
+              </Button>
+            </Link>
+          )}
+        </div>
+      )}
     </div>
   );
 }

@@ -36,6 +36,9 @@ model Trade {
 
   diaryEntry   DiaryEntry? @relation(fields: [diaryEntryId], references: [id])
   diaryEntryId String?
+
+  @@index([date])
+  @@index([result])
 }
 
 model DiaryEntry {
@@ -49,6 +52,8 @@ model DiaryEntry {
 
   trades Trade[]
   images DiaryImage[]
+
+  @@index([date])
 }
 
 model DiaryImage {
@@ -107,6 +112,8 @@ model Replay {
   result    Float    @default(0) // resultado financeiro R$
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  @@index([date])
 }
 
 model PushSubscription {

@@ -1,4 +1,4 @@
-export const dynamic = "force-dynamic";
+export const revalidate = 300;
 
 import { getTrades } from "@/lib/actions";
 import { calculateMetrics, getDailyResults } from "@/lib/calculations";

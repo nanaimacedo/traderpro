@@ -1,9 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import { jwtVerify } from "jose";
 
-const SECRET = new TextEncoder().encode(
-  process.env.JWT_SECRET || "traderpro-jwt-secret-change-in-production"
-);
+const jwtSecret = process.env.JWT_SECRET;
+if (!jwtSecret) throw new Error("JWT_SECRET env var is required");
+const SECRET = new TextEncoder().encode(jwtSecret);
 
 const PUBLIC_PATHS = ["/login", "/api/auth", "/api/cron", "/api/notifications"];
 
