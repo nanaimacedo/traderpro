@@ -193,6 +193,139 @@ export const KNOWLEDGE_MODULES = {
 - 1D: cada vela = 1 dia. Tendencias gerais, linhas de interesse. Macro.
 - Estatistica: somente 3-5% tem resultado positivo. Liberdade economica/geografica e possivel com dedicacao.`,
   },
+  setups_continuacao: {
+    keywords: ['gift', 'presente', 'ttto', 'dttto', 'btto', 'dbtto', 'take out', 'rbi', 'red bar ignored', 'gbi', 'green bar ignored', 'vbs', 'velez buy', 'vss', 'velez sell', 'rbto', 'gbto', 'finta', 'bop', 'bdp', 'breakout play', 'breakdown', 'setup continuacao', 'setup de continuação', 'continuidade', 'engolfada', 'engolfo'],
+    content: `## EBOOK — SETUPS DE CONTINUACAO (Flavia/Oliver Velez)
+
+**GIFT (Presente):**
+- Surge apos BARRA ELEFANTE (BE). E um recuo apos a BE dando entrada com stop mais barato.
+- Nao importa quantas barras contrarias, desde que a BE nao seja engolfada. Entrar quando surgir barra da mesma cor da BE.
+- Stop no topo/fundo da BE. Chamado "presente" porque stop curto + ganho maior.
+- Raro encontrar gift perfeito no mercado BR. Definir ciclo, regioes de interesse, e se a BE esta a favor.
+
+**RBI (Red Bar Ignored) — Continuacao de Alta:**
+- Barra vermelha ignorada pelas verdes em tendencia de alta. Breve pausa do mercado.
+- Quanto MENOR a RBI, mais potencia. Deve estar acima das medias. Com M8 = muito mais potencia.
+- Melhor no comeco do movimento, proximo a ignicao. Ponto de entrada ou adicao.
+
+**GBI (Green Bar Ignored) — Continuacao de Baixa:**
+- Espelho do RBI. Barra verde ignorada em tendencia de baixa.
+- Mesmas regras: quanto menor, mais potencia. Abaixo das medias. Com M8 = mais potencia.
+
+**TTTO (Topping Tail Take Out) — Continuacao Compradora:**
+- Martelo invertido (TT) em regiao de topo que parece reversao, mas e ENGOLFADO por barra(s) compradora(s).
+- TTTO: engolfado por 1 barra elefante. DTTTO (delayed): engolfado por varias barras.
+- Mais qualidade: proximo MAs 20/200, apos ignicao, no comeco da tendencia. TT vermelho = mais qualidade.
+
+**BTTO (Bottoming Tail Take Out) — Continuacao Vendedora:**
+- Martelo (BT) em regiao de fundo que parece reversao, mas e ENGOLFADO por barra(s) vendedora(s).
+- BTTO: engolfado por 1 barra. DBTTO: engolfado por varias. BT verde = mais qualidade.
+
+**VBS (Velez Buy Setup) — Pullback Comprador:**
+- Pausa maior: minimo 2 barras vermelhas amparadas pelas medias curtas.
+- Entrada quando barra verde engolfa a ultima vermelha. Se BT aparece apos respiro = mais qualidade.
+- M8 serve como suporte. Grudada na M8 ou rejeitando = ideal. Primeiro VBS = mais qualidade.
+
+**VSS (Velez Sell Setup) — Pullback Vendedor:**
+- Espelho do VBS. Minimo 2 barras verdes amparadas pelas medias. M8 como resistencia.
+- Entrada quando barra vermelha engolfa a ultima verde. Se TT aparece = mais qualidade.
+
+**RBTO (Red Bar Take Out) — Finta Compradora:**
+- Finta vendedora em tendencia de alta. Barra vermelha importante que NAO da continuidade e e eliminada.
+- So fazer se M8 e M20 estiverem abaixo do preco. E um respiro profundo.
+- Se falhar: encerrar ou virar a mao. Observar fechamento em relacao a M8.
+
+**GBTO (Green Bar Take Out) — Finta Vendedora:**
+- Espelho do RBTO. Finta compradora em tendencia de baixa. Barra verde eliminada por vermelha.
+
+**BOP (Breakout Play) — Rompimento Altista:**
+- Lateralizacao no TOPO do movimento (candles lado a lado). Correcao no TEMPO, nao no preco.
+- Base apertada. Acumulacao nao passa de 33% do movimento de alta.
+- Rompimento apos tocar M8 ou M20.
+
+**BDP (Breakdown Play) — Rompimento Baixista:**
+- Lateralizacao no FUNDO do movimento. Mesmas regras do BOP espelhadas.
+- Acumulacao nao passa de 33% do movimento de baixa. Rompimento apos tocar M8/M20.`,
+  },
+
+  setups_reversao: {
+    keywords: ['bull 180', 'bear 180', '180', 'reversao', 'reversão', 'reverter', 'reverteu', 'poder das duplas', 'duplas', 'regra das duas cores', 'duas cores', 'kirida', 'golden', 'engolfo', 'engolfou', 'engolfada', 'virada', 'giro', 'touro', 'urso', 'bull', 'bear'],
+    content: `## EBOOK — SETUPS DE REVERSAO (Flavia/Oliver Velez)
+
+**BULL 180° — Reversao para Compra:**
+- BE vendedora engolfada por BE compradora. Giro de 180° em regiao de interesse.
+- Procurar em FUNDO para reversoes ou em medias para pullbacks.
+- Quanto mais distante da MA20, mais poderosa. Pode ser 2 barras compradoras engolfando.
+
+**BEAR 180° — Reversao para Venda:**
+- BE compradora engolfada por BE vendedora. Giro de 180° em regiao de interesse.
+- Procurar em TOPO para reversoes ou em medias para pullbacks.
+- Quanto mais distante da MA20, mais poderosa. Pode ser 2 barras vendedoras engolfando.
+
+**Poder das Duplas — Reversao por Pavios:**
+- RARO e MUITO PODEROSO. Duas barras de pavio na mesma regiao.
+- A 2a barra deve testar ou renovar a minima/maxima da 1a.
+- COR NAO IMPORTA, so o pavio. Mais forte em topos/fundos que no meio.
+- Em baixa: 2 pavios inferiores = reversao pra alta. Em alta: 2 pavios superiores = reversao pra baixa.
+
+**Regra das Duas Cores — Reversao por Fraqueza:**
+- 2 barras a favor da tendencia que NAO produzem continuidade, engolfadas por barra solida contraria.
+- Reversao de cima pra baixo: padrão ACIMA da regiao de interesse.
+- Reversao de baixo pra cima: padrão ABAIXO da regiao de interesse.
+- Se M8 proxima: esperar barra fechar DENTRO da M8.
+
+**Kirida — Setup Exclusivo da Flavia:**
+- Doji + regiao de interesse. Setup de reversao.
+- Alta → kirida ACIMA da regiao, proxima barra fecha ABAIXO. Mais grudadinha = mais qualidade.
+- Baixa → kirida ABAIXO da regiao, proxima barra fecha ACIMA.
+- Pavio deve ficar em cima (ou embaixo) da regiao de interesse.
+
+**Golden — Reversao com Forca:**
+- Martelo/martelo invertido em regiao de interesse + barra de engolfo com 80% do corpo fora da regiao.
+- Pode marcar fim de lateralizacao. Funciona em alvos de Fibonacci (100%, 161,8%).
+- Proximo a M8: entrar apos preco fechar dentro dela.`,
+  },
+
+  ciclos_regioes: {
+    keywords: ['ciclo', 'ciclo a', 'ciclo b', 'ciclo c', 'ciclo d', 'acumulacao', 'acumulação', 'distribuicao', 'distribuição', 'regiao de interesse', 'região de interesse', 'regiao', 'região', 'simetria', 'rompimento', 'rejeicao', 'rejeição', 'rejeitou', 'suporte', 'resistencia', 'resistência', 'memoria do mercado', 'maxima do dia', 'mínima do dia', 'minima do dia', 'fibonacci', '100%', '161'],
+    content: `## EBOOK — CICLOS E REGIOES DE INTERESSE (Flavia Figueiredo)
+
+**4 Ciclos do Mercado:**
+- **Ciclo A (Acumulacao de Fundo):** Lateralizacao no fundo apos queda. Players acumulam. Priorizar COMPRAS (pode romper pra cima a qualquer momento). Observar: fundos ascendentes + MA20 afunilando = rompimento iminente.
+- **Ciclo B (Tendencia de Alta):** Saiu da acumulacao, alta definida. Operacoes COMPRADORAS. Vendas so para scalps/correcao curta. No inicio, nao respeita medias curtas (super tendencia).
+- **Ciclo C (Distribuicao de Topo):** Lateralizacao no topo. Players se desfazendo. Priorizar VENDAS (pode romper pra baixo). Topo e fundo definidos, dificeis de romper.
+- **Ciclo D (Tendencia de Baixa):** Rompeu fundo do Ciclo C, baixa definida. Operacoes VENDEDORAS. No inicio, muita forca, nao precisa das medias.
+
+**Regra de Ouro:** Melhores operacoes = mini ciclo coincide com macro ciclo. Contra o macro = NAO CASE COM A OPERACAO (so correcao).
+**MA20** e a grande aliada pra identificar ciclos. 5min = ciclo micro. 60min/diario = ciclo macro.
+**Anomalias:** Gaps grandes, noticias — mercado pula ciclos. Considerar so o macro nesses casos.
+
+**REGIOES DE INTERESSE — REGIOES + CICLOS = CONTEXTO:**
+- "Memoria do mercado" — pontos onde grandes players reagiram. Setup perfeito em regiao errada = FALHA.
+- Quanto MAIOR o deslocamento que a regiao segurou, mais FORTE ela e.
+- **Sempre marcar:** maxima/minima do dia anterior, MA200 de 5min/15min/60min (fixar antes do pregao), simetrias, VWAP dia anterior.
+- Marcar suportes/resistencias no 60min e diario (corpo da barra, nunca pavio). Confirmar no 5min.
+- NAO vender so porque chegou na resistencia. ESPERAR REJEICAO (confirmacao).
+
+**SIMETRIA:**
+- Segmento de reta dos ultimos topos/fundos relevantes (corpo da barra).
+- Respeitada por 3+ dias = vira regiao de interesse.
+- Analisar como preco reage: rejeita ou rompe?
+- "Memoria do mercado" — fundamental pro dia seguinte.
+
+**ROMPIMENTO:**
+- Preco passa regiao de interesse/simetria. Corpo precisa fechar com 1/3 FORA da regiao.
+- M20 sempre acompanha o preco na hora de romper.
+- O MELHOR rompimento: apos o preco ja ter REJEITADO a regiao antes.
+- Apos rompimento, movimento contrario = busca de liquidez, nao reversao.
+
+**REJEICAO — "Operacional preferido da Flavia":**
+- Mercado rejeita regiao de interesse. Onde nascem as MELHORES OPERACOES.
+- Regioes provaveis: linhas de interesse, simetrias, alvos 100%/161,8%, MA20, MA200, max/min dia anterior.
+- 6 padroes validos de rejeicao: Regra das 2 Cores, Martelo/TT, Golden, Kirida, Bull/Bear 180°, Poder das Duplas.
+- Rejeicao de TOPO: padrao com 80% do corpo ACIMA da regiao.
+- Rejeicao de FUNDO: padrao com 80% do corpo ABAIXO da regiao.`,
+  },
 } as const;
 
 export type KnowledgeModuleKey = keyof typeof KNOWLEDGE_MODULES;
