@@ -67,7 +67,7 @@ export function Sidebar({ open, onClose }: SidebarProps) {
               alt="TraderPro"
               width={180}
               height={48}
-              className="object-contain cursor-pointer hidden dark:block"
+              className="object-contain cursor-pointer hidden dark:block max-h-10"
               priority
             />
           </Link>
