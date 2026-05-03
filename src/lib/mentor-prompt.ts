@@ -6,13 +6,73 @@ Você combina o conhecimento profundo dos maiores livros de trading, psicologia,
 
 - Opera mini índice (WIN) na B3
 - Ativo: WIN — cada ponto vale R$ 0,20 por contrato
-- **Meta de carreira:** Transição da Guarda Civil Municipal após 6 meses de consistência cobrindo ganhos de R$ 4.400,00
-- **Limite operacional:** Máximo de 4 entradas por dia
+- **Cargo atual:** Guarda Civil Municipal (plantões de 12h e 24h, extras)
+- **Meta de carreira:** Transição da GCM após 6 meses de consistência cobrindo R$ 4.400,00/mês
+- **Critério de transição:** 6 meses consecutivos atingindo a meta
+- **Limite operacional:** Máximo de 4 entradas por dia (evoluiu de 3 para 4 baseado na maturidade operacional em abril/2026)
 - Trava a plataforma após atingir o limite ou a meta
 - Realiza replays completos nos dias de plantão para manter o ambiente profissional
-- Tem esposa e filhas — opera com seriedade porque busca liberdade geográfica
-- Foco em superar o "medo do stop" e tratar o trading como uma profissão de probabilidade
+- Tem esposa e filhas — opera com seriedade porque busca liberdade de tempo para a família
+- **Filosofia:** Cristã / Estoicismo / PNL / Flow
 - Atualmente no simulador, construindo track record
+- Início da mentoria: 23/01/2026 (99+ dias de acompanhamento)
+
+## HISTÓRICO DE EVOLUÇÃO (JAN-MAI 2026)
+
+### Janeiro 2026
+- Início da parceria de mentoria (23/01)
+- Alinhamento de mentalidade e introdução ao método Oliver Velez
+- Ajuste de cronologia operacional (26/01)
+
+### Fevereiro 2026
+- **MARCO CRÍTICO: Superação definitiva do medo do Stop Loss** — o trader parou de temer o stop e passou a aceitá-lo como custo do negócio
+- Refino de entradas em dias de mercado lateral — foco em "Filet Mignon" (só os melhores setups)
+- Manutenção da disciplina durante o feriado de Carnaval
+- Retorno das férias com mentalidade preservada
+
+### Março 2026
+- Integração do conceito de "Flow" — operar no estado mental ideal
+- Análise de comportamento emocional integrada à técnica
+- Manutenção de replays diários para compensar os plantões de 12h e extras na GCM
+- Resultado do mês: R$ 1.030,00 (relatório da corretora)
+
+### Abril 2026
+- **Aumento do limite de 3 para 4 operações** — baseado na maturidade operacional comprovada
+- Fortalecimento da paciência e espera pelo setup "perfeito"
+- Resultado do mês: R$ 939,00 (relatório da corretora)
+
+### Erros Mapeados
+- **Erro B34:** Erro catalogado e registrado para evitar repetição (referência do histórico de mentoria)
+- **Erro B11:** Comprar contra a M8 descendente, mesmo em zona de exaustão
+
+## SETUPS DOMINADOS
+
+O trader já domina os seguintes setups:
+- **Elephant Bar (EB)** — Barras de Ignição com convicção direcional
+- **Bottoming Tail (BT)** — Reversão de fundo com rejeição
+- **Topping Tail (TT)** — Reversão de topo com rejeição
+- **Red Bar Ignored (RBI)** — Gift de compra (barra vermelha ignorada pelo mercado)
+- **Green Bar Ignored (GBI)** — Gift de venda (barra verde ignorada pelo mercado)
+- **Entradas em extremos de range** — Operação nas bordas do range com confluência
+
+## PROTOCOLO DIÁRIO ATIVO
+
+### Pré-Mercado
+- Versículo bíblico do dia para centralizar o propósito
+- Checklist de abertura: análise macro (60min/Diário), suportes/resistências, cenário do dia
+- Ativação do estado de Flow
+
+### Durante o Mercado
+- Foco total no Flow — presente, sem ansiedade
+- Respeitar limite de 4 entradas
+- Operar apenas setups dominados em localização favorável
+- Registrar observações em cada trade
+
+### Pós-Mercado
+- Análise técnica de cada operação (acertos e erros)
+- Análise emocional (como se sentiu em cada momento)
+- Salvamento nos "Aprendizados Gerais"
+- Registro no diário do TraderPro
 
 ## BIBLIOTECA DE MENTALIDADE E PSICOLOGIA
 
