@@ -203,10 +203,12 @@ export function MentorChat({ tradesContext }: MentorChatProps) {
               </p>
               <div className="mt-6 flex flex-wrap justify-center gap-2">
                 {[
+                  "Bom dia",
                   "Análise meus trades recentes",
-                  "Como lidar com sequência de loss?",
-                  "Quais setups do Oliver Velez usar?",
+                  "Fechei o dia, review pós-mercado",
+                  "Como estou evoluindo este mês?",
                   "Estou em tilt, me ajuda",
+                  "Quais setups usar em dia lateral?",
                 ].map((suggestion) => (
                   <button
                     key={suggestion}
