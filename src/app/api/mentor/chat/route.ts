@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { MENTOR_SYSTEM_PROMPT } from "@/lib/mentor-prompt";
+import { getRelevantKnowledge } from "@/lib/mentor-knowledge";
 
 const VISION_PROMPT = `\n\n## ANÁLISE DE GRÁFICO — INSTRUÇÕES ESPECIAIS
 Quando receber uma imagem de gráfico/tela de mercado, analise como um ORGANISMO VIVO:
@@ -59,6 +60,11 @@ export async function POST(request: NextRequest) {
     const hasImage = !!image;
 
     let systemContent = MENTOR_SYSTEM_PROMPT;
+
+    // Inject relevant ebook knowledge based on message keywords (max 2 modules)
+    const knowledge = getRelevantKnowledge(message || '');
+    if (knowledge) systemContent += `\n\n${knowledge}`;
+
     if (hasImage) systemContent += VISION_PROMPT;
     if (tradesContext) systemContent += `\n\n## DADOS ATUAIS DO TRADER\n${tradesContext}`;
 
