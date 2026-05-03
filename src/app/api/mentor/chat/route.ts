@@ -58,6 +58,8 @@ export async function POST(request: NextRequest) {
     });
 
     const hasImage = !!image;
+    const isFirstMessage = conversation.messages.length <= 1;
+    const msgLower = (message || '').toLowerCase();
 
     let systemContent = MENTOR_SYSTEM_PROMPT;
 
@@ -66,7 +68,15 @@ export async function POST(request: NextRequest) {
     if (knowledge) systemContent += `\n\n${knowledge}`;
 
     if (hasImage) systemContent += VISION_PROMPT;
-    if (tradesContext) systemContent += `\n\n## DADOS ATUAIS DO TRADER\n${tradesContext}`;
+
+    // Smart context: only send tradesContext when actually needed
+    // - First message of conversation (mentor needs to know the trader's state)
+    // - When trader asks about performance, results, trades, or says "bom dia" / "fechei"
+    const needsContext = isFirstMessage || hasImage || /\b(bom dia|fechei|acabou|resultado|meta|trade|operac|semana|m[eê]s|win rate|payoff|como (foi|estou|ta|tá)|review|p[oó]s.?mercado|diario|diary|replay|relat[oó]rio)\b/i.test(msgLower);
+
+    if (tradesContext && needsContext) {
+      systemContent += `\n\n## DADOS ATUAIS DO TRADER\n${tradesContext}`;
+    }
 
     const contents: any[] = [];
 
@@ -99,6 +109,10 @@ export async function POST(request: NextRequest) {
     const model = "gemini-2.0-flash";
     const convId = conversation.id;
 
+    // Dynamic output limit: full protocol for "bom dia"/"fechei", shorter for Q&A
+    const isProtocol = /\b(bom dia|fechei|acabou|review|p[oó]s.?mercado)\b/i.test(msgLower);
+    const maxTokens = isProtocol || hasImage ? 4096 : 2048;
+
     // Use streaming endpoint
     const geminiResponse = await fetch(
       `https://generativelanguage.googleapis.com/v1beta/models/${model}:streamGenerateContent?alt=sse&key=${apiKey}`,
@@ -110,7 +124,7 @@ export async function POST(request: NextRequest) {
           contents,
           generationConfig: {
             temperature: 0.7,
-            maxOutputTokens: 4096,
+            maxOutputTokens: maxTokens,
           },
         }),
       }
