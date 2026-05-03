@@ -106,37 +106,65 @@ export async function POST(request: NextRequest) {
       });
     }
 
-    const model = "gemini-2.0-flash";
     const convId = conversation.id;
 
     // Dynamic output limit: full protocol for "bom dia"/"fechei", shorter for Q&A
     const isProtocol = /\b(bom dia|fechei|acabou|review|p[oó]s.?mercado)\b/i.test(msgLower);
     const maxTokens = isProtocol || hasImage ? 4096 : 2048;
 
-    // Use streaming endpoint
-    const geminiResponse = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/${model}:streamGenerateContent?alt=sse&key=${apiKey}`,
-      {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          systemInstruction: { parts: [{ text: systemContent }] },
-          contents,
-          generationConfig: {
-            temperature: 0.7,
-            maxOutputTokens: maxTokens,
-          },
-        }),
-      }
-    );
+    // Models to try in order (fallback on 429 quota exceeded)
+    const models = ["gemini-2.0-flash", "gemini-2.0-flash-lite", "gemini-1.5-flash"];
 
-    if (!geminiResponse.ok) {
-      const errorData = await geminiResponse.text();
-      console.error("Gemini API error:", geminiResponse.status, errorData);
-      return NextResponse.json(
-        { error: `Gemini erro ${geminiResponse.status}: ${errorData.slice(0, 200)}` },
-        { status: 502 }
+    const requestBody = JSON.stringify({
+      systemInstruction: { parts: [{ text: systemContent }] },
+      contents,
+      generationConfig: {
+        temperature: 0.7,
+        maxOutputTokens: maxTokens,
+      },
+    });
+
+    let geminiResponse: Response | null = null;
+    let usedModel = models[0];
+
+    for (const model of models) {
+      const res = await fetch(
+        `https://generativelanguage.googleapis.com/v1beta/models/${model}:streamGenerateContent?alt=sse&key=${apiKey}`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: requestBody,
+        }
       );
+
+      if (res.ok) {
+        geminiResponse = res;
+        usedModel = model;
+        break;
+      }
+
+      // Only retry on 429 (quota exceeded), fail fast on other errors
+      if (res.status !== 429) {
+        const errorData = await res.text();
+        console.error(`Gemini API error (${model}):`, res.status, errorData);
+        return NextResponse.json(
+          { error: `Gemini erro ${res.status}: ${errorData.slice(0, 200)}` },
+          { status: 502 }
+        );
+      }
+
+      console.warn(`Model ${model} returned 429, trying next fallback...`);
+    }
+
+    if (!geminiResponse) {
+      return NextResponse.json(
+        { error: "Todos os modelos Gemini estão com quota excedida. Tente novamente mais tarde." },
+        { status: 429 }
+      );
+    }
+
+    if (usedModel !== models[0]) {
+      console.log(`Fallback: using ${usedModel} instead of ${models[0]}`);
     }
 
     const encoder = new TextEncoder();
