@@ -62,10 +62,8 @@ export async function POST(request: NextRequest) {
     if (hasImage) systemContent += VISION_PROMPT;
     if (tradesContext) systemContent += `\n\n## DADOS ATUAIS DO TRADER\n${tradesContext}`;
 
-    // Build Gemini contents array from conversation history
     const contents: any[] = [];
 
-    // Add conversation history (last 10 messages)
     for (const msg of conversation.messages.slice(-10)) {
       contents.push({
         role: msg.role === "assistant" ? "model" : "user",
@@ -73,7 +71,6 @@ export async function POST(request: NextRequest) {
       });
     }
 
-    // Add current user message (with image if present)
     if (hasImage) {
       const imageData = image.replace(/^data:image\/\w+;base64,/, "");
       const mimeMatch = image.match(/^data:(image\/\w+);base64,/);
@@ -82,7 +79,7 @@ export async function POST(request: NextRequest) {
       contents.push({
         role: "user",
         parts: [
-          { text: message || "Analise este gráfico usando a metodologia Oliver Velez. Identifique setups, localização, médias e dê sua opinião como mentor." },
+          { text: message || "Analise este gráfico usando a metodologia Oliver Velez." },
           { inlineData: { mimeType, data: imageData } },
         ],
       });
@@ -94,9 +91,11 @@ export async function POST(request: NextRequest) {
     }
 
     const model = "gemini-2.5-flash";
+    const convId = conversation.id;
 
+    // Use streaming endpoint
     const geminiResponse = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`,
+      `https://generativelanguage.googleapis.com/v1beta/models/${model}:streamGenerateContent?alt=sse&key=${apiKey}`,
       {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -120,22 +119,71 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const data = await geminiResponse.json();
-    const assistantContent =
-      data.candidates?.[0]?.content?.parts?.[0]?.text ||
-      "Desculpe, não consegui gerar uma resposta.";
+    const encoder = new TextEncoder();
+    let fullContent = "";
 
-    await prisma.mentorMessage.create({
-      data: {
-        role: "assistant",
-        content: assistantContent,
-        conversationId: conversation.id,
+    const stream = new ReadableStream({
+      async start(controller) {
+        // Send conversationId first
+        controller.enqueue(encoder.encode(`data: ${JSON.stringify({ conversationId: convId })}\n\n`));
+
+        const reader = geminiResponse.body!.getReader();
+        const decoder = new TextDecoder();
+        let buffer = "";
+
+        try {
+          while (true) {
+            const { done, value } = await reader.read();
+            if (done) break;
+
+            buffer += decoder.decode(value, { stream: true });
+            const lines = buffer.split("\n");
+            buffer = lines.pop() || "";
+
+            for (const line of lines) {
+              if (!line.startsWith("data: ")) continue;
+              const jsonStr = line.slice(6).trim();
+              if (!jsonStr || jsonStr === "[DONE]") continue;
+
+              try {
+                const chunk = JSON.parse(jsonStr);
+                const text = chunk.candidates?.[0]?.content?.parts?.[0]?.text;
+                if (text) {
+                  fullContent += text;
+                  controller.enqueue(encoder.encode(`data: ${JSON.stringify({ text })}\n\n`));
+                }
+              } catch {
+                // skip malformed chunks
+              }
+            }
+          }
+
+          // Save full response to DB
+          if (fullContent) {
+            await prisma.mentorMessage.create({
+              data: {
+                role: "assistant",
+                content: fullContent,
+                conversationId: convId,
+              },
+            });
+          }
+
+          controller.enqueue(encoder.encode(`data: [DONE]\n\n`));
+          controller.close();
+        } catch (err) {
+          console.error("Stream error:", err);
+          controller.error(err);
+        }
       },
     });
 
-    return NextResponse.json({
-      conversationId: conversation.id,
-      message: assistantContent,
+    return new Response(stream, {
+      headers: {
+        "Content-Type": "text/event-stream",
+        "Cache-Control": "no-cache",
+        Connection: "keep-alive",
+      },
     });
   } catch (err: unknown) {
     const errorMessage = err instanceof Error ? err.message : String(err);

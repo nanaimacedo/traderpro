@@ -32,6 +32,7 @@ export function MentorChat({ tradesContext }: MentorChatProps) {
   const [loading, setLoading] = useState(false);
   const [loadingConversations, setLoadingConversations] = useState(true);
   const [showSidebar, setShowSidebar] = useState(false);
+  const [streamingContent, setStreamingContent] = useState("");
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const scrollToBottom = useCallback(() => {
@@ -40,7 +41,7 @@ export function MentorChat({ tradesContext }: MentorChatProps) {
 
   useEffect(() => {
     scrollToBottom();
-  }, [messages, scrollToBottom]);
+  }, [messages, streamingContent, scrollToBottom]);
 
   useEffect(() => {
     fetchConversations();
@@ -91,45 +92,115 @@ export function MentorChat({ tradesContext }: MentorChatProps) {
     };
     setMessages((prev) => [...prev, tempUserMsg]);
     setLoading(true);
+    setStreamingContent("");
 
-    const res = await fetch("/api/mentor/chat", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        message,
-        image,
-        conversationId: activeConversationId,
-        tradesContext,
-      }),
-    });
+    try {
+      const res = await fetch("/api/mentor/chat", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          message,
+          image,
+          conversationId: activeConversationId,
+          tradesContext,
+        }),
+      });
 
-    const data = await res.json();
+      const contentType = res.headers.get("content-type") || "";
 
-    if (data.error) {
+      // Streaming response (SSE)
+      if (contentType.includes("text/event-stream") && res.body) {
+        const reader = res.body.getReader();
+        const decoder = new TextDecoder();
+        let accumulated = "";
+        let buffer = "";
+
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
+
+          buffer += decoder.decode(value, { stream: true });
+          const lines = buffer.split("\n");
+          buffer = lines.pop() || "";
+
+          for (const line of lines) {
+            if (!line.startsWith("data: ")) continue;
+            const payload = line.slice(6).trim();
+
+            if (payload === "[DONE]") continue;
+
+            try {
+              const parsed = JSON.parse(payload);
+
+              if (parsed.conversationId && !activeConversationId) {
+                setActiveConversationId(parsed.conversationId);
+              }
+
+              if (parsed.text) {
+                accumulated += parsed.text;
+                setStreamingContent(accumulated);
+              }
+            } catch {
+              // skip malformed
+            }
+          }
+        }
+
+        // Streaming done — move to messages
+        if (accumulated) {
+          setMessages((prev) => [
+            ...prev,
+            {
+              id: `resp-${Date.now()}`,
+              role: "assistant",
+              content: accumulated,
+              createdAt: new Date().toISOString(),
+            },
+          ]);
+        }
+        setStreamingContent("");
+        fetchConversations();
+      } else {
+        // JSON fallback (errors)
+        const data = await res.json();
+        if (data.error) {
+          setMessages((prev) => [
+            ...prev,
+            {
+              id: `error-${Date.now()}`,
+              role: "assistant",
+              content: `Erro: ${data.error}`,
+              createdAt: new Date().toISOString(),
+            },
+          ]);
+        } else {
+          if (!activeConversationId) {
+            setActiveConversationId(data.conversationId);
+          }
+          setMessages((prev) => [
+            ...prev,
+            {
+              id: `resp-${Date.now()}`,
+              role: "assistant",
+              content: data.message,
+              createdAt: new Date().toISOString(),
+            },
+          ]);
+          fetchConversations();
+        }
+      }
+    } catch {
       setMessages((prev) => [
         ...prev,
         {
           id: `error-${Date.now()}`,
           role: "assistant",
-          content: `Erro: ${data.error}`,
+          content: "Erro: Falha na conexão com o mentor",
           createdAt: new Date().toISOString(),
         },
       ]);
-    } else {
-      if (!activeConversationId) {
-        setActiveConversationId(data.conversationId);
-      }
-      setMessages((prev) => [
-        ...prev,
-        {
-          id: `resp-${Date.now()}`,
-          role: "assistant",
-          content: data.message,
-          createdAt: new Date().toISOString(),
-        },
-      ]);
-      fetchConversations();
     }
+
     setLoading(false);
   }
 
@@ -143,7 +214,7 @@ export function MentorChat({ tradesContext }: MentorChatProps) {
         />
       )}
 
-      {/* Sidebar de conversas — desktop always visible, mobile drawer */}
+      {/* Sidebar de conversas */}
       <div className={`
         fixed inset-y-0 left-0 z-50 w-72 bg-white dark:bg-zinc-950 p-4 shadow-xl transition-transform duration-300 lg:static lg:translate-x-0 lg:shadow-none lg:rounded-xl lg:border lg:border-zinc-100 dark:lg:border-zinc-800
         ${showSidebar ? "translate-x-0" : "-translate-x-full"}
@@ -192,7 +263,7 @@ export function MentorChat({ tradesContext }: MentorChatProps) {
 
         {/* Messages */}
         <div className="flex-1 overflow-y-auto px-4 lg:px-6 py-4">
-          {messages.length === 0 ? (
+          {messages.length === 0 && !streamingContent ? (
             <div className="flex h-full flex-col items-center justify-center text-center px-4">
               <div className="flex h-14 w-14 lg:h-16 lg:w-16 items-center justify-center rounded-full bg-amber-50 dark:bg-amber-950">
                 <Brain className="h-7 w-7 lg:h-8 lg:w-8 text-amber-500" />
@@ -229,7 +300,11 @@ export function MentorChat({ tradesContext }: MentorChatProps) {
               {messages.map((msg) => (
                 <ChatMessage key={msg.id} role={msg.role} content={msg.content} image={msg.image} />
               ))}
-              {loading && (
+              {/* Streaming message — appears while Gemini is typing */}
+              {streamingContent && (
+                <ChatMessage role="assistant" content={streamingContent} />
+              )}
+              {loading && !streamingContent && (
                 <div className="flex gap-3">
                   <div className="flex h-8 w-8 items-center justify-center rounded-full bg-amber-500">
                     <Brain className="h-4 w-4 text-white" />
