@@ -12,6 +12,7 @@ import {
   FileBarChart,
   Brain,
   Lightbulb,
+  PlayCircle,
   X,
 } from "lucide-react";
 
@@ -21,6 +22,7 @@ const navigation = [
   { name: "Histórico", href: "/trades", icon: History },
   { name: "Diário", href: "/diary", icon: BookOpen },
   { name: "Relatórios", href: "/reports", icon: FileBarChart },
+  { name: "Replays", href: "/replays", icon: PlayCircle },
   { name: "Insights", href: "/insights", icon: Lightbulb },
   { name: "Mentor", href: "/mentor", icon: Brain },
 ];

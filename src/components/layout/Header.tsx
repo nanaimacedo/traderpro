@@ -10,6 +10,7 @@ const pageTitles: Record<string, { title: string; description: string }> = {
   "/trades": { title: "Histórico", description: "Todas as operações realizadas" },
   "/diary": { title: "Diário de Trade", description: "Registros e análises pessoais" },
   "/reports": { title: "Relatórios", description: "Relatórios da corretora" },
+  "/replays": { title: "Replays", description: "Estudos e simulações de mercado" },
   "/insights": { title: "Insights", description: "Análise semanal e mensal dos seus resultados" },
   "/mentor": { title: "Mentor", description: "Seu mentor pessoal de trading" },
 };

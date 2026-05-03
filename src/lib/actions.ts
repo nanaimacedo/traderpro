@@ -132,3 +132,35 @@ export async function deleteBrokerReport(id: string) {
   await prisma.brokerReport.delete({ where: { id } });
   revalidatePath("/reports");
 }
+
+// === REPLAYS ===
+
+export async function createReplay(formData: FormData) {
+  const date = new Date(formData.get("date") as string);
+  const title = formData.get("title") as string;
+  const content = formData.get("content") as string;
+  const mood = (formData.get("mood") as string) || null;
+  const entries = parseInt(formData.get("entries") as string) || 0;
+  const gains = parseInt(formData.get("gains") as string) || 0;
+  const losses = parseInt(formData.get("losses") as string) || 0;
+  const zeros = entries - gains - losses;
+  const points = parseFloat(formData.get("points") as string) || 0;
+  const result = points * 0.2;
+
+  await prisma.replay.create({
+    data: { date, title, content, mood, entries, gains, losses, zeros, points, result },
+  });
+
+  revalidatePath("/replays");
+}
+
+export async function getReplays() {
+  return prisma.replay.findMany({
+    orderBy: { date: "desc" },
+  });
+}
+
+export async function deleteReplay(id: string) {
+  await prisma.replay.delete({ where: { id } });
+  revalidatePath("/replays");
+}

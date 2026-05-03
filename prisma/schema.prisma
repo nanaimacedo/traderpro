@@ -93,6 +93,22 @@ model MentorMessage {
   conversationId String
 }
 
+model Replay {
+  id        String   @id @default(cuid())
+  date      DateTime
+  title     String
+  content   String // diário do replay
+  mood      String? // OTIMISTA | NEUTRO | FRUSTRADO | DISCIPLINADO | ANSIOSO
+  entries   Int      @default(0) // quantidade de entradas
+  gains     Int      @default(0)
+  losses    Int      @default(0)
+  zeros     Int      @default(0)
+  points    Float    @default(0) // pontos totais
+  result    Float    @default(0) // resultado financeiro R$
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
 model PushSubscription {
   id        String   @id @default(cuid())
   endpoint  String   @unique
