@@ -3,10 +3,10 @@ import { prisma } from "@/lib/prisma";
 import { MENTOR_SYSTEM_PROMPT } from "@/lib/mentor-prompt";
 
 export async function POST(request: NextRequest) {
-  const apiKey = process.env.GEMINI_API_KEY;
+  const apiKey = process.env.GROQ_API_KEY;
   if (!apiKey) {
     return NextResponse.json(
-      { error: "GEMINI_API_KEY nao configurada. Adicione no .env" },
+      { error: "GROQ_API_KEY não configurada" },
       { status: 500 }
     );
   }
@@ -41,47 +41,50 @@ export async function POST(request: NextRequest) {
     },
   });
 
-  let systemInstruction = MENTOR_SYSTEM_PROMPT;
+  let systemContent = MENTOR_SYSTEM_PROMPT;
   if (tradesContext) {
-    systemInstruction += `\n\n## DADOS ATUAIS DO TRADER\n${tradesContext}`;
+    systemContent += `\n\n## DADOS ATUAIS DO TRADER\n${tradesContext}`;
   }
 
-  const history = conversation.messages.map((msg) => ({
-    role: msg.role === "user" ? "user" : "model",
-    parts: [{ text: msg.content }],
-  }));
+  const messages = [
+    { role: "system" as const, content: systemContent },
+    ...conversation.messages.map((msg) => ({
+      role: msg.role as "user" | "assistant",
+      content: msg.content,
+    })),
+    { role: "user" as const, content: message },
+  ];
 
-  history.push({ role: "user", parts: [{ text: message }] });
-
-  const geminiResponse = await fetch(
-    `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`,
+  const groqResponse = await fetch(
+    "https://api.groq.com/openai/v1/chat/completions",
     {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${apiKey}`,
+      },
       body: JSON.stringify({
-        system_instruction: { parts: [{ text: systemInstruction }] },
-        contents: history,
-        generationConfig: {
-          temperature: 0.7,
-          maxOutputTokens: 2048,
-        },
+        model: "llama-3.3-70b-versatile",
+        messages,
+        temperature: 0.7,
+        max_tokens: 2048,
       }),
     }
   );
 
-  if (!geminiResponse.ok) {
-    const errorData = await geminiResponse.text();
-    console.error("Gemini API error:", errorData);
+  if (!groqResponse.ok) {
+    const errorData = await groqResponse.text();
+    console.error("Groq API error:", errorData);
     return NextResponse.json(
-      { error: "Erro ao comunicar com o Gemini" },
+      { error: "Erro ao comunicar com o mentor" },
       { status: 502 }
     );
   }
 
-  const data = await geminiResponse.json();
+  const data = await groqResponse.json();
   const assistantContent =
-    data.candidates?.[0]?.content?.parts?.[0]?.text ||
-    "Desculpe, nao consegui gerar uma resposta.";
+    data.choices?.[0]?.message?.content ||
+    "Desculpe, não consegui gerar uma resposta.";
 
   await prisma.mentorMessage.create({
     data: {
