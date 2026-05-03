@@ -55,7 +55,7 @@ export function NewDiaryForm() {
           <form onSubmit={handleSubmit} className="space-y-5">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-2">
-                <label className="text-sm font-medium text-zinc-700">Data</label>
+                <label className="text-sm font-medium text-zinc-700 dark:text-zinc-300">Data</label>
                 <Input
                   type="date"
                   name="date"
@@ -64,14 +64,14 @@ export function NewDiaryForm() {
                 />
               </div>
               <div className="space-y-2">
-                <label className="text-sm font-medium text-zinc-700">Título</label>
+                <label className="text-sm font-medium text-zinc-700 dark:text-zinc-300">Título</label>
                 <Input name="title" placeholder="Ex: Setup de rompimento no WIN" required />
               </div>
             </div>
 
             {/* Mood selector */}
             <div className="space-y-2">
-              <label className="text-sm font-medium text-zinc-700">Estado Emocional</label>
+              <label className="text-sm font-medium text-zinc-700 dark:text-zinc-300">Estado Emocional</label>
               <div className="flex gap-2 flex-wrap">
                 {moods.map((mood) => (
                   <label key={mood.value} className="cursor-pointer">
@@ -83,7 +83,7 @@ export function NewDiaryForm() {
                       onChange={() => setSelectedMood(mood.value)}
                       className="sr-only peer"
                     />
-                    <div className="flex items-center gap-1.5 rounded-full border-2 border-zinc-200 px-3 py-1.5 text-sm transition-all peer-checked:border-zinc-900 peer-checked:bg-zinc-900 peer-checked:text-white">
+                    <div className="flex items-center gap-1.5 rounded-full border-2 border-zinc-200 dark:border-zinc-700 px-3 py-1.5 text-sm text-zinc-700 dark:text-zinc-300 transition-all peer-checked:border-zinc-900 peer-checked:bg-zinc-900 peer-checked:text-white dark:peer-checked:border-zinc-100 dark:peer-checked:bg-zinc-100 dark:peer-checked:text-zinc-900">
                       <mood.icon className="h-3.5 w-3.5" />
                       <span>{mood.label}</span>
                     </div>
@@ -93,7 +93,7 @@ export function NewDiaryForm() {
             </div>
 
             <div className="space-y-2">
-              <label className="text-sm font-medium text-zinc-700">Conteúdo</label>
+              <label className="text-sm font-medium text-zinc-700 dark:text-zinc-300">Conteúdo</label>
               <Textarea
                 name="content"
                 placeholder="Descreva o dia de operação, setups utilizados, erros, acertos, emocional..."
@@ -108,7 +108,7 @@ export function NewDiaryForm() {
           </form>
         ) : (
           <div className="space-y-4">
-            <p className="text-sm text-zinc-600">
+            <p className="text-sm text-zinc-600 dark:text-zinc-400">
               Entrada salva! Agora você pode adicionar prints do mercado.
             </p>
             <ImageUpload diaryEntryId={diaryId!} />

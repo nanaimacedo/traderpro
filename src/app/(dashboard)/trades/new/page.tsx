@@ -32,7 +32,7 @@ export default function NewTradePage() {
             {/* Date and Time */}
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
-                <label className="text-sm font-medium text-zinc-700">Data</label>
+                <label className="text-sm font-medium text-zinc-700 dark:text-zinc-300">Data</label>
                 <Input
                   type="date"
                   name="date"
@@ -41,14 +41,14 @@ export default function NewTradePage() {
                 />
               </div>
               <div className="space-y-2">
-                <label className="text-sm font-medium text-zinc-700">Horário</label>
+                <label className="text-sm font-medium text-zinc-700 dark:text-zinc-300">Horário</label>
                 <Input type="time" name="time" required defaultValue="09:00" />
               </div>
             </div>
 
             {/* Direction */}
             <div className="space-y-2">
-              <label className="text-sm font-medium text-zinc-700">Direção</label>
+              <label className="text-sm font-medium text-zinc-700 dark:text-zinc-300">Direção</label>
               <div className="grid grid-cols-2 gap-3">
                 <label className="relative flex cursor-pointer">
                   <input
@@ -58,7 +58,7 @@ export default function NewTradePage() {
                     defaultChecked
                     className="peer sr-only"
                   />
-                  <div className="flex w-full items-center justify-center rounded-lg border-2 border-zinc-200 bg-white py-3 text-sm font-medium text-zinc-600 transition-all peer-checked:border-emerald-500 peer-checked:bg-emerald-50 peer-checked:text-emerald-700">
+                  <div className="flex w-full items-center justify-center rounded-lg border-2 border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 py-3 text-sm font-medium text-zinc-600 dark:text-zinc-400 transition-all peer-checked:border-emerald-500 peer-checked:bg-emerald-50 dark:peer-checked:bg-emerald-950 peer-checked:text-emerald-700 dark:peer-checked:text-emerald-400">
                     COMPRA
                   </div>
                 </label>
@@ -69,7 +69,7 @@ export default function NewTradePage() {
                     value="VENDA"
                     className="peer sr-only"
                   />
-                  <div className="flex w-full items-center justify-center rounded-lg border-2 border-zinc-200 bg-white py-3 text-sm font-medium text-zinc-600 transition-all peer-checked:border-rose-500 peer-checked:bg-rose-50 peer-checked:text-rose-700">
+                  <div className="flex w-full items-center justify-center rounded-lg border-2 border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 py-3 text-sm font-medium text-zinc-600 dark:text-zinc-400 transition-all peer-checked:border-rose-500 peer-checked:bg-rose-50 dark:peer-checked:bg-rose-950 peer-checked:text-rose-700 dark:peer-checked:text-rose-400">
                     VENDA
                   </div>
                 </label>
@@ -79,7 +79,7 @@ export default function NewTradePage() {
             {/* Prices */}
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
-                <label className="text-sm font-medium text-zinc-700">Preço Entrada</label>
+                <label className="text-sm font-medium text-zinc-700 dark:text-zinc-300">Preço Entrada</label>
                 <Input
                   type="number"
                   name="entryPrice"
@@ -89,7 +89,7 @@ export default function NewTradePage() {
                 />
               </div>
               <div className="space-y-2">
-                <label className="text-sm font-medium text-zinc-700">Preço Saída</label>
+                <label className="text-sm font-medium text-zinc-700 dark:text-zinc-300">Preço Saída</label>
                 <Input
                   type="number"
                   name="exitPrice"
@@ -103,7 +103,7 @@ export default function NewTradePage() {
             {/* Contracts and Duration */}
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
-                <label className="text-sm font-medium text-zinc-700">Contratos</label>
+                <label className="text-sm font-medium text-zinc-700 dark:text-zinc-300">Contratos</label>
                 <Input
                   type="number"
                   name="contracts"
@@ -113,7 +113,7 @@ export default function NewTradePage() {
                 />
               </div>
               <div className="space-y-2">
-                <label className="text-sm font-medium text-zinc-700">Duração (min)</label>
+                <label className="text-sm font-medium text-zinc-700 dark:text-zinc-300">Duração (min)</label>
                 <Input
                   type="number"
                   name="durationMinutes"
@@ -125,7 +125,7 @@ export default function NewTradePage() {
 
             {/* Notes */}
             <div className="space-y-2">
-              <label className="text-sm font-medium text-zinc-700">Observações</label>
+              <label className="text-sm font-medium text-zinc-700 dark:text-zinc-300">Observações</label>
               <Textarea
                 name="notes"
                 placeholder="Setup utilizado, emocional, observações..."
@@ -134,11 +134,11 @@ export default function NewTradePage() {
             </div>
 
             {/* Preview */}
-            <div className="rounded-lg bg-zinc-50 border border-zinc-100 p-4">
-              <p className="text-xs font-medium text-zinc-500 uppercase tracking-wider mb-1">
+            <div className="rounded-lg bg-zinc-50 dark:bg-zinc-800 border border-zinc-100 dark:border-zinc-700 p-4">
+              <p className="text-xs font-medium text-zinc-500 dark:text-zinc-400 uppercase tracking-wider mb-1">
                 Ativo
               </p>
-              <p className="text-sm font-bold text-zinc-900">WIN - Mini Índice</p>
+              <p className="text-sm font-bold text-zinc-900 dark:text-zinc-100">WIN - Mini Índice</p>
               <p className="text-xs text-zinc-400 mt-1">
                 1 ponto = R$ 0,20 por contrato
               </p>

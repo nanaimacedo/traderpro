@@ -19,10 +19,10 @@ export function DeleteReportButton({ id }: { id: string }) {
         >
           Sim
         </button>
-        <span className="text-xs text-zinc-300">/</span>
+        <span className="text-xs text-zinc-300 dark:text-zinc-600">/</span>
         <button
           onClick={() => setConfirming(false)}
-          className="text-xs text-zinc-500 hover:text-zinc-700 cursor-pointer"
+          className="text-xs text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-300 cursor-pointer"
         >
           Nao
         </button>
@@ -33,7 +33,7 @@ export function DeleteReportButton({ id }: { id: string }) {
   return (
     <button
       onClick={() => setConfirming(true)}
-      className="text-zinc-300 hover:text-rose-500 transition-colors cursor-pointer"
+      className="text-zinc-300 dark:text-zinc-600 hover:text-rose-500 transition-colors cursor-pointer"
     >
       <Trash2 className="h-4 w-4" />
     </button>

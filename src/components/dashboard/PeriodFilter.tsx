@@ -29,13 +29,13 @@ export function PeriodFilter() {
     <div className="flex items-center gap-3 flex-wrap">
       <button
         onClick={() => navigate(month - 1, year)}
-        className="flex h-8 w-8 items-center justify-center rounded-lg border border-zinc-200 bg-white text-zinc-500 hover:bg-zinc-50 hover:text-zinc-700 transition-colors cursor-pointer"
+        className="flex h-8 w-8 items-center justify-center rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-zinc-500 dark:text-zinc-400 hover:bg-zinc-50 dark:hover:bg-zinc-800 hover:text-zinc-700 dark:hover:text-zinc-300 transition-colors cursor-pointer"
       >
         <ChevronLeft className="h-4 w-4" />
       </button>
 
-      <div className="flex items-center gap-2 rounded-lg border border-zinc-200 bg-white px-4 py-1.5 min-w-[180px] justify-center">
-        <span className="text-sm font-semibold text-zinc-900">
+      <div className="flex items-center gap-2 rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 px-4 py-1.5 min-w-[180px] justify-center">
+        <span className="text-sm font-semibold text-zinc-900 dark:text-zinc-100">
           {monthNames[month]} {year}
         </span>
       </div>
@@ -43,7 +43,7 @@ export function PeriodFilter() {
       <button
         onClick={() => navigate(month + 1, year)}
         disabled={isCurrentMonth}
-        className="flex h-8 w-8 items-center justify-center rounded-lg border border-zinc-200 bg-white text-zinc-500 hover:bg-zinc-50 hover:text-zinc-700 transition-colors cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed"
+        className="flex h-8 w-8 items-center justify-center rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-zinc-500 dark:text-zinc-400 hover:bg-zinc-50 dark:hover:bg-zinc-800 hover:text-zinc-700 dark:hover:text-zinc-300 transition-colors cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed"
       >
         <ChevronRight className="h-4 w-4" />
       </button>
@@ -51,7 +51,7 @@ export function PeriodFilter() {
       {!isCurrentMonth && (
         <button
           onClick={() => navigate(now.getMonth(), now.getFullYear())}
-          className="text-xs text-zinc-500 hover:text-zinc-700 underline cursor-pointer ml-1"
+          className="text-xs text-zinc-500 dark:text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-300 underline cursor-pointer ml-1"
         >
           Hoje
         </button>
@@ -59,7 +59,7 @@ export function PeriodFilter() {
 
       <Link
         href={`/reports/pdf?month=${month}&year=${year}`}
-        className="ml-auto flex items-center gap-1.5 rounded-lg border border-zinc-200 bg-white px-3 py-1.5 text-xs font-medium text-zinc-600 hover:bg-zinc-50 hover:text-zinc-900 transition-colors"
+        className="ml-auto flex items-center gap-1.5 rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 px-3 py-1.5 text-xs font-medium text-zinc-600 dark:text-zinc-400 hover:bg-zinc-50 dark:hover:bg-zinc-800 hover:text-zinc-900 dark:hover:text-zinc-100 transition-colors"
       >
         <FileDown className="h-3.5 w-3.5" />
         <span className="hidden sm:inline">Gerar Relatório</span>

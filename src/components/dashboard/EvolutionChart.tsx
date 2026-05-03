@@ -187,7 +187,7 @@ export function EvolutionChart({ trades }: EvolutionChartProps) {
         <div className="flex items-center justify-between flex-wrap gap-2">
           <div className="flex items-center gap-2">
             <activeIndicator.icon className="h-4 w-4" style={{ color }} />
-            <h3 className="text-base font-semibold text-zinc-900">{activeIndicator.label}</h3>
+            <h3 className="text-base font-semibold text-zinc-900 dark:text-zinc-100">{activeIndicator.label}</h3>
             {chartData.length > 0 && (
               <span className="text-sm font-bold ml-1" style={{ color }}>
                 {formatValue(lastValue)}
@@ -196,7 +196,7 @@ export function EvolutionChart({ trades }: EvolutionChartProps) {
           </div>
 
           {/* Period toggle */}
-          <div className="flex items-center rounded-lg border border-zinc-200 bg-zinc-50 p-0.5">
+          <div className="flex items-center rounded-lg border border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-800 p-0.5">
             {(["mes", "semana"] as Period[]).map((p) => (
               <button
                 key={p}
@@ -204,8 +204,8 @@ export function EvolutionChart({ trades }: EvolutionChartProps) {
                 className={cn(
                   "px-3 py-1 text-xs font-medium rounded-md transition-all cursor-pointer",
                   period === p
-                    ? "bg-white text-zinc-900 shadow-sm"
-                    : "text-zinc-500 hover:text-zinc-700"
+                    ? "bg-white dark:bg-zinc-900 text-zinc-900 dark:text-zinc-100 shadow-sm"
+                    : "text-zinc-500 dark:text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-300"
                 )}
               >
                 {p === "mes" ? "Diário" : "Semanal"}
@@ -223,8 +223,8 @@ export function EvolutionChart({ trades }: EvolutionChartProps) {
               className={cn(
                 "flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-medium transition-all cursor-pointer",
                 indicator === ind.key
-                  ? "bg-zinc-900 text-white shadow-sm"
-                  : "bg-zinc-100 text-zinc-500 hover:bg-zinc-200 hover:text-zinc-700"
+                  ? "bg-zinc-900 dark:bg-zinc-100 text-white dark:text-zinc-900 shadow-sm"
+                  : "bg-zinc-100 dark:bg-zinc-800 text-zinc-500 dark:text-zinc-400 hover:bg-zinc-200 dark:hover:bg-zinc-700 hover:text-zinc-700 dark:hover:text-zinc-300"
               )}
             >
               <ind.icon className="h-3 w-3" />
@@ -238,7 +238,7 @@ export function EvolutionChart({ trades }: EvolutionChartProps) {
         <div className="h-64 lg:h-72">
           {chartData.length === 0 ? (
             <div className="flex h-full items-center justify-center">
-              <p className="text-sm text-zinc-400">Sem dados no período</p>
+              <p className="text-sm text-zinc-400 dark:text-zinc-500">Sem dados no período</p>
             </div>
           ) : indicator === "operacoes" ? (
             <ResponsiveContainer width="100%" height="100%">

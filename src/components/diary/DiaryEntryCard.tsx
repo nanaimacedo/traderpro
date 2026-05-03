@@ -45,12 +45,12 @@ export function DiaryEntryCard({ entry, moodLabels }: DiaryEntryProps) {
                 </span>
               )}
             </div>
-            <h4 className="text-sm font-semibold text-zinc-900">{entry.title}</h4>
+            <h4 className="text-sm font-semibold text-zinc-900 dark:text-zinc-100">{entry.title}</h4>
           </div>
           <div className="flex items-center gap-2">
             <button
               onClick={() => setExpanded(!expanded)}
-              className="text-zinc-400 hover:text-zinc-600 transition-colors cursor-pointer"
+              className="text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300 transition-colors cursor-pointer"
             >
               {expanded ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
             </button>
@@ -60,7 +60,7 @@ export function DiaryEntryCard({ entry, moodLabels }: DiaryEntryProps) {
                 setDeleting(true);
                 await deleteDiaryEntry(entry.id);
               }}
-              className="text-zinc-300 hover:text-rose-500 transition-colors cursor-pointer"
+              className="text-zinc-300 dark:text-zinc-600 hover:text-rose-500 transition-colors cursor-pointer"
             >
               <Trash2 className="h-4 w-4" />
             </button>
@@ -69,7 +69,7 @@ export function DiaryEntryCard({ entry, moodLabels }: DiaryEntryProps) {
 
         {expanded && (
           <div className="mt-4 space-y-4">
-            <p className="text-sm text-zinc-600 whitespace-pre-wrap leading-relaxed">
+            <p className="text-sm text-zinc-600 dark:text-zinc-400 whitespace-pre-wrap leading-relaxed">
               {entry.content}
             </p>
 
@@ -81,7 +81,7 @@ export function DiaryEntryCard({ entry, moodLabels }: DiaryEntryProps) {
                     href={img.path}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="relative rounded-lg overflow-hidden border border-zinc-100 hover:border-zinc-300 transition-colors"
+                    className="relative rounded-lg overflow-hidden border border-zinc-100 dark:border-zinc-800 hover:border-zinc-300 dark:hover:border-zinc-600 transition-colors"
                   >
                     <img
                       src={img.path}

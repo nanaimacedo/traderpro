@@ -28,8 +28,8 @@ export function ChatMessage({ role, content, image }: ChatMessageProps) {
         className={cn(
           "max-w-[85%] lg:max-w-[75%] rounded-2xl px-3 lg:px-4 py-2.5 lg:py-3 text-sm leading-relaxed",
           isUser
-            ? "bg-zinc-900 text-white"
-            : "bg-zinc-100 text-zinc-800"
+            ? "bg-zinc-900 text-white dark:bg-zinc-100 dark:text-zinc-900"
+            : "bg-zinc-100 dark:bg-zinc-800 text-zinc-800 dark:text-zinc-200"
         )}
       >
         {image && (

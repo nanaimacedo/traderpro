@@ -52,7 +52,7 @@ export function ImageUpload({ diaryEntryId }: { diaryEntryId: string }) {
             onChange={handleUpload}
             className="sr-only"
           />
-          <div className="flex items-center gap-2 rounded-lg border-2 border-dashed border-zinc-200 px-4 py-3 text-sm text-zinc-500 transition-colors hover:border-zinc-400 hover:text-zinc-700">
+          <div className="flex items-center gap-2 rounded-lg border-2 border-dashed border-zinc-200 dark:border-zinc-700 px-4 py-3 text-sm text-zinc-500 dark:text-zinc-400 transition-colors hover:border-zinc-400 dark:hover:border-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-300">
             <Upload className="h-4 w-4" />
             {uploading ? "Enviando..." : "Fazer upload de prints"}
           </div>
@@ -62,7 +62,7 @@ export function ImageUpload({ diaryEntryId }: { diaryEntryId: string }) {
       {images.length > 0 && (
         <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
           {images.map((img) => (
-            <div key={img.id} className="relative group rounded-lg overflow-hidden border border-zinc-100">
+            <div key={img.id} className="relative group rounded-lg overflow-hidden border border-zinc-100 dark:border-zinc-800">
               <img
                 src={img.path}
                 alt={img.originalName}

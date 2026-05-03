@@ -3,6 +3,7 @@
 import { usePathname, useRouter } from "next/navigation";
 import { NotificationToggle } from "@/components/NotificationToggle";
 import { LogOut, Menu } from "lucide-react";
+import { ThemeToggle } from "@/components/ThemeToggle";
 
 const pageTitles: Record<string, { title: string; description: string }> = {
   "/": { title: "Dashboard", description: "Visão geral das suas operações" },
@@ -12,7 +13,7 @@ const pageTitles: Record<string, { title: string; description: string }> = {
   "/reports": { title: "Relatórios", description: "Relatórios da corretora" },
   "/replays": { title: "Replays", description: "Estudos e simulações de mercado" },
   "/insights": { title: "Insights", description: "Análise semanal e mensal dos seus resultados" },
-  "/mentor": { title: "Mentor", description: "Seu mentor pessoal de trading" },
+  "/mentor": { title: "Gemini", description: "Seu mentor pessoal de trading" },
 };
 
 interface HeaderProps {
@@ -31,7 +32,7 @@ export function Header({ onMenuClick }: HeaderProps) {
   }
 
   return (
-    <header className="sticky top-0 z-30 flex h-14 lg:h-16 items-center justify-between border-b border-zinc-100 bg-white/80 backdrop-blur-sm px-4 lg:px-8">
+    <header className="sticky top-0 z-30 flex h-14 lg:h-16 items-center justify-between border-b border-zinc-100 dark:border-zinc-800 bg-white/80 dark:bg-zinc-900/80 backdrop-blur-sm px-4 lg:px-8">
       <div className="flex items-center gap-3">
         <button
           onClick={onMenuClick}
@@ -40,14 +41,15 @@ export function Header({ onMenuClick }: HeaderProps) {
           <Menu className="h-5 w-5" />
         </button>
         <div>
-          <h2 className="text-base lg:text-lg font-semibold text-zinc-900">{page.title}</h2>
-          <p className="hidden sm:block text-xs text-zinc-500">{page.description}</p>
+          <h2 className="text-base lg:text-lg font-semibold text-zinc-900 dark:text-zinc-100">{page.title}</h2>
+          <p className="hidden sm:block text-xs text-zinc-500 dark:text-zinc-400">{page.description}</p>
         </div>
       </div>
       <div className="flex items-center gap-2 lg:gap-3">
+        <ThemeToggle />
         <NotificationToggle />
         <div className="hidden md:block text-right">
-          <p className="text-xs text-zinc-400">
+          <p className="text-xs text-zinc-400 dark:text-zinc-500">
             {new Date().toLocaleDateString("pt-BR", {
               weekday: "long",
               day: "2-digit",
@@ -58,7 +60,7 @@ export function Header({ onMenuClick }: HeaderProps) {
         </div>
         <button
           onClick={handleLogout}
-          className="flex items-center gap-1.5 rounded-lg px-2 lg:px-3 py-2 text-xs font-medium text-zinc-500 hover:bg-zinc-100 hover:text-zinc-700 transition-colors cursor-pointer"
+          className="flex items-center gap-1.5 rounded-lg px-2 lg:px-3 py-2 text-xs font-medium text-zinc-500 hover:bg-zinc-100 hover:text-zinc-700 dark:hover:bg-zinc-800 dark:hover:text-zinc-300 transition-colors cursor-pointer"
           title="Sair"
         >
           <LogOut className="h-3.5 w-3.5" />

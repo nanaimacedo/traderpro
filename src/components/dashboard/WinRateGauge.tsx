@@ -33,14 +33,14 @@ export function WinRateGauge({ winRate, gains, losses, zeros }: WinRateGaugeProp
           <p className="text-lg font-bold text-emerald-600">{gains}</p>
           <p className="text-[10px] text-zinc-400 uppercase tracking-wider">Gains</p>
         </div>
-        <div className="h-6 w-px bg-zinc-200" />
+        <div className="h-6 w-px bg-zinc-200 dark:bg-zinc-700" />
         <div className="text-center">
           <p className="text-lg font-bold text-rose-500">{losses}</p>
           <p className="text-[10px] text-zinc-400 uppercase tracking-wider">Losses</p>
         </div>
         {zeros > 0 && (
           <>
-            <div className="h-6 w-px bg-zinc-200" />
+            <div className="h-6 w-px bg-zinc-200 dark:bg-zinc-700" />
             <div className="text-center">
               <p className="text-lg font-bold text-zinc-400">{zeros}</p>
               <p className="text-[10px] text-zinc-400 uppercase tracking-wider">Zeros</p>

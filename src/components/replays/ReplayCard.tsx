@@ -47,17 +47,17 @@ export function ReplayCard({ replay, moodLabels }: ReplayCardProps) {
               )}
               <span className={cn(
                 "text-xs font-semibold px-2 py-0.5 rounded-full",
-                isPositive ? "bg-emerald-50 text-emerald-700" : "bg-rose-50 text-rose-700"
+                isPositive ? "bg-emerald-50 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-400" : "bg-rose-50 dark:bg-rose-950 text-rose-700 dark:text-rose-400"
               )}>
                 {replay.points > 0 ? "+" : ""}{replay.points.toFixed(1)} pts
               </span>
             </div>
-            <h4 className="text-sm font-semibold text-zinc-900">{replay.title}</h4>
+            <h4 className="text-sm font-semibold text-zinc-900 dark:text-zinc-100">{replay.title}</h4>
           </div>
           <div className="flex items-center gap-2">
             <button
               onClick={() => setExpanded(!expanded)}
-              className="text-zinc-400 hover:text-zinc-600 transition-colors cursor-pointer"
+              className="text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300 transition-colors cursor-pointer"
             >
               {expanded ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
             </button>
@@ -67,7 +67,7 @@ export function ReplayCard({ replay, moodLabels }: ReplayCardProps) {
                 setDeleting(true);
                 await deleteReplay(replay.id);
               }}
-              className="text-zinc-300 hover:text-rose-500 transition-colors cursor-pointer"
+              className="text-zinc-300 dark:text-zinc-600 hover:text-rose-500 transition-colors cursor-pointer"
             >
               <Trash2 className="h-4 w-4" />
             </button>
@@ -78,7 +78,7 @@ export function ReplayCard({ replay, moodLabels }: ReplayCardProps) {
         <div className="flex items-center gap-4 mt-3">
           <div className="flex items-center gap-1">
             <span className="text-[10px] text-zinc-400">Entradas:</span>
-            <span className="text-xs font-semibold text-zinc-700">{replay.entries}</span>
+            <span className="text-xs font-semibold text-zinc-700 dark:text-zinc-300">{replay.entries}</span>
           </div>
           <div className="flex items-center gap-1">
             <TrendingUp className="h-3 w-3 text-emerald-500" />
@@ -109,8 +109,8 @@ export function ReplayCard({ replay, moodLabels }: ReplayCardProps) {
         </div>
 
         {expanded && (
-          <div className="mt-4 pt-4 border-t border-zinc-100">
-            <p className="text-sm text-zinc-600 whitespace-pre-wrap leading-relaxed">
+          <div className="mt-4 pt-4 border-t border-zinc-100 dark:border-zinc-800">
+            <p className="text-sm text-zinc-600 dark:text-zinc-400 whitespace-pre-wrap leading-relaxed">
               {replay.content}
             </p>
           </div>

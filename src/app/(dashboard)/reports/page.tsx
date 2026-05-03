@@ -22,7 +22,7 @@ export default async function ReportsPage() {
         {reports.length === 0 ? (
           <Card>
             <CardContent className="flex flex-col items-center justify-center py-16">
-              <FileBarChart className="h-12 w-12 text-zinc-200 mb-4" />
+              <FileBarChart className="h-12 w-12 text-zinc-200 dark:text-zinc-600 mb-4" />
               <p className="text-sm text-zinc-500">Nenhum relatório enviado</p>
               <p className="text-xs text-zinc-400 mt-1">
                 Envie os PDFs da sua corretora para manter o histórico
@@ -37,11 +37,11 @@ export default async function ReportsPage() {
                   <div className="flex flex-col sm:flex-row sm:items-center gap-4">
                     {/* File info */}
                     <div className="flex items-center gap-3 flex-1 min-w-0">
-                      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-zinc-50">
+                      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-zinc-50 dark:bg-zinc-800">
                         <FileBarChart className="h-5 w-5 text-zinc-400" />
                       </div>
                       <div className="min-w-0">
-                        <p className="text-sm font-semibold text-zinc-900 truncate">{report.originalName}</p>
+                        <p className="text-sm font-semibold text-zinc-900 dark:text-zinc-100 truncate">{report.originalName}</p>
                         <p className="text-xs text-zinc-400">{formatDate(report.date)}</p>
                       </div>
                     </div>
@@ -51,7 +51,7 @@ export default async function ReportsPage() {
                       {report.totalTrades && (
                         <div className="text-center">
                           <p className="text-xs text-zinc-400">Trades</p>
-                          <p className="text-sm font-semibold text-zinc-700">{report.totalTrades}</p>
+                          <p className="text-sm font-semibold text-zinc-700 dark:text-zinc-300">{report.totalTrades}</p>
                         </div>
                       )}
                       {report.totalGain !== null && (
@@ -92,7 +92,7 @@ export default async function ReportsPage() {
                     <div className="flex items-center gap-3 sm:shrink-0">
                       <a
                         href={`/reports/pdf?month=${new Date(report.date).getMonth()}&year=${new Date(report.date).getFullYear()}`}
-                        className="text-xs text-zinc-500 hover:text-zinc-700 underline"
+                        className="text-xs text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-300 underline"
                       >
                         Ver PDF
                       </a>

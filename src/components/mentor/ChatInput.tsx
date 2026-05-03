@@ -48,7 +48,7 @@ export function ChatInput({ onSend, disabled }: ChatInputProps) {
           <img
             src={imagePreview}
             alt="Preview"
-            className="h-20 rounded-lg border border-zinc-200 object-cover"
+            className="h-20 rounded-lg border border-zinc-200 dark:border-zinc-700 object-cover"
           />
           <button
             onClick={() => setImagePreview(null)}
@@ -63,7 +63,7 @@ export function ChatInput({ onSend, disabled }: ChatInputProps) {
           type="button"
           onClick={() => fileRef.current?.click()}
           disabled={disabled}
-          className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-zinc-200 text-zinc-400 transition-colors hover:bg-zinc-50 hover:text-zinc-600 disabled:opacity-50 cursor-pointer"
+          className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-zinc-200 dark:border-zinc-700 text-zinc-400 transition-colors hover:bg-zinc-50 dark:hover:bg-zinc-800 hover:text-zinc-600 dark:hover:text-zinc-300 disabled:opacity-50 cursor-pointer"
           title="Enviar print do gráfico"
         >
           <ImagePlus className="h-4 w-4" />
@@ -81,12 +81,12 @@ export function ChatInput({ onSend, disabled }: ChatInputProps) {
           disabled={disabled}
           onKeyDown={handleKeyDown}
           rows={1}
-          className="flex-1 resize-none rounded-xl border border-zinc-200 bg-white px-4 py-3 text-sm text-zinc-900 placeholder:text-zinc-400 focus:outline-none focus:ring-2 focus:ring-zinc-900/10 focus:border-zinc-400 disabled:opacity-50 transition-colors"
+          className="flex-1 resize-none rounded-xl border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 px-4 py-3 text-sm text-zinc-900 dark:text-zinc-100 placeholder:text-zinc-400 dark:placeholder:text-zinc-500 focus:outline-none focus:ring-2 focus:ring-zinc-900/10 focus:border-zinc-400 disabled:opacity-50 transition-colors"
         />
         <button
           type="submit"
           disabled={disabled}
-          className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-zinc-900 text-white transition-colors hover:bg-zinc-800 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+          className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-zinc-900 dark:bg-zinc-100 text-white dark:text-zinc-900 transition-colors hover:bg-zinc-800 dark:hover:bg-zinc-200 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
         >
           <Send className="h-4 w-4" />
         </button>

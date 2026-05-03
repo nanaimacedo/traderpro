@@ -80,34 +80,34 @@ export function WeeklyInsights() {
           href={`/mentor`}
           className="text-[10px] font-medium text-amber-600 hover:text-amber-700 uppercase tracking-wider"
         >
-          Falar com Mentor
+          Falar com Gemini
         </Link>
       </CardHeader>
 
       <CardContent className="space-y-4">
         {/* Mini KPIs */}
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-          <div className="rounded-lg bg-zinc-50 p-3 text-center">
-            <p className="text-[10px] font-semibold text-zinc-400 uppercase tracking-wider">Resultado</p>
+          <div className="rounded-lg bg-zinc-50 dark:bg-zinc-800 p-3 text-center">
+            <p className="text-[10px] font-semibold text-zinc-400 dark:text-zinc-500 uppercase tracking-wider">Resultado</p>
             <p className={cn("text-lg font-bold mt-0.5", isPositive ? "text-emerald-600" : "text-rose-500")}>
               R$ {i.netResult.toFixed(0)}
             </p>
           </div>
-          <div className="rounded-lg bg-zinc-50 p-3 text-center">
-            <p className="text-[10px] font-semibold text-zinc-400 uppercase tracking-wider">Win Rate</p>
+          <div className="rounded-lg bg-zinc-50 dark:bg-zinc-800 p-3 text-center">
+            <p className="text-[10px] font-semibold text-zinc-400 dark:text-zinc-500 uppercase tracking-wider">Win Rate</p>
             <p className={cn("text-lg font-bold mt-0.5", i.winRate >= 50 ? "text-emerald-600" : "text-rose-500")}>
               {i.winRate.toFixed(0)}%
             </p>
           </div>
-          <div className="rounded-lg bg-zinc-50 p-3 text-center">
-            <p className="text-[10px] font-semibold text-zinc-400 uppercase tracking-wider">Payoff</p>
+          <div className="rounded-lg bg-zinc-50 dark:bg-zinc-800 p-3 text-center">
+            <p className="text-[10px] font-semibold text-zinc-400 dark:text-zinc-500 uppercase tracking-wider">Payoff</p>
             <p className={cn("text-lg font-bold mt-0.5", i.payoff >= 1.5 ? "text-emerald-600" : i.payoff >= 1 ? "text-amber-500" : "text-rose-500")}>
               {i.payoff > 0 ? i.payoff.toFixed(2) : "—"}
             </p>
           </div>
-          <div className="rounded-lg bg-zinc-50 p-3 text-center">
-            <p className="text-[10px] font-semibold text-zinc-400 uppercase tracking-wider">Trades</p>
-            <p className="text-lg font-bold mt-0.5 text-zinc-900">
+          <div className="rounded-lg bg-zinc-50 dark:bg-zinc-800 p-3 text-center">
+            <p className="text-[10px] font-semibold text-zinc-400 dark:text-zinc-500 uppercase tracking-wider">Trades</p>
+            <p className="text-lg font-bold mt-0.5 text-zinc-900 dark:text-zinc-100">
               {i.total}
             </p>
           </div>
@@ -124,9 +124,9 @@ export function WeeklyInsights() {
             if (insight.includes("Sequencia") && insight.includes("losses")) icon = <AlertTriangle className="h-3.5 w-3.5 text-rose-500 shrink-0 mt-0.5" />;
 
             return (
-              <div key={idx} className="flex items-start gap-2 rounded-lg bg-zinc-50/50 px-3 py-2">
+              <div key={idx} className="flex items-start gap-2 rounded-lg bg-zinc-50/50 dark:bg-zinc-800/50 px-3 py-2">
                 {icon}
-                <p className="text-xs text-zinc-600 leading-relaxed">{insight}</p>
+                <p className="text-xs text-zinc-600 dark:text-zinc-400 leading-relaxed">{insight}</p>
               </div>
             );
           })}

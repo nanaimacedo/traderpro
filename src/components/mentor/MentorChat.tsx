@@ -145,12 +145,12 @@ export function MentorChat({ tradesContext }: MentorChatProps) {
 
       {/* Sidebar de conversas — desktop always visible, mobile drawer */}
       <div className={`
-        fixed inset-y-0 left-0 z-50 w-72 bg-white p-4 shadow-xl transition-transform duration-300 lg:static lg:translate-x-0 lg:shadow-none lg:rounded-xl lg:border lg:border-zinc-100
+        fixed inset-y-0 left-0 z-50 w-72 bg-white dark:bg-zinc-950 p-4 shadow-xl transition-transform duration-300 lg:static lg:translate-x-0 lg:shadow-none lg:rounded-xl lg:border lg:border-zinc-100 dark:lg:border-zinc-800
         ${showSidebar ? "translate-x-0" : "-translate-x-full"}
       `}>
         <div className="flex items-center justify-between lg:hidden mb-3">
-          <span className="text-sm font-semibold text-zinc-900">Conversas</span>
-          <button onClick={() => setShowSidebar(false)} className="p-1 rounded-lg hover:bg-zinc-100 cursor-pointer">
+          <span className="text-sm font-semibold text-zinc-900 dark:text-zinc-100">Conversas</span>
+          <button onClick={() => setShowSidebar(false)} className="p-1 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 cursor-pointer">
             <X className="h-5 w-5 text-zinc-500" />
           </button>
         </div>
@@ -170,12 +170,12 @@ export function MentorChat({ tradesContext }: MentorChatProps) {
       </div>
 
       {/* Area do chat */}
-      <div className="flex flex-1 flex-col rounded-xl border border-zinc-100 bg-white shadow-sm min-w-0">
+      <div className="flex flex-1 flex-col rounded-xl border border-zinc-100 dark:border-zinc-800 bg-white dark:bg-zinc-900 shadow-sm min-w-0">
         {/* Header */}
-        <div className="flex items-center gap-3 border-b border-zinc-100 px-4 lg:px-6 py-3 lg:py-4">
+        <div className="flex items-center gap-3 border-b border-zinc-100 dark:border-zinc-800 px-4 lg:px-6 py-3 lg:py-4">
           <button
             onClick={() => setShowSidebar(true)}
-            className="flex h-9 w-9 items-center justify-center rounded-lg text-zinc-500 hover:bg-zinc-100 lg:hidden cursor-pointer"
+            className="flex h-9 w-9 items-center justify-center rounded-lg text-zinc-500 hover:bg-zinc-100 dark:hover:bg-zinc-800 lg:hidden cursor-pointer"
           >
             <MessageSquare className="h-5 w-5" />
           </button>
@@ -183,7 +183,7 @@ export function MentorChat({ tradesContext }: MentorChatProps) {
             <Brain className="h-4 w-4 lg:h-5 lg:w-5 text-white" />
           </div>
           <div>
-            <h2 className="text-sm font-semibold text-zinc-900">Mentor de Trading</h2>
+            <h2 className="text-sm font-semibold text-zinc-900 dark:text-zinc-100">Gemini</h2>
             <p className="hidden sm:block text-xs text-zinc-500">
               PNL, Oliver Velez, Psicologia de Mercado
             </p>
@@ -194,12 +194,13 @@ export function MentorChat({ tradesContext }: MentorChatProps) {
         <div className="flex-1 overflow-y-auto px-4 lg:px-6 py-4">
           {messages.length === 0 ? (
             <div className="flex h-full flex-col items-center justify-center text-center px-4">
-              <div className="flex h-14 w-14 lg:h-16 lg:w-16 items-center justify-center rounded-full bg-amber-50">
+              <div className="flex h-14 w-14 lg:h-16 lg:w-16 items-center justify-center rounded-full bg-amber-50 dark:bg-amber-950">
                 <Brain className="h-7 w-7 lg:h-8 lg:w-8 text-amber-500" />
               </div>
-              <h3 className="mt-4 text-base lg:text-lg font-semibold text-zinc-900">
-                Seu Mentor de Trading
+              <h3 className="mt-4 text-base lg:text-lg font-semibold text-zinc-900 dark:text-zinc-100">
+                Gemini — Seu Mentor de Trading
               </h3>
+
               <p className="mt-2 max-w-md text-sm text-zinc-500">
                 Pergunte sobre setups, psicologia, gestão de risco, análise dos seus trades,
                 ou qualquer dúvida sobre o operacional.
@@ -216,7 +217,7 @@ export function MentorChat({ tradesContext }: MentorChatProps) {
                   <button
                     key={suggestion}
                     onClick={() => handleSend(suggestion)}
-                    className="rounded-full border border-zinc-200 px-3 py-1.5 text-xs text-zinc-600 transition-colors hover:bg-zinc-50 cursor-pointer"
+                    className="rounded-full border border-zinc-200 dark:border-zinc-700 px-3 py-1.5 text-xs text-zinc-600 dark:text-zinc-400 transition-colors hover:bg-zinc-50 dark:hover:bg-zinc-800 cursor-pointer"
                   >
                     {suggestion}
                   </button>
@@ -233,7 +234,7 @@ export function MentorChat({ tradesContext }: MentorChatProps) {
                   <div className="flex h-8 w-8 items-center justify-center rounded-full bg-amber-500">
                     <Brain className="h-4 w-4 text-white" />
                   </div>
-                  <div className="rounded-2xl bg-zinc-100 px-4 py-3">
+                  <div className="rounded-2xl bg-zinc-100 dark:bg-zinc-800 px-4 py-3">
                     <Loader2 className="h-4 w-4 animate-spin text-zinc-400" />
                   </div>
                 </div>
@@ -244,7 +245,7 @@ export function MentorChat({ tradesContext }: MentorChatProps) {
         </div>
 
         {/* Input */}
-        <div className="border-t border-zinc-100 px-4 lg:px-6 py-3 lg:py-4">
+        <div className="border-t border-zinc-100 dark:border-zinc-800 px-4 lg:px-6 py-3 lg:py-4">
           <ChatInput onSend={handleSend} disabled={loading} />
         </div>
       </div>

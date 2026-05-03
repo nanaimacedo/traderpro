@@ -93,7 +93,7 @@ export function DonutChart({
         {/* Center label */}
         {centerLabel && (
           <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
-            <span className="text-xl font-bold text-zinc-900">{centerLabel}</span>
+            <span className="text-xl font-bold text-zinc-900 dark:text-zinc-100">{centerLabel}</span>
             {centerSub && (
               <span className="text-[10px] text-zinc-400 font-medium">{centerSub}</span>
             )}
@@ -117,9 +117,9 @@ export function DonutChart({
               className="h-2.5 w-2.5 rounded-full shrink-0"
               style={{ backgroundColor: slice.color }}
             />
-            <span className="text-xs text-zinc-600">
-              {slice.label}: <span className="font-semibold text-zinc-800">{slice.value}</span>
-              <span className="text-zinc-400 ml-1">({((slice.value / total) * 100).toFixed(0)}%)</span>
+            <span className="text-xs text-zinc-600 dark:text-zinc-400">
+              {slice.label}: <span className="font-semibold text-zinc-800 dark:text-zinc-200">{slice.value}</span>
+              <span className="text-zinc-400 dark:text-zinc-500 ml-1">({((slice.value / total) * 100).toFixed(0)}%)</span>
             </span>
           </button>
         ))}

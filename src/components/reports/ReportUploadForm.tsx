@@ -66,7 +66,7 @@ export function ReportUploadForm() {
         <form onSubmit={handleSubmit} className="space-y-5">
           {/* File upload */}
           <div className="space-y-2">
-            <label className="text-sm font-medium text-zinc-700">Arquivo PDF</label>
+            <label className="text-sm font-medium text-zinc-700 dark:text-zinc-300">Arquivo PDF</label>
             <label className="cursor-pointer block">
               <input
                 type="file"
@@ -74,9 +74,9 @@ export function ReportUploadForm() {
                 onChange={handleFileChange}
                 className="sr-only"
               />
-              <div className="flex items-center gap-3 rounded-lg border-2 border-dashed border-zinc-200 p-4 transition-colors hover:border-zinc-400">
+              <div className="flex items-center gap-3 rounded-lg border-2 border-dashed border-zinc-200 dark:border-zinc-700 p-4 transition-colors hover:border-zinc-400 dark:hover:border-zinc-500">
                 <Upload className="h-5 w-5 text-zinc-400" />
-                <span className="text-sm text-zinc-500">
+                <span className="text-sm text-zinc-500 dark:text-zinc-400">
                   {loading
                     ? "Enviando..."
                     : fileName
@@ -89,7 +89,7 @@ export function ReportUploadForm() {
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div className="space-y-2">
-              <label className="text-sm font-medium text-zinc-700">Data do Relatório</label>
+              <label className="text-sm font-medium text-zinc-700 dark:text-zinc-300">Data do Relatório</label>
               <Input
                 type="date"
                 name="date"
@@ -98,26 +98,26 @@ export function ReportUploadForm() {
               />
             </div>
             <div className="space-y-2">
-              <label className="text-sm font-medium text-zinc-700">Total de Trades</label>
+              <label className="text-sm font-medium text-zinc-700 dark:text-zinc-300">Total de Trades</label>
               <Input type="number" name="totalTrades" placeholder="Opcional" min="0" />
             </div>
             <div className="space-y-2">
-              <label className="text-sm font-medium text-zinc-700">Taxas / Emolumentos</label>
+              <label className="text-sm font-medium text-zinc-700 dark:text-zinc-300">Taxas / Emolumentos</label>
               <Input type="number" name="fees" placeholder="R$ 0,00" step="0.01" />
             </div>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div className="space-y-2">
-              <label className="text-sm font-medium text-zinc-700">Total Ganhos (R$)</label>
+              <label className="text-sm font-medium text-zinc-700 dark:text-zinc-300">Total Ganhos (R$)</label>
               <Input type="number" name="totalGain" placeholder="R$ 0,00" step="0.01" />
             </div>
             <div className="space-y-2">
-              <label className="text-sm font-medium text-zinc-700">Total Perdas (R$)</label>
+              <label className="text-sm font-medium text-zinc-700 dark:text-zinc-300">Total Perdas (R$)</label>
               <Input type="number" name="totalLoss" placeholder="R$ 0,00" step="0.01" />
             </div>
             <div className="space-y-2">
-              <label className="text-sm font-medium text-zinc-700">Resultado Líquido (R$)</label>
+              <label className="text-sm font-medium text-zinc-700 dark:text-zinc-300">Resultado Líquido (R$)</label>
               <Input type="number" name="netResult" placeholder="R$ 0,00" step="0.01" />
             </div>
           </div>

@@ -10,13 +10,13 @@ const buttonVariants = cva(
   {
     variants: {
       variant: {
-        default: "bg-zinc-900 text-white hover:bg-zinc-800 shadow-sm",
-        destructive: "bg-rose-500 text-white hover:bg-rose-600 shadow-sm",
-        outline: "border border-zinc-200 bg-white hover:bg-zinc-50 text-zinc-700",
-        secondary: "bg-zinc-100 text-zinc-900 hover:bg-zinc-200",
-        ghost: "hover:bg-zinc-100 text-zinc-700",
-        link: "text-zinc-900 underline-offset-4 hover:underline",
-        success: "bg-emerald-600 text-white hover:bg-emerald-700 shadow-sm",
+        default: "bg-zinc-900 text-white hover:bg-zinc-800 shadow-sm dark:bg-zinc-100 dark:text-zinc-900 dark:hover:bg-zinc-200",
+        destructive: "bg-rose-500 text-white hover:bg-rose-600 shadow-sm dark:bg-rose-600 dark:hover:bg-rose-700",
+        outline: "border border-zinc-200 bg-white hover:bg-zinc-50 text-zinc-700 dark:border-zinc-700 dark:bg-zinc-900 dark:hover:bg-zinc-800 dark:text-zinc-300",
+        secondary: "bg-zinc-100 text-zinc-900 hover:bg-zinc-200 dark:bg-zinc-800 dark:text-zinc-100 dark:hover:bg-zinc-700",
+        ghost: "hover:bg-zinc-100 text-zinc-700 dark:hover:bg-zinc-800 dark:text-zinc-300",
+        link: "text-zinc-900 underline-offset-4 hover:underline dark:text-zinc-100",
+        success: "bg-emerald-600 text-white hover:bg-emerald-700 shadow-sm dark:bg-emerald-500 dark:hover:bg-emerald-600",
       },
       size: {
         default: "h-10 px-4 py-2",

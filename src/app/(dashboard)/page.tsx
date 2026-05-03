@@ -162,7 +162,7 @@ export default async function Dashboard({ searchParams }: PageProps) {
         <CardContent>
           {trades.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-12 text-center">
-              <BarChart3 className="h-10 w-10 text-zinc-300 mb-3" />
+              <BarChart3 className="h-10 w-10 text-zinc-300 dark:text-zinc-600 mb-3" />
               <p className="text-sm text-zinc-500">Nenhuma operação neste período</p>
               <p className="text-xs text-zinc-400 mt-1">Use as setas para navegar entre os meses</p>
             </div>
@@ -171,14 +171,14 @@ export default async function Dashboard({ searchParams }: PageProps) {
               {trades.slice(-5).reverse().map((trade: any) => (
                 <div
                   key={trade.id}
-                  className="flex items-center justify-between rounded-lg border border-zinc-50 bg-zinc-50/50 px-3 lg:px-4 py-3 transition-colors hover:bg-zinc-100/50"
+                  className="flex items-center justify-between rounded-lg border border-zinc-50 dark:border-zinc-800 bg-zinc-50/50 dark:bg-zinc-800/50 px-3 lg:px-4 py-3 transition-colors hover:bg-zinc-100/50 dark:hover:bg-zinc-800"
                 >
                   <div className="flex items-center gap-2 lg:gap-3">
                     <Badge variant={trade.result === "GAIN" ? "gain" : trade.result === "LOSS" ? "loss" : "zero"}>
                       {trade.result}
                     </Badge>
                     <div>
-                      <p className="text-sm font-medium text-zinc-700">
+                      <p className="text-sm font-medium text-zinc-700 dark:text-zinc-300">
                         {trade.direction} - {trade.contracts} ct
                       </p>
                       <p className="text-xs text-zinc-400">

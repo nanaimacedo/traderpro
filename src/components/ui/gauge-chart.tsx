@@ -42,7 +42,7 @@ export function GaugeChart({ value, label, sublabel, size = 160, className }: Ga
             cy={size / 2}
             r={radius}
             fill="none"
-            stroke="#f4f4f5"
+            className="stroke-zinc-100 dark:stroke-zinc-800"
             strokeWidth={strokeWidth}
           />
           {/* Progress arc */}
@@ -75,7 +75,7 @@ export function GaugeChart({ value, label, sublabel, size = 160, className }: Ga
         </div>
       </div>
       {label && (
-        <p className="mt-2 text-sm font-semibold text-zinc-700">{label}</p>
+        <p className="mt-2 text-sm font-semibold text-zinc-700 dark:text-zinc-300">{label}</p>
       )}
     </div>
   );

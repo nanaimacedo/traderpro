@@ -112,8 +112,8 @@ export function NotificationToggle() {
       disabled={loading}
       className={`relative flex h-9 w-9 items-center justify-center rounded-lg transition-colors cursor-pointer disabled:opacity-50 ${
         isSubscribed
-          ? 'text-emerald-600 hover:bg-emerald-50'
-          : 'text-zinc-400 hover:bg-zinc-100 hover:text-zinc-600'
+          ? 'text-emerald-600 hover:bg-emerald-50 dark:hover:bg-emerald-950'
+          : 'text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800 hover:text-zinc-600 dark:hover:text-zinc-300'
       }`}
       title={isSubscribed ? 'Notificações ativas' : 'Ativar notificações'}
     >
