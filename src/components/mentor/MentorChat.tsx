@@ -11,6 +11,7 @@ interface Message {
   role: "user" | "assistant";
   content: string;
   createdAt: string;
+  image?: string;
 }
 
 interface Conversation {
@@ -80,12 +81,13 @@ export function MentorChat({ tradesContext }: MentorChatProps) {
     fetchConversations();
   }
 
-  async function handleSend(message: string) {
+  async function handleSend(message: string, image?: string) {
     const tempUserMsg: Message = {
       id: `temp-${Date.now()}`,
       role: "user",
-      content: message,
+      content: image ? `[Imagem enviada]\n${message}` : message,
       createdAt: new Date().toISOString(),
+      image,
     };
     setMessages((prev) => [...prev, tempUserMsg]);
     setLoading(true);
@@ -95,6 +97,7 @@ export function MentorChat({ tradesContext }: MentorChatProps) {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         message,
+        image,
         conversationId: activeConversationId,
         tradesContext,
       }),
@@ -223,7 +226,7 @@ export function MentorChat({ tradesContext }: MentorChatProps) {
           ) : (
             <div className="space-y-4">
               {messages.map((msg) => (
-                <ChatMessage key={msg.id} role={msg.role} content={msg.content} />
+                <ChatMessage key={msg.id} role={msg.role} content={msg.content} image={msg.image} />
               ))}
               {loading && (
                 <div className="flex gap-3">

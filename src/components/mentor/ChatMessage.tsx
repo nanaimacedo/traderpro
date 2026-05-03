@@ -4,9 +4,10 @@ import { Brain, User } from "lucide-react";
 interface ChatMessageProps {
   role: "user" | "assistant";
   content: string;
+  image?: string;
 }
 
-export function ChatMessage({ role, content }: ChatMessageProps) {
+export function ChatMessage({ role, content, image }: ChatMessageProps) {
   const isUser = role === "user";
 
   return (
@@ -31,6 +32,13 @@ export function ChatMessage({ role, content }: ChatMessageProps) {
             : "bg-zinc-100 text-zinc-800"
         )}
       >
+        {image && (
+          <img
+            src={image}
+            alt="Gráfico enviado"
+            className="rounded-lg mb-2 max-h-60 w-auto"
+          />
+        )}
         <div className="whitespace-pre-wrap break-words">{content}</div>
       </div>
     </div>
