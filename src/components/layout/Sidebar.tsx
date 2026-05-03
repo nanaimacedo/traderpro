@@ -59,7 +59,15 @@ export function Sidebar({ open, onClose }: SidebarProps) {
               alt="TraderPro"
               width={180}
               height={48}
-              className="object-contain cursor-pointer"
+              className="object-contain cursor-pointer dark:hidden"
+              priority
+            />
+            <Image
+              src="/logo-dark.png"
+              alt="TraderPro"
+              width={180}
+              height={48}
+              className="object-contain cursor-pointer hidden dark:block"
               priority
             />
           </Link>
