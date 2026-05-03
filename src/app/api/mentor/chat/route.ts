@@ -70,7 +70,7 @@ export async function POST(request: NextRequest) {
 
     const contents: any[] = [];
 
-    for (const msg of conversation.messages.slice(-10)) {
+    for (const msg of conversation.messages.slice(-6)) {
       contents.push({
         role: msg.role === "assistant" ? "model" : "user",
         parts: [{ text: msg.content }],

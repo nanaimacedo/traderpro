@@ -32,7 +32,7 @@ export default async function MentorPage() {
 
   const lastTrades = await prisma.trade.findMany({
     orderBy: [{ date: "desc" }, { time: "desc" }],
-    take: 15,
+    take: 8,
   });
 
   // === DIÁRIO ===
@@ -44,7 +44,7 @@ export default async function MentorPage() {
   // === REPLAYS ===
   const replays = await prisma.replay.findMany({
     orderBy: { date: "desc" },
-    take: 10,
+    take: 5,
   });
 
   // === RELATÓRIOS DA CORRETORA ===
@@ -106,7 +106,7 @@ export default async function MentorPage() {
     context += `## DIÁRIO DO TRADER (últimas ${diaryEntries.length} entradas)\n`;
     for (const d of diaryEntries) {
       context += `### ${formatDate(d.date)} — ${d.title}${d.mood ? ` [${d.mood}]` : ""}\n`;
-      context += `${d.content.slice(0, 500)}${d.content.length > 500 ? "..." : ""}\n\n`;
+      context += `${d.content.slice(0, 300)}${d.content.length > 300 ? "..." : ""}\n\n`;
     }
   }
 
