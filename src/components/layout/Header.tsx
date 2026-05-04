@@ -13,6 +13,7 @@ const pageTitles: Record<string, { title: string; description: string }> = {
   "/reports": { title: "Relatórios", description: "Relatórios da corretora" },
   "/replays": { title: "Replays", description: "Estudos e simulações de mercado" },
   "/insights": { title: "Insights", description: "Análise semanal e mensal dos seus resultados" },
+  "/analytics": { title: "Analytics", description: "Métricas institucionais e performance avançada" },
   "/mentor": { title: "Gemini", description: "Seu mentor pessoal de trading" },
 };
 

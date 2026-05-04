@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
@@ -13,6 +14,7 @@ import {
   Brain,
   Lightbulb,
   PlayCircle,
+  BarChart3,
   X,
 } from "lucide-react";
 
@@ -24,6 +26,7 @@ const navigation = [
   { name: "Relatórios", href: "/reports", icon: FileBarChart },
   { name: "Replays", href: "/replays", icon: PlayCircle },
   { name: "Insights", href: "/insights", icon: Lightbulb },
+  { name: "Analytics", href: "/analytics", icon: BarChart3 },
   { name: "Gemini", href: "/mentor", icon: Brain },
 ];
 
@@ -32,8 +35,23 @@ interface SidebarProps {
   onClose?: () => void;
 }
 
+const ASSET_LABELS: Record<string, { name: string; exchange: string }> = {
+  WIN: { name: "Mini Índice", exchange: "B3 - Bovespa" },
+  WDO: { name: "Mini Dólar", exchange: "B3 - Bovespa" },
+};
+
 export function Sidebar({ open, onClose }: SidebarProps) {
   const pathname = usePathname();
+  const [asset, setAsset] = useState("WIN");
+
+  useEffect(() => {
+    fetch("/api/profile/check")
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.profile?.asset) setAsset(data.profile.asset);
+      })
+      .catch(() => {});
+  }, []);
 
   return (
     <>
@@ -99,8 +117,8 @@ export function Sidebar({ open, onClose }: SidebarProps) {
         <div className="border-t border-zinc-100 dark:border-zinc-800 p-4">
           <div className="rounded-lg bg-zinc-50 dark:bg-zinc-900 p-3">
             <p className="text-xs font-medium text-zinc-500 dark:text-zinc-400">Ativo Operado</p>
-            <p className="text-sm font-bold text-zinc-900 dark:text-zinc-100">WIN - Mini Índice</p>
-            <p className="text-[10px] text-zinc-400 dark:text-zinc-500 mt-1">B3 - Bovespa</p>
+            <p className="text-sm font-bold text-zinc-900 dark:text-zinc-100">{asset} - {ASSET_LABELS[asset]?.name || asset}</p>
+            <p className="text-[10px] text-zinc-400 dark:text-zinc-500 mt-1">{ASSET_LABELS[asset]?.exchange || "B3"}</p>
           </div>
         </div>
       </aside>

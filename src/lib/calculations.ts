@@ -122,3 +122,122 @@ export function getCumulativeResults(trades: { date: Date; financialResult: numb
     };
   });
 }
+
+// --- Advanced Analytics (Institutional Grade) ---
+
+interface AdvancedTradeData {
+  date: Date;
+  time: string;
+  result: string;
+  points: number;
+  financialResult: number;
+  contracts: number;
+}
+
+export function calculateAdvancedMetrics(trades: AdvancedTradeData[]) {
+  if (trades.length === 0) return null;
+
+  const results = trades.map((t) => t.financialResult);
+  const gains = results.filter((r) => r > 0);
+  const losses = results.filter((r) => r < 0);
+
+  // Expectancy (expectativa matemática por trade)
+  const avgGain = gains.length > 0 ? gains.reduce((s, v) => s + v, 0) / gains.length : 0;
+  const avgLoss = losses.length > 0 ? Math.abs(losses.reduce((s, v) => s + v, 0) / losses.length) : 0;
+  const winRate = gains.length / trades.length;
+  const expectancy = winRate * avgGain - (1 - winRate) * avgLoss;
+
+  // Profit Factor
+  const grossProfit = gains.reduce((s, v) => s + v, 0);
+  const grossLoss = Math.abs(losses.reduce((s, v) => s + v, 0));
+  const profitFactor = grossLoss > 0 ? grossProfit / grossLoss : grossProfit > 0 ? Infinity : 0;
+
+  // Sharpe Ratio (simplified - annualized)
+  const mean = results.reduce((s, v) => s + v, 0) / results.length;
+  const variance = results.reduce((s, v) => s + (v - mean) ** 2, 0) / results.length;
+  const stdDev = Math.sqrt(variance);
+  const sharpeRatio = stdDev > 0 ? (mean / stdDev) * Math.sqrt(252) : 0; // 252 trading days
+
+  // Maximum Drawdown
+  let peak = 0;
+  let cumulative = 0;
+  let maxDrawdown = 0;
+  let maxDrawdownPct = 0;
+  const equityCurve: number[] = [];
+
+  for (const r of results) {
+    cumulative += r;
+    equityCurve.push(cumulative);
+    if (cumulative > peak) peak = cumulative;
+    const drawdown = peak - cumulative;
+    if (drawdown > maxDrawdown) {
+      maxDrawdown = drawdown;
+      maxDrawdownPct = peak > 0 ? (drawdown / peak) * 100 : 0;
+    }
+  }
+
+  // Recovery Factor
+  const totalReturn = cumulative;
+  const recoveryFactor = maxDrawdown > 0 ? totalReturn / maxDrawdown : 0;
+
+  // Heatmap de horários (resultado por hora)
+  const hourMap = new Map<string, { result: number; trades: number; gains: number; losses: number }>();
+  for (const t of trades) {
+    const hour = t.time.slice(0, 2) + ":00";
+    const existing = hourMap.get(hour) || { result: 0, trades: 0, gains: 0, losses: 0 };
+    existing.result += t.financialResult;
+    existing.trades++;
+    if (t.result === "GAIN") existing.gains++;
+    if (t.result === "LOSS") existing.losses++;
+    hourMap.set(hour, existing);
+  }
+  const heatmap = Array.from(hourMap.entries())
+    .map(([hour, data]) => ({ hour, ...data, winRate: data.trades > 0 ? (data.gains / data.trades) * 100 : 0 }))
+    .sort((a, b) => a.hour.localeCompare(b.hour));
+
+  // Heatmap por dia da semana
+  const dayNames = ["Domingo", "Segunda", "Terça", "Quarta", "Quinta", "Sexta", "Sábado"];
+  const dayMap = new Map<number, { result: number; trades: number; gains: number; losses: number }>();
+  for (const t of trades) {
+    const day = new Date(t.date).getDay();
+    const existing = dayMap.get(day) || { result: 0, trades: 0, gains: 0, losses: 0 };
+    existing.result += t.financialResult;
+    existing.trades++;
+    if (t.result === "GAIN") existing.gains++;
+    if (t.result === "LOSS") existing.losses++;
+    dayMap.set(day, existing);
+  }
+  const dayHeatmap = Array.from(dayMap.entries())
+    .map(([day, data]) => ({ day: dayNames[day], ...data, winRate: data.trades > 0 ? (data.gains / data.trades) * 100 : 0 }))
+    .sort((a, b) => {
+      const order = [1, 2, 3, 4, 5]; // seg-sex
+      return order.indexOf(dayNames.indexOf(a.day) || 0) - order.indexOf(dayNames.indexOf(b.day) || 0);
+    });
+
+  // Discipline Score (0-100)
+  const dailyTradeCounts = new Map<string, number>();
+  for (const t of trades) {
+    const dateKey = new Date(t.date).toISOString().split("T")[0];
+    dailyTradeCounts.set(dateKey, (dailyTradeCounts.get(dateKey) || 0) + 1);
+  }
+  const daysOverLimit = Array.from(dailyTradeCounts.values()).filter((c) => c > 4).length;
+  const totalDays = dailyTradeCounts.size;
+  const disciplineScore = totalDays > 0 ? Math.round(((totalDays - daysOverLimit) / totalDays) * 100) : 100;
+
+  return {
+    expectancy,
+    profitFactor,
+    sharpeRatio,
+    maxDrawdown,
+    maxDrawdownPct,
+    recoveryFactor,
+    equityCurve,
+    heatmap,
+    dayHeatmap,
+    disciplineScore,
+    totalReturn: cumulative,
+    avgGain,
+    avgLoss,
+    stdDev,
+  };
+}

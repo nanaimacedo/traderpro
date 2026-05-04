@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { MENTOR_SYSTEM_PROMPT } from "@/lib/mentor-prompt";
 import { getRelevantKnowledge } from "@/lib/mentor-knowledge";
+import { getMethodologyPrompt } from "@/lib/methodology-plugins";
 import { getRecentMemories, generateConversationSummary } from "@/lib/mentor-memory";
 
 const VISION_PROMPT = `\n\n## ANÁLISE DE GRÁFICO — INSTRUÇÕES ESPECIAIS
@@ -213,7 +214,29 @@ export async function POST(request: NextRequest) {
     const isFirstMessage = conversation.messages.length <= 1;
     const msgLower = (message || "").toLowerCase();
 
+    // Load trader profile for personalized mentoring
+    const traderProfile = await prisma.traderProfile.findFirst();
+
     let systemContent = MENTOR_SYSTEM_PROMPT;
+
+    // Inject dynamic profile data
+    if (traderProfile) {
+      systemContent += `\n\n## PERFIL DO TRADER (DADOS ATUAIS)
+- **Nome:** ${traderProfile.name}${traderProfile.nickname ? ` (pode chamá-lo de "${traderProfile.nickname}" em momentos de motivação)` : ""}
+- **Ativo:** ${traderProfile.asset} — cada ponto vale R$ ${traderProfile.pointValue.toFixed(2)} por contrato
+${traderProfile.currentJob ? `- **Profissão:** ${traderProfile.currentJob}` : ""}
+- **Meta mensal:** R$ ${traderProfile.monthlyGoal.toFixed(2)}
+- **Limite operacional:** Máximo de ${traderProfile.maxEntries} entradas por dia
+- **Metodologia:** ${traderProfile.methodology}
+${traderProfile.philosophy ? `- **Filosofia:** ${traderProfile.philosophy}` : ""}
+${traderProfile.motivation ? `- **Motivação:** ${traderProfile.motivation}` : ""}
+- **Início da mentoria:** ${traderProfile.mentoringSince.toLocaleDateString("pt-BR")}`;
+    }
+
+    // Inject methodology plugin from profile (default: oliver-velez)
+    const methodologyId = traderProfile?.methodology || "oliver-velez";
+    const methodology = getMethodologyPrompt(methodologyId);
+    if (methodology) systemContent += `\n\n${methodology}`;
 
     const knowledge = getRelevantKnowledge(message || "");
     if (knowledge) systemContent += `\n\n${knowledge}`;
