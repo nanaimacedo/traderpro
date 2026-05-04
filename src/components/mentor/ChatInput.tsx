@@ -1,7 +1,8 @@
 "use client";
 
-import { useRef, useState } from "react";
-import { Send, ImagePlus, X } from "lucide-react";
+import { useRef, useState, useCallback } from "react";
+import { Send, ImagePlus, X, Mic, Square, Loader2 } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 interface ChatInputProps {
   onSend: (message: string, image?: string) => void;
@@ -11,7 +12,12 @@ interface ChatInputProps {
 export function ChatInput({ onSend, disabled }: ChatInputProps) {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const fileRef = useRef<HTMLInputElement>(null);
+  const mediaRecorderRef = useRef<MediaRecorder | null>(null);
+  const chunksRef = useRef<Blob[]>([]);
+
   const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [recording, setRecording] = useState(false);
+  const [transcribing, setTranscribing] = useState(false);
 
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -32,14 +38,60 @@ export function ChatInput({ onSend, disabled }: ChatInputProps) {
   function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
     if (!file) return;
-
     const reader = new FileReader();
-    reader.onload = () => {
-      setImagePreview(reader.result as string);
-    };
+    reader.onload = () => setImagePreview(reader.result as string);
     reader.readAsDataURL(file);
     e.target.value = "";
   }
+
+  const startRecording = useCallback(async () => {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      const mediaRecorder = new MediaRecorder(stream, { mimeType: "audio/webm;codecs=opus" });
+      mediaRecorderRef.current = mediaRecorder;
+      chunksRef.current = [];
+
+      mediaRecorder.ondataavailable = (e) => {
+        if (e.data.size > 0) chunksRef.current.push(e.data);
+      };
+
+      mediaRecorder.onstop = async () => {
+        stream.getTracks().forEach((t) => t.stop());
+        const blob = new Blob(chunksRef.current, { type: "audio/webm" });
+
+        if (blob.size < 1000) return; // too short
+
+        setTranscribing(true);
+        try {
+          const formData = new FormData();
+          formData.append("audio", blob);
+
+          const res = await fetch("/api/speech", { method: "POST", body: formData });
+          const data = await res.json();
+
+          if (data.text && textareaRef.current) {
+            textareaRef.current.value = data.text;
+            textareaRef.current.focus();
+          }
+        } catch {
+          // silently fail
+        }
+        setTranscribing(false);
+      };
+
+      mediaRecorder.start();
+      setRecording(true);
+    } catch {
+      // mic permission denied
+    }
+  }, []);
+
+  const stopRecording = useCallback(() => {
+    mediaRecorderRef.current?.stop();
+    setRecording(false);
+  }, []);
+
+  const hasMic = typeof navigator !== "undefined" && "mediaDevices" in navigator;
 
   return (
     <div className="space-y-2">
@@ -77,15 +129,46 @@ export function ChatInput({ onSend, disabled }: ChatInputProps) {
         />
         <textarea
           ref={textareaRef}
-          placeholder={imagePreview ? "Descreva o que quer analisar..." : "Pergunte ao seu mentor..."}
-          disabled={disabled}
+          placeholder={
+            transcribing
+              ? "Transcrevendo áudio..."
+              : recording
+              ? "Gravando... clique no botão para parar"
+              : imagePreview
+              ? "Descreva o que quer analisar..."
+              : "Pergunte ao seu mentor..."
+          }
+          disabled={disabled || recording || transcribing}
           onKeyDown={handleKeyDown}
           rows={1}
           className="flex-1 resize-none rounded-xl border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 px-4 py-3 text-sm text-zinc-900 dark:text-zinc-100 placeholder:text-zinc-400 dark:placeholder:text-zinc-500 focus:outline-none focus:ring-2 focus:ring-zinc-900/10 focus:border-zinc-400 disabled:opacity-50 transition-colors"
         />
+        {/* Mic button */}
+        {hasMic && (
+          <button
+            type="button"
+            onClick={recording ? stopRecording : startRecording}
+            disabled={disabled || transcribing}
+            className={cn(
+              "flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border transition-all cursor-pointer disabled:opacity-50",
+              recording
+                ? "border-rose-300 dark:border-rose-700 bg-rose-50 dark:bg-rose-950 text-rose-500 animate-pulse"
+                : "border-zinc-200 dark:border-zinc-700 text-zinc-400 hover:bg-zinc-50 dark:hover:bg-zinc-800 hover:text-zinc-600 dark:hover:text-zinc-300"
+            )}
+            title={recording ? "Parar gravação" : "Gravar áudio"}
+          >
+            {transcribing ? (
+              <Loader2 className="h-4 w-4 animate-spin" />
+            ) : recording ? (
+              <Square className="h-3.5 w-3.5 fill-current" />
+            ) : (
+              <Mic className="h-4 w-4" />
+            )}
+          </button>
+        )}
         <button
           type="submit"
-          disabled={disabled}
+          disabled={disabled || recording || transcribing}
           className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-zinc-900 dark:bg-zinc-100 text-white dark:text-zinc-900 transition-colors hover:bg-zinc-800 dark:hover:bg-zinc-200 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
         >
           <Send className="h-4 w-4" />

@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { MENTOR_SYSTEM_PROMPT } from "@/lib/mentor-prompt";
 import { getRelevantKnowledge } from "@/lib/mentor-knowledge";
+import { getRecentMemories, generateConversationSummary } from "@/lib/mentor-memory";
 
 const VISION_PROMPT = `\n\n## ANÁLISE DE GRÁFICO — INSTRUÇÕES ESPECIAIS
 Quando receber uma imagem de gráfico/tela de mercado, analise como um ORGANISMO VIVO:
@@ -217,6 +218,10 @@ export async function POST(request: NextRequest) {
     const knowledge = getRelevantKnowledge(message || "");
     if (knowledge) systemContent += `\n\n${knowledge}`;
 
+    // Inject mentor memories from past conversations
+    const memories = await getRecentMemories(15);
+    if (memories) systemContent += `\n\n${memories}`;
+
     if (hasImage) systemContent += VISION_PROMPT;
 
     const needsContext =
@@ -296,6 +301,14 @@ export async function POST(request: NextRequest) {
             await prisma.mentorMessage.create({
               data: { role: "assistant", content: fullContent, conversationId: convId },
             });
+
+            // Generate memory summary in background (don't block response)
+            const allMessages = await prisma.mentorMessage.findMany({
+              where: { conversationId: convId },
+              orderBy: { createdAt: "asc" },
+              select: { role: true, content: true },
+            });
+            generateConversationSummary(convId, allMessages).catch(() => {});
           }
           controller.enqueue(encoder.encode(`data: [DONE]\n\n`));
           controller.close();

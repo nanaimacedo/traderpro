@@ -84,9 +84,28 @@ model BrokerReport {
 model MentorConversation {
   id        String           @id @default(cuid())
   title     String
+  summary   String? // AI-generated summary of the conversation (for memory)
   createdAt DateTime         @default(now())
   updatedAt DateTime         @updatedAt
   messages  MentorMessage[]
+}
+
+model TraderProfile {
+  id             String   @id @default(cuid())
+  name           String
+  nickname       String? // como o mentor chama (ex: "guerreiro")
+  asset          String   @default("WIN") // WIN, WDO, etc
+  pointValue     Float    @default(0.20) // valor do ponto por contrato
+  currentJob     String? // cargo atual
+  monthlyGoal    Float    @default(4400) // meta mensal R$
+  maxEntries     Int      @default(4) // limite de entradas por dia
+  methodology    String   @default("oliver-velez") // plugin de metodologia
+  philosophy     String? // ex: "Cristã / Estoicismo / PNL / Flow"
+  motivation     String? // por que faz trade (família, liberdade, etc)
+  mentoringSince DateTime @default(now())
+  onboarded      Boolean  @default(false) // se já completou onboarding
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
 }
 
 model MentorMessage {
