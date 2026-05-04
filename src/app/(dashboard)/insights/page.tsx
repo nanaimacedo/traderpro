@@ -1,6 +1,7 @@
 export const dynamic = "force-dynamic";
 
 import { prisma } from "@/lib/prisma";
+import { getSession } from "@/lib/auth";
 import { generateWeeklyInsights } from "@/lib/insights";
 import { formatCurrency } from "@/lib/utils";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -28,16 +29,19 @@ function getMonthRange() {
 }
 
 export default async function InsightsPage() {
+  const session = await getSession();
+  const userId = session?.userId;
+
   const week = getWeekRange();
   const month = getMonthRange();
 
   const weekTrades = await prisma.trade.findMany({
-    where: { date: { gte: week.start, lte: week.end } },
+    where: { userId, date: { gte: week.start, lte: week.end } },
     orderBy: [{ date: "asc" }, { time: "asc" }],
   });
 
   const monthTrades = await prisma.trade.findMany({
-    where: { date: { gte: month.start, lte: month.end } },
+    where: { userId, date: { gte: month.start, lte: month.end } },
     orderBy: [{ date: "asc" }, { time: "asc" }],
   });
 

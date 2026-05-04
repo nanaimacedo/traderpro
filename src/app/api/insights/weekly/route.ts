@@ -1,12 +1,15 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { getSession } from "@/lib/auth";
 import { generateWeeklyInsights } from "@/lib/insights";
 
 export async function GET() {
-  const now = new Date();
-  const dayOfWeek = now.getDay(); // 0=Sun, 6=Sat
+  const session = await getSession();
+  if (!session) return NextResponse.json({ error: "Nao autenticado" }, { status: 401 });
 
-  // Get current week (Mon-Fri)
+  const now = new Date();
+  const dayOfWeek = now.getDay();
+
   const startOfWeek = new Date(now);
   startOfWeek.setDate(now.getDate() - (dayOfWeek === 0 ? 6 : dayOfWeek - 1));
   startOfWeek.setHours(0, 0, 0, 0);
@@ -16,7 +19,7 @@ export async function GET() {
   endOfWeek.setHours(23, 59, 59, 999);
 
   const trades = await prisma.trade.findMany({
-    where: { date: { gte: startOfWeek, lte: endOfWeek } },
+    where: { userId: session.userId, date: { gte: startOfWeek, lte: endOfWeek } },
     orderBy: [{ date: "asc" }, { time: "asc" }],
   });
 

@@ -1,31 +1,27 @@
 import { prisma } from "@/lib/prisma";
 
 const SUMMARY_PROMPT = `Resuma esta conversa em 2-3 frases curtas focando em:
-- Insights técnicos ou erros identificados
+- Insights tecnicos ou erros identificados
 - Estado emocional do trader
-- Decisões ou compromissos feitos
-- Evolução observada
+- Decisoes ou compromissos feitos
+- Evolucao observada
 
 Escreva como notas pessoais do mentor para si mesmo. Seja direto. Exemplo:
-"Trader entrou em BT na MA200 do 15min — gain de 150 pontos. Confiança alta. Combinou de manter max 4 entradas. Risco: euforia pós-gain."`;
+"Trader entrou em BT na MA200 do 15min — gain de 150 pontos. Confianca alta. Combinou de manter max 4 entradas. Risco: euforia pos-gain."`;
 
-/**
- * Generate and save a conversation summary using Gemini/Groq
- */
 export async function generateConversationSummary(
   conversationId: string,
   messages: { role: string; content: string }[]
 ): Promise<string | null> {
-  if (messages.length < 3) return null; // too short to summarize
+  if (messages.length < 3) return null;
 
   const geminiKeys = (process.env.GEMINI_API_KEYS || process.env.GEMINI_API_KEY || "")
     .split(",")
     .map((k) => k.trim())
     .filter(Boolean);
 
-  // Build a compact version of the conversation for summarization
   const conversationText = messages
-    .slice(-8) // last 8 messages max
+    .slice(-8)
     .map((m) => `${m.role === "assistant" ? "Mentor" : "Trader"}: ${m.content.slice(0, 300)}`)
     .join("\n");
 
@@ -33,7 +29,6 @@ export async function generateConversationSummary(
 
   let summary: string | null = null;
 
-  // Try Gemini first (use flash-lite for summaries — cheaper)
   for (const key of geminiKeys) {
     try {
       const res = await fetch(
@@ -58,7 +53,6 @@ export async function generateConversationSummary(
     }
   }
 
-  // Fallback to Groq
   if (!summary && process.env.GROQ_API_KEY) {
     try {
       const res = await fetch("https://api.groq.com/openai/v1/chat/completions", {
@@ -94,12 +88,12 @@ export async function generateConversationSummary(
   return summary;
 }
 
-/**
- * Get recent conversation memories to inject into mentor context
- */
-export async function getRecentMemories(limit = 15): Promise<string> {
+export async function getRecentMemories(limit = 15, userId?: string): Promise<string> {
   const conversations = await prisma.mentorConversation.findMany({
-    where: { summary: { not: null } },
+    where: {
+      summary: { not: null },
+      ...(userId ? { userId } : {}),
+    },
     orderBy: { updatedAt: "desc" },
     take: limit,
     select: {
@@ -117,5 +111,5 @@ export async function getRecentMemories(limit = 15): Promise<string> {
     })
     .join("\n");
 
-  return `## MEMÓRIA DO MENTOR (últimas ${conversations.length} conversas)\nUse essas memórias para referenciar conversas anteriores, mostrar evolução e personalizar respostas.\n${memories}`;
+  return `## MEMORIA DO MENTOR (ultimas ${conversations.length} conversas)\nUse essas memorias para referenciar conversas anteriores, mostrar evolucao e personalizar respostas.\n${memories}`;
 }

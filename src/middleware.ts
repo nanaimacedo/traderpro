@@ -5,7 +5,7 @@ const jwtSecret = process.env.JWT_SECRET;
 if (!jwtSecret) throw new Error("JWT_SECRET env var is required");
 const SECRET = new TextEncoder().encode(jwtSecret);
 
-const PUBLIC_PATHS = ["/login", "/api/auth", "/api/cron", "/api/notifications"];
+const PUBLIC_PATHS = ["/login", "/api/auth", "/api/cron", "/api/notifications", "/api/stripe/webhook"];
 
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;

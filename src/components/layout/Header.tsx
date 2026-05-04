@@ -17,7 +17,9 @@ const pageTitles: Record<string, { title: string; description: string }> = {
   "/setups": { title: "Setup Analytics", description: "Performance por setup operacional" },
   "/achievements": { title: "Conquistas", description: "XP, níveis, badges e conquistas" },
   "/trades/import": { title: "Importar Trades", description: "CSV do Profit, Tryd ou MetaTrader" },
+  "/leaderboard": { title: "Leaderboard", description: "Ranking anonimo por Sharpe Ratio" },
   "/mentor": { title: "Gemini", description: "Seu mentor pessoal de trading" },
+  "/pricing": { title: "Planos", description: "Free vs Pro — escolha seu plano" },
 };
 
 interface HeaderProps {

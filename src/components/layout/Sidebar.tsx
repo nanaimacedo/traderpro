@@ -18,6 +18,8 @@ import {
   Trophy,
   Tags,
   Upload,
+  Crown,
+  Medal,
   X,
 } from "lucide-react";
 
@@ -33,7 +35,9 @@ const navigation = [
   { name: "Setups", href: "/setups", icon: Tags },
   { name: "Conquistas", href: "/achievements", icon: Trophy },
   { name: "Importar", href: "/trades/import", icon: Upload },
+  { name: "Leaderboard", href: "/leaderboard", icon: Medal },
   { name: "Gemini", href: "/mentor", icon: Brain },
+  { name: "Planos", href: "/pricing", icon: Crown },
 ];
 
 interface SidebarProps {
