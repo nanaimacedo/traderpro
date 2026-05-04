@@ -136,41 +136,28 @@ export default function NewTradePage() {
               </div>
             </div>
 
-            {/* Divider */}
-            <div className="border-t border-zinc-100 dark:border-zinc-800 pt-4">
+            {/* Diário comentado — Gemini lê os dados direto da aba Nova Operação */}
+            {/* <div className="border-t border-zinc-100 dark:border-zinc-800 pt-4">
               <p className="text-xs font-semibold text-zinc-400 dark:text-zinc-500 uppercase tracking-wider mb-3">
                 Como você está? <span className="normal-case font-normal text-zinc-400">(opcional — salva no diário)</span>
               </p>
-
-              {/* Mood */}
               <div className="flex gap-2 flex-wrap mb-3">
                 <input type="hidden" name="diaryMood" value={selectedMood} />
                 {moods.map((mood) => (
-                  <button
-                    key={mood.value}
-                    type="button"
+                  <button key={mood.value} type="button"
                     onClick={() => setSelectedMood(selectedMood === mood.value ? "" : mood.value)}
-                    className={cn(
-                      "flex items-center gap-1.5 rounded-full border-2 px-3 py-1.5 text-xs font-medium transition-all cursor-pointer",
+                    className={cn("flex items-center gap-1.5 rounded-full border-2 px-3 py-1.5 text-xs font-medium transition-all cursor-pointer",
                       selectedMood === mood.value
                         ? "border-zinc-900 bg-zinc-900 text-white dark:border-zinc-100 dark:bg-zinc-100 dark:text-zinc-900"
                         : "border-zinc-200 dark:border-zinc-700 text-zinc-600 dark:text-zinc-400 hover:border-zinc-400 dark:hover:border-zinc-500"
-                    )}
-                  >
+                    )}>
                     <mood.icon className="h-3 w-3" />
                     {mood.label}
                   </button>
                 ))}
               </div>
-
-              {/* Quick note */}
-              <Textarea
-                name="diaryNote"
-                placeholder="O que rolou nessa operação? Observações rápidas..."
-                rows={2}
-                className="text-sm"
-              />
-            </div>
+              <Textarea name="diaryNote" placeholder="O que rolou nessa operação? Observações rápidas..." rows={2} className="text-sm" />
+            </div> */}
 
             {error && (
               <p className="text-sm text-rose-500 bg-rose-50 dark:bg-rose-950 rounded-lg px-3 py-2">{error}</p>
