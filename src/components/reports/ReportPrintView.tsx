@@ -2,6 +2,7 @@
 
 import { useEffect } from "react";
 import { formatCurrency } from "@/lib/utils";
+import { formatDuration } from "@/lib/calculations";
 
 interface Trade {
   date: string;
@@ -40,6 +41,13 @@ interface ReportData {
     totalContracts: number;
     maxWinStreak: number;
     maxLossStreak: number;
+    tradingDays: number;
+    maxDailyGain: number;
+    maxDailyLoss: number;
+    maxGainPerOp: number;
+    maxLossPerOp: number;
+    maxDurationTrade: { minutes: number; financialResult: number } | null;
+    minDurationTrade: { minutes: number; financialResult: number } | null;
   };
   payoffRatio: number;
   trades: Trade[];
@@ -217,6 +225,14 @@ export function ReportPrintView({ data }: { data: ReportData }) {
         .charts-row { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; align-items: center; }
         .chart-box { text-align: center; }
         .chart-label { font-size: 10px; font-weight: 600; color: #71717a; margin-top: 8px; }
+        .stats-table { width: 100%; border-collapse: collapse; font-size: 10px; }
+        .stats-table td { padding: 5px 10px; border-bottom: 1px solid #f4f4f5; }
+        .stats-table tr:nth-child(even) { background: #fafafa; }
+        .stats-table .stat-label { color: #52525b; font-weight: 500; text-transform: uppercase; font-size: 9px; letter-spacing: 0.5px; }
+        .stats-table .stat-value { text-align: right; font-weight: 700; font-size: 10px; color: #18181b; white-space: nowrap; }
+        .stats-table .stat-sub { text-align: right; font-size: 9px; color: #71717a; padding-left: 6px; white-space: nowrap; }
+        .stats-table .stat-separator td { padding: 4px 0; border: none; background: transparent; }
+        .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0 24px; }
       `}</style>
 
       {/* Print button */}
@@ -295,6 +311,95 @@ export function ReportPrintView({ data }: { data: ReportData }) {
             <div className="kpi-label">Seq. Perdedora</div>
             <div className="kpi-value" style={{ fontSize: 16 }}>{m.maxLossStreak} trades</div>
           </div>
+        </div>
+
+        {/* Resumo Estatístico — estilo relatório de corretora */}
+        <div className="section-title">Resumo Estatístico</div>
+        <div className="stats-grid">
+          {/* Coluna esquerda */}
+          <table className="stats-table">
+            <tbody>
+              <tr>
+                <td className="stat-label">Quant. Dias Operados</td>
+                <td className="stat-value">{m.tradingDays}</td>
+                <td className="stat-sub"></td>
+              </tr>
+              <tr>
+                <td className="stat-label">Operações Totais</td>
+                <td className="stat-value">{m.totalTrades}</td>
+                <td className="stat-sub"></td>
+              </tr>
+              <tr>
+                <td className="stat-label">Quant. Op. Gain</td>
+                <td className="stat-value" style={{ color: "#059669" }}>{m.gains}</td>
+                <td className="stat-sub"></td>
+              </tr>
+              <tr>
+                <td className="stat-label">Quant. Op. Loss</td>
+                <td className="stat-value" style={{ color: "#f43f5e" }}>{m.losses}</td>
+                <td className="stat-sub"></td>
+              </tr>
+              <tr>
+                <td className="stat-label">Op. Zeradas</td>
+                <td className="stat-value" style={{ color: "#71717a" }}>{m.zeros}</td>
+                <td className="stat-sub"></td>
+              </tr>
+              <tr className="stat-separator"><td colSpan={3}></td></tr>
+              <tr>
+                <td className="stat-label">Maior Tempo por Op.</td>
+                <td className="stat-value">{m.maxDurationTrade ? formatDuration(m.maxDurationTrade.minutes) : "—"}</td>
+                <td className="stat-sub">{m.maxDurationTrade ? formatCurrency(m.maxDurationTrade.financialResult) : ""}</td>
+              </tr>
+              <tr>
+                <td className="stat-label">Menor Tempo por Op.</td>
+                <td className="stat-value">{m.minDurationTrade ? formatDuration(m.minDurationTrade.minutes) : "—"}</td>
+                <td className="stat-sub">{m.minDurationTrade ? formatCurrency(m.minDurationTrade.financialResult) : ""}</td>
+              </tr>
+            </tbody>
+          </table>
+
+          {/* Coluna direita */}
+          <table className="stats-table">
+            <tbody>
+              <tr>
+                <td className="stat-label">Maior Gain Diário</td>
+                <td className="stat-value" style={{ color: "#059669" }}>{m.maxDailyGain > 0 ? formatCurrency(m.maxDailyGain) : "—"}</td>
+                <td className="stat-sub"></td>
+              </tr>
+              <tr>
+                <td className="stat-label">Maior Loss Diário</td>
+                <td className="stat-value" style={{ color: "#f43f5e" }}>{m.maxDailyLoss < 0 ? formatCurrency(m.maxDailyLoss) : "—"}</td>
+                <td className="stat-sub"></td>
+              </tr>
+              <tr className="stat-separator"><td colSpan={3}></td></tr>
+              <tr>
+                <td className="stat-label">Maior Gain por Op.</td>
+                <td className="stat-value" style={{ color: "#059669" }}>{m.maxGainPerOp > 0 ? formatCurrency(m.maxGainPerOp) : "—"}</td>
+                <td className="stat-sub"></td>
+              </tr>
+              <tr>
+                <td className="stat-label">Maior Loss por Op.</td>
+                <td className="stat-value" style={{ color: "#f43f5e" }}>{m.maxLossPerOp < 0 ? formatCurrency(m.maxLossPerOp) : "—"}</td>
+                <td className="stat-sub"></td>
+              </tr>
+              <tr className="stat-separator"><td colSpan={3}></td></tr>
+              <tr>
+                <td className="stat-label">Valor Total Gain</td>
+                <td className="stat-value" style={{ color: "#059669" }}>{formatCurrency(m.totalGain)}</td>
+                <td className="stat-sub"></td>
+              </tr>
+              <tr>
+                <td className="stat-label">Valor Total Loss</td>
+                <td className="stat-value" style={{ color: "#f43f5e" }}>{formatCurrency(m.totalLoss)}</td>
+                <td className="stat-sub"></td>
+              </tr>
+              <tr style={{ background: m.netResult >= 0 ? "#ecfdf5" : "#fff1f2" }}>
+                <td className="stat-label" style={{ fontWeight: 700, color: "#18181b", fontSize: 10 }}>Resultado Final</td>
+                <td className="stat-value" style={{ color: m.netResult >= 0 ? "#059669" : "#f43f5e", fontSize: 12 }}>{formatCurrency(m.netResult)}</td>
+                <td className="stat-sub"></td>
+              </tr>
+            </tbody>
+          </table>
         </div>
 
         {/* Charts */}
