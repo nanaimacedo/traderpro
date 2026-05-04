@@ -30,6 +30,10 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: "GEMINI_API_KEY não configurada" }, { status: 500 });
   }
 
+  // Get first user (single-tenant for now)
+  const user = await prisma.user.findFirst();
+  if (!user) return NextResponse.json({ message: "No users" });
+
   // Today's trades
   const today = new Date();
   const dayStart = new Date(today);
@@ -97,7 +101,7 @@ ${tradeLines}
 
   if (!insightConvo) {
     insightConvo = await prisma.mentorConversation.create({
-      data: { title: "Insights Diários" },
+      data: { title: "Insights Diários", userId: user.id },
     });
   }
 

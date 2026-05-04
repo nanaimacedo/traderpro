@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { getSession } from "@/lib/auth";
 import { MENTOR_SYSTEM_PROMPT } from "@/lib/mentor-prompt";
 import { getRelevantKnowledge } from "@/lib/mentor-knowledge";
 import { getMethodologyPrompt } from "@/lib/methodology-plugins";
@@ -180,6 +181,9 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Nenhuma API key configurada (GEMINI_API_KEYS ou GROQ_API_KEY)" }, { status: 500 });
     }
 
+    const session = await getSession();
+    if (!session) return NextResponse.json({ error: "Não autenticado" }, { status: 401 });
+
     const { message, image, conversationId, tradesContext } = await request.json();
 
     if (!message?.trim() && !image) {
@@ -197,7 +201,7 @@ export async function POST(request: NextRequest) {
     if (!conversation) {
       const title = (message || "Análise de gráfico").slice(0, 60);
       conversation = await prisma.mentorConversation.create({
-        data: { title },
+        data: { title, userId: session.userId },
         include: { messages: true },
       });
     }
@@ -215,7 +219,9 @@ export async function POST(request: NextRequest) {
     const msgLower = (message || "").toLowerCase();
 
     // Load trader profile for personalized mentoring
-    const traderProfile = await prisma.traderProfile.findFirst();
+    const traderProfile = await prisma.traderProfile.findUnique({
+      where: { userId: session.userId },
+    });
 
     let systemContent = MENTOR_SYSTEM_PROMPT;
 

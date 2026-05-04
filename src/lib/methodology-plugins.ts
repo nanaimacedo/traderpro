@@ -155,3 +155,58 @@ export function listMethodologies(): { id: string; name: string; author: string;
     id, name, author, description,
   }));
 }
+
+// Setup tags available per methodology — used in the trade form
+export const SETUP_TAGS: Record<string, { value: string; label: string }[]> = {
+  "oliver-velez": [
+    { value: "EB", label: "Elephant Bar" },
+    { value: "BT", label: "Bottoming Tail" },
+    { value: "TT", label: "Topping Tail" },
+    { value: "RBI", label: "Red Bar Ignored" },
+    { value: "GBI", label: "Green Bar Ignored" },
+    { value: "NRB", label: "Narrow Range Bar" },
+    { value: "180", label: "180° Reversal" },
+    { value: "20-bar", label: "20-bar Play" },
+    { value: "PB", label: "Power Breakout" },
+    { value: "RANGE", label: "Extremo de Range" },
+  ],
+  "al-brooks": [
+    { value: "SB", label: "Signal Bar" },
+    { value: "EB-AB", label: "Entry Bar" },
+    { value: "ii", label: "Inside-Inside" },
+    { value: "WEDGE", label: "Wedge (Cunha)" },
+    { value: "DB", label: "Double Bottom" },
+    { value: "DT", label: "Double Top" },
+    { value: "MM", label: "Measured Move" },
+    { value: "BPB", label: "Breakout Pullback" },
+    { value: "TCL", label: "Channel Overshoot" },
+  ],
+  "ict": [
+    { value: "OB", label: "Order Block" },
+    { value: "FVG", label: "Fair Value Gap" },
+    { value: "BRK", label: "Breaker Block" },
+    { value: "LIQ", label: "Liquidity Sweep" },
+    { value: "DISP", label: "Displacement" },
+    { value: "OTE", label: "Optimal Trade Entry" },
+    { value: "JUDAS", label: "Judas Swing" },
+    { value: "MSS", label: "Market Structure Shift" },
+  ],
+  "tape-reading": [
+    { value: "ABS", label: "Absorção" },
+    { value: "AGR", label: "Agressão Direcional" },
+    { value: "ICE", label: "Iceberg" },
+    { value: "PBF", label: "Pullback no Fluxo" },
+    { value: "RMP", label: "Rompimento c/ Fluxo" },
+    { value: "EXH", label: "Exaustão" },
+    { value: "LEIL", label: "Leilão" },
+  ],
+};
+
+// Generic setups available for all methodologies
+export const GENERIC_SETUPS = [
+  { value: "TREND", label: "Tendência" },
+  { value: "REVERSAL", label: "Reversão" },
+  { value: "BREAKOUT", label: "Rompimento" },
+  { value: "SCALP", label: "Scalp" },
+  { value: "OTHER", label: "Outro" },
+];

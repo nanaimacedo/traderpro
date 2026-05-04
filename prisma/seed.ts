@@ -358,9 +358,22 @@ const dailyData = [
 async function main() {
   console.log("Seeding database with PDF report data...");
 
-  // Clear existing data
-  await prisma.trade.deleteMany();
-  await prisma.brokerReport.deleteMany();
+  // Get or create seed user
+  let user = await prisma.user.findFirst();
+  if (!user) {
+    const bcrypt = await import("bcryptjs");
+    user = await prisma.user.create({
+      data: {
+        name: "Jonatas",
+        email: "jonatas@traderpro.com",
+        password: await bcrypt.hash("seed-password", 12),
+      },
+    });
+  }
+
+  // Clear existing trade/report data for this user
+  await prisma.trade.deleteMany({ where: { userId: user.id } });
+  await prisma.brokerReport.deleteMany({ where: { userId: user.id } });
 
   let tradeCount = 0;
 
@@ -374,6 +387,7 @@ async function main() {
 
       await prisma.trade.create({
         data: {
+          userId: user.id,
           date: new Date(day.date),
           time: trade.time,
           asset: "WIN",
@@ -395,6 +409,7 @@ async function main() {
   // Create broker reports with monthly summaries
   const reports = [
     {
+      userId: user.id,
       date: new Date("2026-02-28"),
       filename: "relatorio-fev-2026.pdf",
       originalName: "RELATORIO PERFORMANCE 2026 - FEVEREIRO.pdf",
@@ -405,6 +420,7 @@ async function main() {
       fees: null,
     },
     {
+      userId: user.id,
       date: new Date("2026-03-31"),
       filename: "relatorio-mar-2026.pdf",
       originalName: "RELATORIO PERFORMANCE 2026 - MARCO.pdf",
@@ -415,6 +431,7 @@ async function main() {
       fees: null,
     },
     {
+      userId: user.id,
       date: new Date("2026-04-29"),
       filename: "relatorio-abr-2026.pdf",
       originalName: "RELATORIO PERFORMANCE 2026 - ABRIL.pdf",

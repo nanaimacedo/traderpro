@@ -15,6 +15,9 @@ import {
   Lightbulb,
   PlayCircle,
   BarChart3,
+  Trophy,
+  Tags,
+  Upload,
   X,
 } from "lucide-react";
 
@@ -27,6 +30,9 @@ const navigation = [
   { name: "Replays", href: "/replays", icon: PlayCircle },
   { name: "Insights", href: "/insights", icon: Lightbulb },
   { name: "Analytics", href: "/analytics", icon: BarChart3 },
+  { name: "Setups", href: "/setups", icon: Tags },
+  { name: "Conquistas", href: "/achievements", icon: Trophy },
+  { name: "Importar", href: "/trades/import", icon: Upload },
   { name: "Gemini", href: "/mentor", icon: Brain },
 ];
 

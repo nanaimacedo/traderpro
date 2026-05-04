@@ -6,11 +6,24 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { SETUP_TAGS, GENERIC_SETUPS } from "@/lib/methodology-plugins";
+import { cn } from "@/lib/utils";
 
 export default function NewTradePage() {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
+  const [methodology, setMethodology] = useState("oliver-velez");
+  const [selectedSetup, setSelectedSetup] = useState("");
+
+  useEffect(() => {
+    fetch("/api/profile/check")
+      .then((r) => r.json())
+      .then((d) => { if (d.profile?.methodology) setMethodology(d.profile.methodology); })
+      .catch(() => {});
+  }, []);
+
+  const setupOptions = [...(SETUP_TAGS[methodology] || []), ...GENERIC_SETUPS];
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -123,12 +136,38 @@ export default function NewTradePage() {
               </div>
             </div>
 
+            {/* Setup Tag */}
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-zinc-700 dark:text-zinc-300">Setup utilizado</label>
+              <input type="hidden" name="setup" value={selectedSetup} />
+              <div className="flex flex-wrap gap-1.5">
+                {setupOptions.map((s) => (
+                  <button
+                    key={s.value}
+                    type="button"
+                    onClick={() => setSelectedSetup(selectedSetup === s.value ? "" : s.value)}
+                    className={cn(
+                      "rounded-full px-2.5 py-1 text-xs font-medium border transition-all cursor-pointer",
+                      selectedSetup === s.value
+                        ? "bg-violet-500 text-white border-violet-500"
+                        : "bg-white dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 border-zinc-200 dark:border-zinc-700 hover:border-violet-300 dark:hover:border-violet-700"
+                    )}
+                  >
+                    {s.value} — {s.label}
+                  </button>
+                ))}
+              </div>
+              <p className="text-xs text-zinc-400 dark:text-zinc-500">
+                Taguear o setup ajuda a descobrir quais padrões te dão mais dinheiro.
+              </p>
+            </div>
+
             {/* Notes */}
             <div className="space-y-2">
               <label className="text-sm font-medium text-zinc-700 dark:text-zinc-300">Observações</label>
               <Textarea
                 name="notes"
-                placeholder="Setup utilizado, emocional, observações..."
+                placeholder="Emocional, observações sobre a entrada..."
                 rows={3}
               />
             </div>

@@ -1,6 +1,8 @@
 export const dynamic = "force-dynamic";
 
 import { prisma } from "@/lib/prisma";
+import { getSession } from "@/lib/auth";
+import { redirect } from "next/navigation";
 import { calculateAdvancedMetrics, getCumulativeResults } from "@/lib/calculations";
 import { formatCurrency } from "@/lib/utils";
 import { cn } from "@/lib/utils";
@@ -8,7 +10,11 @@ import { BarChart3, TrendingUp, TrendingDown, Shield, Zap, Target, Clock, Calend
 import Link from "next/link";
 
 export default async function AnalyticsPage() {
+  const session = await getSession();
+  if (!session) redirect("/login");
+
   const allTrades = await prisma.trade.findMany({
+    where: { userId: session.userId },
     orderBy: [{ date: "asc" }, { time: "asc" }],
   });
 

@@ -1,8 +1,17 @@
 "use server";
 
 import { prisma } from "@/lib/prisma";
+import { getSession } from "@/lib/auth";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
+
+async function requireUserId(): Promise<string> {
+  const session = await getSession();
+  if (!session) throw new Error("Não autenticado");
+  return session.userId;
+}
+
+import { ASSET_CONFIG } from "@/lib/asset-config";
 
 const tradeSchema = z.object({
   date: z.string().min(1),
@@ -12,6 +21,7 @@ const tradeSchema = z.object({
   exitPrice: z.number().positive(),
   contracts: z.number().int().min(1).max(100),
   durationMinutes: z.number().int().positive().nullable(),
+  setup: z.string().max(50).nullable(),
   notes: z.string().max(1000).nullable(),
 });
 
@@ -36,6 +46,8 @@ const replaySchema = z.object({
 const MAX_TRADES_PER_DAY = 4;
 
 export async function createTrade(formData: FormData) {
+  const userId = await requireUserId();
+
   const parsed = tradeSchema.safeParse({
     date: formData.get("date"),
     time: formData.get("time"),
@@ -46,6 +58,7 @@ export async function createTrade(formData: FormData) {
     durationMinutes: formData.get("durationMinutes")
       ? parseInt(formData.get("durationMinutes") as string)
       : null,
+    setup: (formData.get("setup") as string) || null,
     notes: (formData.get("notes") as string) || null,
   });
 
@@ -53,35 +66,53 @@ export async function createTrade(formData: FormData) {
     throw new Error("Dados inválidos: " + parsed.error.issues.map(i => i.message).join(", "));
   }
 
-  const { date, time, direction, entryPrice, exitPrice, contracts, durationMinutes, notes } = parsed.data;
+  const { date, time, direction, entryPrice, exitPrice, contracts, durationMinutes, setup, notes } = parsed.data;
   const tradeDate = new Date(date);
+  const asset = (formData.get("asset") as string) || "WIN";
+  const assetCfg = ASSET_CONFIG[asset] || ASSET_CONFIG.WIN;
 
-  // Enforce 4 trades/day limit
+  const profile = await prisma.traderProfile.findUnique({ where: { userId } });
+  const maxEntries = profile?.maxEntries || MAX_TRADES_PER_DAY;
+
   const dayStart = new Date(tradeDate);
   dayStart.setHours(0, 0, 0, 0);
   const dayEnd = new Date(tradeDate);
   dayEnd.setHours(23, 59, 59, 999);
 
   const todayCount = await prisma.trade.count({
-    where: { date: { gte: dayStart, lte: dayEnd } },
+    where: { userId, date: { gte: dayStart, lte: dayEnd } },
   });
 
-  if (todayCount >= MAX_TRADES_PER_DAY) {
-    throw new Error(`Limite de ${MAX_TRADES_PER_DAY} operações por dia atingido`);
+  if (todayCount >= maxEntries) {
+    throw new Error(`Limite de ${maxEntries} operações por dia atingido`);
   }
 
   const points = direction === "COMPRA"
     ? exitPrice - entryPrice
     : entryPrice - exitPrice;
 
-  const financialResult = points * 0.2 * contracts;
+  const pointValue = assetCfg.pointValue;
+  const financialResult = points * pointValue * contracts;
   const result = points > 0 ? "GAIN" : points < 0 ? "LOSS" : "ZERO";
+
+  // Circuit breaker: check daily loss limit
+  if (profile?.dailyLossLimit) {
+    const todayTrades = await prisma.trade.findMany({
+      where: { userId, date: { gte: dayStart, lte: dayEnd } },
+      select: { financialResult: true },
+    });
+    const todayResult = todayTrades.reduce((s, t) => s + t.financialResult, 0);
+    if (todayResult + financialResult < -profile.dailyLossLimit) {
+      throw new Error(`Circuit breaker: loss diário atingiria R$ ${Math.abs(todayResult + financialResult).toFixed(2)}, limite é R$ ${profile.dailyLossLimit.toFixed(2)}`);
+    }
+  }
 
   await prisma.trade.create({
     data: {
+      userId,
       date: tradeDate,
       time,
-      asset: "WIN",
+      asset,
       direction,
       entryPrice,
       exitPrice,
@@ -89,6 +120,8 @@ export async function createTrade(formData: FormData) {
       result,
       points,
       financialResult,
+      pointValue,
+      setup,
       durationMinutes,
       notes,
     },
@@ -99,12 +132,14 @@ export async function createTrade(formData: FormData) {
 }
 
 export async function deleteTrade(id: string) {
-  await prisma.trade.delete({ where: { id } });
+  const userId = await requireUserId();
+  await prisma.trade.deleteMany({ where: { id, userId } });
   revalidatePath("/");
   revalidatePath("/trades");
 }
 
 export async function getTrades(month?: number, year?: number) {
+  const userId = await requireUserId();
   const now = new Date();
   const m = month ?? now.getMonth();
   const y = year ?? now.getFullYear();
@@ -114,6 +149,7 @@ export async function getTrades(month?: number, year?: number) {
 
   return prisma.trade.findMany({
     where: {
+      userId,
       date: { gte: startDate, lte: endDate },
     },
     orderBy: { date: "asc" },
@@ -121,21 +157,25 @@ export async function getTrades(month?: number, year?: number) {
 }
 
 export async function getAllTrades(page = 1, limit = 50) {
+  const userId = await requireUserId();
   const skip = (page - 1) * limit;
 
   const [trades, total] = await Promise.all([
     prisma.trade.findMany({
+      where: { userId },
       orderBy: [{ date: "desc" }, { time: "desc" }],
       skip,
       take: limit,
     }),
-    prisma.trade.count(),
+    prisma.trade.count({ where: { userId } }),
   ]);
 
   return { trades, total, pages: Math.ceil(total / limit) };
 }
 
 export async function createDiaryEntry(formData: FormData) {
+  const userId = await requireUserId();
+
   const parsed = diarySchema.safeParse({
     date: formData.get("date"),
     title: formData.get("title"),
@@ -149,6 +189,7 @@ export async function createDiaryEntry(formData: FormData) {
 
   const entry = await prisma.diaryEntry.create({
     data: {
+      userId,
       date: new Date(parsed.data.date),
       title: parsed.data.title,
       content: parsed.data.content,
@@ -161,7 +202,9 @@ export async function createDiaryEntry(formData: FormData) {
 }
 
 export async function getDiaryEntries() {
+  const userId = await requireUserId();
   return prisma.diaryEntry.findMany({
+    where: { userId },
     include: { images: true, trades: true },
     orderBy: { date: "desc" },
   });
@@ -175,11 +218,13 @@ export async function getDiaryEntry(id: string) {
 }
 
 export async function deleteDiaryEntry(id: string) {
-  await prisma.diaryEntry.delete({ where: { id } });
+  const userId = await requireUserId();
+  await prisma.diaryEntry.deleteMany({ where: { id, userId } });
   revalidatePath("/diary");
 }
 
 export async function createBrokerReport(formData: FormData) {
+  const userId = await requireUserId();
   const date = new Date(formData.get("date") as string);
   const filename = formData.get("filename") as string;
   const originalName = formData.get("originalName") as string;
@@ -190,26 +235,31 @@ export async function createBrokerReport(formData: FormData) {
   const fees = formData.get("fees") ? parseFloat(formData.get("fees") as string) : null;
 
   await prisma.brokerReport.create({
-    data: { date, filename, originalName, totalTrades, totalGain, totalLoss, netResult, fees },
+    data: { userId, date, filename, originalName, totalTrades, totalGain, totalLoss, netResult, fees },
   });
 
   revalidatePath("/reports");
 }
 
 export async function getBrokerReports() {
+  const userId = await requireUserId();
   return prisma.brokerReport.findMany({
+    where: { userId },
     orderBy: { date: "desc" },
   });
 }
 
 export async function deleteBrokerReport(id: string) {
-  await prisma.brokerReport.delete({ where: { id } });
+  const userId = await requireUserId();
+  await prisma.brokerReport.deleteMany({ where: { id, userId } });
   revalidatePath("/reports");
 }
 
 // === REPLAYS ===
 
 export async function createReplay(formData: FormData) {
+  const userId = await requireUserId();
+
   const parsed = replaySchema.safeParse({
     date: formData.get("date"),
     title: formData.get("title"),
@@ -230,19 +280,40 @@ export async function createReplay(formData: FormData) {
   const result = points * 0.2;
 
   await prisma.replay.create({
-    data: { date: new Date(date), title, content, mood, entries, gains, losses, zeros, points, result },
+    data: { userId, date: new Date(date), title, content, mood, entries, gains, losses, zeros, points, result },
   });
 
   revalidatePath("/replays");
 }
 
 export async function getReplays() {
+  const userId = await requireUserId();
   return prisma.replay.findMany({
+    where: { userId },
     orderBy: { date: "desc" },
   });
 }
 
 export async function deleteReplay(id: string) {
-  await prisma.replay.delete({ where: { id } });
+  const userId = await requireUserId();
+  await prisma.replay.deleteMany({ where: { id, userId } });
   revalidatePath("/replays");
+}
+
+// === EXPORT CSV ===
+
+export async function exportTradesCSV() {
+  const userId = await requireUserId();
+  const trades = await prisma.trade.findMany({
+    where: { userId },
+    orderBy: [{ date: "asc" }, { time: "asc" }],
+  });
+
+  const header = "Data,Hora,Ativo,Direção,Entrada,Saída,Contratos,Resultado,Pontos,Financeiro,Setup,Notas";
+  const rows = trades.map(t => {
+    const date = new Date(t.date).toLocaleDateString("pt-BR");
+    return `${date},${t.time},${t.asset},${t.direction},${t.entryPrice},${t.exitPrice},${t.contracts},${t.result},${t.points},${t.financialResult},${t.setup || ""},${(t.notes || "").replace(/,/g, ";")}`;
+  });
+
+  return [header, ...rows].join("\n");
 }

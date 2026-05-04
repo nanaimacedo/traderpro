@@ -1,6 +1,6 @@
 generator client {
-  provider        = "prisma-client-js"
-  output = "../node_modules/.prisma/client"
+  provider = "prisma-client-js"
+  output   = "../node_modules/.prisma/client"
 }
 
 datasource db {
@@ -13,36 +13,70 @@ model User {
   name      String
   email     String   @unique
   password  String // bcrypt hash
+  plan      String   @default("free") // free | pro
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  trades        Trade[]
+  diaryEntries  DiaryEntry[]
+  brokerReports BrokerReport[]
+  conversations MentorConversation[]
+  profile       TraderProfile?
+  replays       Replay[]
+  subscriptions PushSubscription[]
+  subscription  Subscription?
+}
+
+model Subscription {
+  id               String    @id @default(cuid())
+  userId           String    @unique
+  user             User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  stripeCustomerId String?   @unique
+  stripeSubId      String?   @unique
+  plan             String    @default("free") // free | pro
+  status           String    @default("active") // active | canceled | past_due | trialing
+  trialEnd         DateTime?
+  currentPeriodEnd DateTime?
+  cancelAtEnd      Boolean   @default(false)
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
 }
 
 model Trade {
   id              String   @id @default(cuid())
+  userId          String
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   date            DateTime
   time            String // horario da operacao HH:mm
-  asset           String   @default("WIN")
+  asset           String   @default("WIN") // WIN | WDO | PETR4 | VALE3 | BTC...
   direction       String // COMPRA | VENDA
   entryPrice      Float
   exitPrice       Float
   contracts       Int
   result          String // GAIN | LOSS | ZERO
   points          Float // pontos ganhos/perdidos
-  financialResult Float // resultado em R$ (pontos * 0.20 * contratos)
+  financialResult Float // resultado em R$
+  pointValue      Float    @default(0.20) // valor do ponto no momento do trade
   durationMinutes Int?
+  setup           String? // tag do setup usado: EB, BT, TT, RBI, GBI, OB, FVG, etc
+  source          String   @default("manual") // manual | csv-profit | csv-tryd | csv-metatrader
   notes           String?
+  screenshotUrl   String? // URL da screenshot anotada
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
 
   diaryEntry   DiaryEntry? @relation(fields: [diaryEntryId], references: [id])
   diaryEntryId String?
 
-  @@index([date])
-  @@index([result])
+  @@index([userId, date])
+  @@index([userId, result])
+  @@index([setup])
 }
 
 model DiaryEntry {
   id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   date      DateTime
   title     String
   content   String // texto do diario
@@ -53,7 +87,7 @@ model DiaryEntry {
   trades Trade[]
   images DiaryImage[]
 
-  @@index([date])
+  @@index([userId, date])
 }
 
 model DiaryImage {
@@ -69,6 +103,8 @@ model DiaryImage {
 
 model BrokerReport {
   id           String   @id @default(cuid())
+  userId       String
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   date         DateTime
   filename     String
   originalName String
@@ -79,19 +115,27 @@ model BrokerReport {
   fees         Float? // taxas e emolumentos
   rawData      String? // dados brutos extraidos do PDF
   createdAt    DateTime @default(now())
+
+  @@index([userId])
 }
 
 model MentorConversation {
   id        String           @id @default(cuid())
+  userId    String
+  user      User             @relation(fields: [userId], references: [id], onDelete: Cascade)
   title     String
-  summary   String? // AI-generated summary of the conversation (for memory)
+  summary   String? // AI-generated summary for memory
   createdAt DateTime         @default(now())
   updatedAt DateTime         @updatedAt
   messages  MentorMessage[]
+
+  @@index([userId])
 }
 
 model TraderProfile {
   id             String   @id @default(cuid())
+  userId         String   @unique
+  user           User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   name           String
   nickname       String? // como o mentor chama (ex: "guerreiro")
   asset          String   @default("WIN") // WIN, WDO, etc
@@ -99,11 +143,12 @@ model TraderProfile {
   currentJob     String? // cargo atual
   monthlyGoal    Float    @default(4400) // meta mensal R$
   maxEntries     Int      @default(4) // limite de entradas por dia
+  dailyLossLimit Float? // loss diario maximo antes de circuit breaker (R$)
   methodology    String   @default("oliver-velez") // plugin de metodologia
-  philosophy     String? // ex: "Cristã / Estoicismo / PNL / Flow"
-  motivation     String? // por que faz trade (família, liberdade, etc)
+  philosophy     String? // ex: "Crista / Estoicismo / PNL / Flow"
+  motivation     String? // por que faz trade (familia, liberdade, etc)
   mentoringSince DateTime @default(now())
-  onboarded      Boolean  @default(false) // se já completou onboarding
+  onboarded      Boolean  @default(false) // se ja completou onboarding
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
 }
@@ -119,30 +164,36 @@ model MentorMessage {
 
 model Replay {
   id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   date      DateTime
   title     String
-  content   String // diário do replay
+  content   String // diario do replay
   mood      String? // OTIMISTA | NEUTRO | FRUSTRADO | DISCIPLINADO | ANSIOSO
-  entries   Int      @default(0) // quantidade de entradas
+  entries   Int      @default(0)
   gains     Int      @default(0)
   losses    Int      @default(0)
   zeros     Int      @default(0)
-  points    Float    @default(0) // pontos totais
-  result    Float    @default(0) // resultado financeiro R$
+  points    Float    @default(0)
+  result    Float    @default(0)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  @@index([date])
+  @@index([userId, date])
 }
 
 model PushSubscription {
   id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   endpoint  String   @unique
   p256dh    String // chave publica do cliente
   auth      String // token de autenticacao
   active    Boolean  @default(true)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  @@index([userId])
 }
 
 model NotificationLog {
@@ -152,4 +203,19 @@ model NotificationLog {
   sentAt    DateTime @default(now())
   success   Int      @default(0)
   failed    Int      @default(0)
+}
+
+model EconomicEvent {
+  id        String   @id @default(cuid())
+  date      DateTime
+  time      String? // HH:mm UTC
+  title     String
+  country   String // BR | US | EU
+  impact    String // LOW | MEDIUM | HIGH
+  actual    String?
+  forecast  String?
+  previous  String?
+  createdAt DateTime @default(now())
+
+  @@index([date])
 }

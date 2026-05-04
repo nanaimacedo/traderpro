@@ -23,6 +23,7 @@ import {
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { CircuitBreakerAlert } from "@/components/dashboard/CircuitBreakerAlert";
 
 interface PageProps {
   searchParams: Promise<{ month?: string; year?: string }>;
@@ -44,6 +45,9 @@ export default async function Dashboard({ searchParams }: PageProps) {
 
   return (
     <div className="space-y-6 lg:space-y-8">
+      {/* Circuit Breaker Alert */}
+      <CircuitBreakerAlert />
+
       {/* Period Filter */}
       <PeriodFilter />
 

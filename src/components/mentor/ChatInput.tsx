@@ -44,7 +44,58 @@ export function ChatInput({ onSend, disabled }: ChatInputProps) {
     e.target.value = "";
   }
 
+  // Web Speech API (browser-native STT — zero API cost)
+  const speechRecognitionRef = useRef<any>(null);
+  const hasWebSpeech = typeof window !== "undefined" && ("SpeechRecognition" in window || "webkitSpeechRecognition" in window);
+
   const startRecording = useCallback(async () => {
+    // Prefer Web Speech API (free, real-time) over MediaRecorder → API
+    if (hasWebSpeech) {
+      try {
+        const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+        const recognition = new SpeechRecognition();
+        recognition.lang = "pt-BR";
+        recognition.continuous = true;
+        recognition.interimResults = true;
+
+        let finalTranscript = "";
+
+        recognition.onresult = (event: any) => {
+          let interim = "";
+          for (let i = event.resultIndex; i < event.results.length; i++) {
+            if (event.results[i].isFinal) {
+              finalTranscript += event.results[i][0].transcript + " ";
+            } else {
+              interim += event.results[i][0].transcript;
+            }
+          }
+          if (textareaRef.current) {
+            textareaRef.current.value = (finalTranscript + interim).trim();
+          }
+        };
+
+        recognition.onerror = () => {
+          setRecording(false);
+        };
+
+        recognition.onend = () => {
+          setRecording(false);
+          if (textareaRef.current) {
+            textareaRef.current.value = finalTranscript.trim();
+            textareaRef.current.focus();
+          }
+        };
+
+        speechRecognitionRef.current = recognition;
+        recognition.start();
+        setRecording(true);
+        return;
+      } catch {
+        // Fall through to MediaRecorder
+      }
+    }
+
+    // Fallback: MediaRecorder → /api/speech
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
       const mediaRecorder = new MediaRecorder(stream, { mimeType: "audio/webm;codecs=opus" });
@@ -59,23 +110,19 @@ export function ChatInput({ onSend, disabled }: ChatInputProps) {
         stream.getTracks().forEach((t) => t.stop());
         const blob = new Blob(chunksRef.current, { type: "audio/webm" });
 
-        if (blob.size < 1000) return; // too short
+        if (blob.size < 1000) return;
 
         setTranscribing(true);
         try {
           const formData = new FormData();
           formData.append("audio", blob);
-
           const res = await fetch("/api/speech", { method: "POST", body: formData });
           const data = await res.json();
-
           if (data.text && textareaRef.current) {
             textareaRef.current.value = data.text;
             textareaRef.current.focus();
           }
-        } catch {
-          // silently fail
-        }
+        } catch { /* silently fail */ }
         setTranscribing(false);
       };
 
@@ -84,10 +131,15 @@ export function ChatInput({ onSend, disabled }: ChatInputProps) {
     } catch {
       // mic permission denied
     }
-  }, []);
+  }, [hasWebSpeech]);
 
   const stopRecording = useCallback(() => {
-    mediaRecorderRef.current?.stop();
+    if (speechRecognitionRef.current) {
+      speechRecognitionRef.current.stop();
+      speechRecognitionRef.current = null;
+    } else {
+      mediaRecorderRef.current?.stop();
+    }
     setRecording(false);
   }, []);
 

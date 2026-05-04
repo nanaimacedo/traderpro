@@ -14,6 +14,9 @@ const pageTitles: Record<string, { title: string; description: string }> = {
   "/replays": { title: "Replays", description: "Estudos e simulações de mercado" },
   "/insights": { title: "Insights", description: "Análise semanal e mensal dos seus resultados" },
   "/analytics": { title: "Analytics", description: "Métricas institucionais e performance avançada" },
+  "/setups": { title: "Setup Analytics", description: "Performance por setup operacional" },
+  "/achievements": { title: "Conquistas", description: "XP, níveis, badges e conquistas" },
+  "/trades/import": { title: "Importar Trades", description: "CSV do Profit, Tryd ou MetaTrader" },
   "/mentor": { title: "Gemini", description: "Seu mentor pessoal de trading" },
 };
 

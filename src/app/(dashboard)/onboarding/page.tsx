@@ -27,10 +27,11 @@ const STEPS = [
 ];
 
 const METHODOLOGIES = [
-  { value: "oliver-velez", label: "Oliver Velez" },
+  { value: "oliver-velez", label: "Oliver Velez / Pristine" },
+  { value: "al-brooks", label: "Al Brooks Price Action" },
   { value: "ict", label: "ICT (Inner Circle Trader)" },
-  { value: "smc", label: "SMC (Smart Money Concepts)" },
-  { value: "price-action", label: "Price Action" },
+  { value: "tape-reading", label: "Tape Reading / Fluxo" },
+  { value: "price-action", label: "Price Action Clássico" },
   { value: "wyckoff", label: "Wyckoff" },
   { value: "custom", label: "Personalizada" },
 ];
@@ -42,6 +43,7 @@ interface FormData {
   currentJob: string;
   monthlyGoal: string;
   maxEntries: string;
+  dailyLossLimit: string;
   methodology: string;
   philosophy: string;
   motivation: string;
@@ -58,6 +60,7 @@ export default function OnboardingPage() {
     currentJob: "",
     monthlyGoal: "4400",
     maxEntries: "4",
+    dailyLossLimit: "500",
     methodology: "oliver-velez",
     philosophy: "",
     motivation: "",
@@ -277,6 +280,27 @@ export default function OnboardingPage() {
                   </div>
                   <p className="text-xs text-zinc-400 dark:text-zinc-500">
                     Limite disciplinado de operacoes por dia.
+                  </p>
+                </div>
+                <div className="space-y-2">
+                  <label className="text-sm font-medium text-zinc-700 dark:text-zinc-300">
+                    Loss diario maximo (R$) — Circuit Breaker
+                  </label>
+                  <div className="relative">
+                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-zinc-400">
+                      R$
+                    </span>
+                    <Input
+                      type="number"
+                      value={form.dailyLossLimit}
+                      onChange={(e) => update("dailyLossLimit", e.target.value)}
+                      className="pl-10"
+                      min="0"
+                      step="50"
+                    />
+                  </div>
+                  <p className="text-xs text-zinc-400 dark:text-zinc-500">
+                    Ao atingir esse loss no dia, o mentor ativa o circuit breaker. 0 = desativado.
                   </p>
                 </div>
               </div>
