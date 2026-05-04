@@ -9,7 +9,7 @@ const pageTitles: Record<string, { title: string; description: string }> = {
   "/": { title: "Dashboard", description: "Visão geral das suas operações" },
   "/trades/new": { title: "Nova Operação", description: "Registrar uma nova operação no WIN" },
   "/trades": { title: "Histórico", description: "Todas as operações realizadas" },
-  "/diary": { title: "Diário de Trade", description: "Registros e análises pessoais" },
+  "/diary": { title: "Diário & Setups", description: "Registros pessoais e analytics por setup" },
   "/reports": { title: "Relatórios", description: "Relatórios da corretora" },
   "/replays": { title: "Replays", description: "Estudos e simulações de mercado" },
   "/insights": { title: "Insights", description: "Análise semanal e mensal dos seus resultados" },
