@@ -32,7 +32,7 @@ const navigation = [
   { name: "Insights", href: "/insights", icon: Lightbulb },
   { name: "Analytics", href: "/analytics", icon: BarChart3 },
   { name: "Importar", href: "/trades/import", icon: Upload },
-  { name: "Leaderboard", href: "/leaderboard", icon: Medal },
+  // { name: "Leaderboard", href: "/leaderboard", icon: Medal },
   { name: "Histórico", href: "/trades", icon: History },
   { name: "Relatórios", href: "/reports", icon: FileBarChart },
   // { name: "Conquistas", href: "/achievements", icon: Trophy },
