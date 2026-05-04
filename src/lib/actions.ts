@@ -131,6 +131,77 @@ export async function createTrade(formData: FormData) {
   revalidatePath("/trades");
 }
 
+export async function createTradeWithDiary(formData: FormData) {
+  const userId = await requireUserId();
+
+  const parsed = tradeSchema.safeParse({
+    date: formData.get("date"),
+    time: formData.get("time"),
+    direction: formData.get("direction"),
+    entryPrice: parseFloat(formData.get("entryPrice") as string),
+    exitPrice: parseFloat(formData.get("exitPrice") as string),
+    contracts: parseInt(formData.get("contracts") as string),
+    durationMinutes: formData.get("durationMinutes") ? parseInt(formData.get("durationMinutes") as string) : null,
+    setup: (formData.get("setup") as string) || null,
+    notes: (formData.get("notes") as string) || null,
+  });
+
+  if (!parsed.success) {
+    throw new Error("Dados inválidos: " + parsed.error.issues.map(i => i.message).join(", "));
+  }
+
+  const { date, time, direction, entryPrice, exitPrice, contracts, durationMinutes, setup, notes } = parsed.data;
+  const tradeDate = new Date(date);
+  const asset = (formData.get("asset") as string) || "WIN";
+  const assetCfg = ASSET_CONFIG[asset] || ASSET_CONFIG.WIN;
+
+  const profile = await prisma.traderProfile.findUnique({ where: { userId } });
+  const maxEntries = profile?.maxEntries || MAX_TRADES_PER_DAY;
+
+  const dayStart = new Date(tradeDate); dayStart.setHours(0, 0, 0, 0);
+  const dayEnd = new Date(tradeDate); dayEnd.setHours(23, 59, 59, 999);
+
+  const todayCount = await prisma.trade.count({ where: { userId, date: { gte: dayStart, lte: dayEnd } } });
+  if (todayCount >= maxEntries) throw new Error(`Limite de ${maxEntries} operações por dia atingido`);
+
+  const points = direction === "COMPRA" ? exitPrice - entryPrice : entryPrice - exitPrice;
+  const pointValue = assetCfg.pointValue;
+  const financialResult = points * pointValue * contracts;
+  const result = points > 0 ? "GAIN" : points < 0 ? "LOSS" : "ZERO";
+
+  if (profile?.dailyLossLimit) {
+    const todayTrades = await prisma.trade.findMany({ where: { userId, date: { gte: dayStart, lte: dayEnd } }, select: { financialResult: true } });
+    const todayResult = todayTrades.reduce((s, t) => s + t.financialResult, 0);
+    if (todayResult + financialResult < -profile.dailyLossLimit) {
+      throw new Error(`Circuit breaker: loss diário atingiria R$ ${Math.abs(todayResult + financialResult).toFixed(2)}, limite é R$ ${profile.dailyLossLimit.toFixed(2)}`);
+    }
+  }
+
+  await prisma.trade.create({
+    data: { userId, date: tradeDate, time, asset, direction, entryPrice, exitPrice, contracts, result, points, financialResult, pointValue, setup, durationMinutes, notes },
+  });
+
+  // Optional diary entry — only if mood or note provided
+  const diaryMood = (formData.get("diaryMood") as string) || null;
+  const diaryNote = (formData.get("diaryNote") as string).trim() || null;
+
+  if (diaryMood || diaryNote) {
+    const setupLabel = setup ? ` [${setup}]` : "";
+    const resultLabel = result === "GAIN" ? "Gain" : result === "LOSS" ? "Loss" : "Zero";
+    const title = `${direction}${setupLabel} — ${resultLabel} ${points > 0 ? "+" : ""}${points.toFixed(1)}pts`;
+    const content = diaryNote || `${direction} ${asset}${setupLabel}. Resultado: ${resultLabel} (${points > 0 ? "+" : ""}${points.toFixed(1)} pts).`;
+
+    await prisma.diaryEntry.create({
+      data: { userId, date: tradeDate, title, content, mood: diaryMood as any },
+    });
+
+    revalidatePath("/diary");
+  }
+
+  revalidatePath("/");
+  revalidatePath("/trades");
+}
+
 export async function deleteTrade(id: string) {
   const userId = await requireUserId();
   await prisma.trade.deleteMany({ where: { id, userId } });
