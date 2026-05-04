@@ -25,35 +25,37 @@ async function callGemini(
   maxTokens: number,
   apiKeys: string[]
 ): Promise<Response | null> {
-  const model = "gemini-2.0-flash";
+  // Try best model first, fallback to lighter if unavailable
+  const models = ["gemini-2.5-flash", "gemini-2.0-flash"];
 
-  const requestBody = JSON.stringify({
-    systemInstruction: { parts: [{ text: systemContent }] },
-    contents,
-    generationConfig: { temperature: 0.7, maxOutputTokens: maxTokens },
-  });
+  // Try each model + key combination until one works
+  for (const model of models) {
+    const requestBody = JSON.stringify({
+      systemInstruction: { parts: [{ text: systemContent }] },
+      contents,
+      generationConfig: { temperature: 0.7, maxOutputTokens: maxTokens },
+    });
 
-  // Try each API key until one works
-  for (let i = 0; i < apiKeys.length; i++) {
-    const key = apiKeys[i];
-    const res = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/${model}:streamGenerateContent?alt=sse&key=${key}`,
-      { method: "POST", headers: { "Content-Type": "application/json" }, body: requestBody }
-    );
+    for (let i = 0; i < apiKeys.length; i++) {
+      const key = apiKeys[i];
+      const res = await fetch(
+        `https://generativelanguage.googleapis.com/v1beta/models/${model}:streamGenerateContent?alt=sse&key=${key}`,
+        { method: "POST", headers: { "Content-Type": "application/json" }, body: requestBody }
+      );
 
-    if (res.ok) {
-      if (i > 0) console.log(`Gemini: key #${i + 1} used (keys 1-${i} exhausted)`);
-      return res;
+      if (res.ok) {
+        if (model !== models[0] || i > 0) console.log(`Gemini: ${model} key #${i + 1}`);
+        return res;
+      }
+
+      if (res.status !== 429) {
+        const errorData = await res.text();
+        console.error(`Gemini ${model} key #${i + 1} error ${res.status}:`, errorData.slice(0, 200));
+        continue;
+      }
+
+      console.warn(`Gemini ${model} key #${i + 1} quota exceeded, trying next...`);
     }
-
-    if (res.status !== 429) {
-      const errorData = await res.text();
-      console.error(`Gemini key #${i + 1} error ${res.status}:`, errorData.slice(0, 200));
-      // Try next key even on non-429 (key might be invalid)
-      continue;
-    }
-
-    console.warn(`Gemini key #${i + 1} quota exceeded, trying next key...`);
   }
 
   return null;
