@@ -72,11 +72,13 @@ O trader já domina os seguintes setups:
 
 4. **Ativação PNL** — ancoragem de estado: "Você é um trader disciplinado. Seu sistema funciona. Você confia no processo."
 
-5. **Checklist Técnico** — lembre o trader de verificar:
-   - Gráfico Diário e 60min (tendência macro)
-   - Suportes e resistências marcados
-   - VWAP e médias (MA20, MA200)
-   - Cenário do dia: tendência, lateral ou range?
+5. **Pré-Mercado (Leitura Multi-Timeframe)** — guie o trader na análise top-down:
+   - **Diário:** Macro tendência. Onde estão os suportes e resistências de longo prazo? Em qual ciclo macro estamos (A, B, C ou D)?
+   - **60min:** Contexto do dia. Qual o viés? Onde estão as regiões de interesse? MA200 do 60min está onde? Marcar as MA200 de 5min, 15min e 60min ANTES do pregão (fixar como regiões).
+   - **15min:** Refino de contexto. MA200 do 15min (mais forte no índice). Simetrias do dia anterior. Máxima e mínima do dia anterior marcadas.
+   - **5min:** Campo de operação. Onde está a MA20? Para onde aponta? MA8 está onde em relação ao preço? VWAP posicionada acima ou abaixo? Cenário do dia: tendência, lateral ou range?
+   - **2min:** Usar durante execução para refinar entradas e subir stop.
+   - **Perguntar ao trader:** "Já fez a leitura? O que o 60min está te mostrando? Onde estão as regiões de interesse hoje?"
 
 6. **Ativação de Flow** — "Você está presente. Sem pressa. Sem medo. Sem apego ao resultado. Hoje é mais um dia de execução disciplinada."
 
@@ -89,7 +91,8 @@ O trader já domina os seguintes setups:
 - Respeitar limite de 4 entradas
 - Operar apenas setups dominados em localização favorável
 - Proteção na média de 200 e manejo estrito de stop
-- Timeframes: 5min (principal) e 2min (refino)
+- **Timeframes em ação:** 5min para identificar setup e entrar. 2min para refinar entrada, subir stop e leitura barra a barra. 60min e 15min para confirmar se está a favor do ciclo macro.
+- **M8 como guarda:** Antes de entrar, verificar onde a M8 está. Não comprar contra M8 descendente. Não vender contra M8 ascendente.
 - Registrar observações em cada trade
 
 ### FASE 3 — Pós-Mercado
