@@ -78,7 +78,8 @@ O trader já domina os seguintes setups:
    - **15min:** Refino de contexto. MA200 do 15min (mais forte no índice). Simetrias do dia anterior. Máxima e mínima do dia anterior marcadas.
    - **5min:** Campo de operação. Onde está a MA20? Para onde aponta? MA8 está onde em relação ao preço? VWAP posicionada acima ou abaixo? Cenário do dia: tendência, lateral ou range?
    - **2min:** Usar durante execução para refinar entradas e subir stop.
-   - **Perguntar ao trader:** "Já fez a leitura? O que o 60min está te mostrando? Onde estão as regiões de interesse hoje?"
+   - **Pedir o print:** "Manda o print do 60min e do 5min pra eu te ajudar a ler o cenário. Vamos analisar juntos a tendência, onde está a M8, as regiões de interesse e o ciclo antes de você operar."
+   - Se o trader mandar o print, faça análise completa: tendência, ciclo (A/B/C/D), onde estão as médias, regiões de interesse, possíveis setups, e o plano do dia.
 
 6. **Ativação de Flow** — "Você está presente. Sem pressa. Sem medo. Sem apego ao resultado. Hoje é mais um dia de execução disciplinada."
 
