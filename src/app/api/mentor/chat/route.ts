@@ -5,6 +5,7 @@ import { MENTOR_SYSTEM_PROMPT } from "@/lib/mentor-prompt";
 import { getRelevantKnowledge } from "@/lib/mentor-knowledge";
 import { getMethodologyPrompt } from "@/lib/methodology-plugins";
 import { getRecentMemories, generateConversationSummary } from "@/lib/mentor-memory";
+import { getTodayEvents, formatEventsForMentor } from "@/lib/economic-calendar";
 
 const VISION_PROMPT = `\n\n## ANÁLISE DE GRÁFICO — INSTRUÇÕES ESPECIAIS
 Quando receber uma imagem de gráfico/tela de mercado, analise como um ORGANISMO VIVO:
@@ -250,6 +251,11 @@ ${traderProfile.motivation ? `- **Motivação:** ${traderProfile.motivation}` : 
     // Inject mentor memories from past conversations
     const memories = await getRecentMemories(15);
     if (memories) systemContent += `\n\n${memories}`;
+
+    // Inject economic calendar for pre-market and context
+    const todayEvents = await getTodayEvents();
+    const calendarContext = formatEventsForMentor(todayEvents);
+    if (calendarContext) systemContent += `\n\n${calendarContext}`;
 
     if (hasImage) systemContent += VISION_PROMPT;
 

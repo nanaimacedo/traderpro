@@ -24,6 +24,7 @@ import {
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { CircuitBreakerAlert } from "@/components/dashboard/CircuitBreakerAlert";
+import { EconomicCalendar } from "@/components/dashboard/EconomicCalendar";
 
 interface PageProps {
   searchParams: Promise<{ month?: string; year?: string }>;
@@ -47,6 +48,9 @@ export default async function Dashboard({ searchParams }: PageProps) {
     <div className="space-y-6 lg:space-y-8">
       {/* Circuit Breaker Alert */}
       <CircuitBreakerAlert />
+
+      {/* Economic Calendar */}
+      <EconomicCalendar />
 
       {/* Period Filter */}
       <PeriodFilter />

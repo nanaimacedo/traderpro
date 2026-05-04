@@ -1,12 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { webPush, getRandomMorningMessage } from '@/lib/web-push';
+import { getTodayEvents, syncCalendarEvents } from '@/lib/economic-calendar';
 
-// GET — chamado pelo Vercel Cron ou servico externo todo dia as 7:30 BRT
-// Configura no vercel.json: { "crons": [{ "path": "/api/cron/morning-notification", "schedule": "30 10 * * 1-5" }] }
-// 10:30 UTC = 7:30 BRT (dias uteis seg-sex)
+// GET — chamado pelo Vercel Cron todo dia as 7:30 BRT
+// vercel.json: { "path": "/api/cron/morning-notification", "schedule": "30 10 * * 1-5" }
 export async function GET(request: NextRequest) {
-  // Verificar autorizacao
   const authHeader = request.headers.get('authorization');
   const cronSecret = process.env.CRON_SECRET;
 
@@ -15,6 +14,9 @@ export async function GET(request: NextRequest) {
   }
 
   try {
+    // Sync calendar events (ensures today's events exist)
+    await syncCalendarEvents(1);
+
     const subscriptions = await prisma.pushSubscription.findMany({
       where: { active: true },
     });
@@ -23,10 +25,28 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ message: 'Nenhum inscrito', sent: 0 });
     }
 
+    // Get today's economic events
+    const todayEvents = await getTodayEvents();
+    const highEvents = todayEvents.filter((e) => e.impact === 'HIGH');
+
+    // Build notification message
     const message = getRandomMorningMessage();
+    let body = message.body;
+
+    if (highEvents.length > 0) {
+      const eventNames = highEvents
+        .map((e) => {
+          const brtH = e.time ? parseInt(e.time.split(':')[0]) - 3 : null;
+          const timeStr = brtH != null ? `${String(brtH < 0 ? brtH + 24 : brtH).padStart(2, '0')}:${e.time!.split(':')[1]}` : '';
+          return `${e.title}${timeStr ? ` (${timeStr})` : ''}`;
+        })
+        .join(', ');
+      body += `\n⚠️ ALERTA: ${highEvents.length} evento(s) de alto impacto hoje: ${eventNames}`;
+    }
+
     const payload = JSON.stringify({
       title: message.title,
-      body: message.body,
+      body,
       url: '/dashboard',
     });
 
@@ -59,11 +79,10 @@ export async function GET(request: NextRequest) {
       })
     );
 
-    // Log
     await prisma.notificationLog.create({
       data: {
         title: message.title,
-        body: message.body,
+        body,
         success,
         failed,
       },
@@ -71,6 +90,8 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json({
       message: 'Notificacao matinal enviada',
+      calendarEvents: todayEvents.length,
+      highImpact: highEvents.length,
       success,
       failed,
       total: subscriptions.length,
