@@ -1,6 +1,6 @@
 export const revalidate = 300;
 
-import { getTrades } from "@/lib/actions";
+import { getTrades, getBrokerReportForMonth } from "@/lib/actions";
 import { calculateMetrics, getDailyResults } from "@/lib/calculations";
 import { formatCurrency } from "@/lib/utils";
 import { MetricCard } from "@/components/dashboard/MetricCard";
@@ -36,9 +36,23 @@ export default async function Dashboard({ searchParams }: PageProps) {
   const month = params.month !== undefined ? parseInt(params.month) : now.getMonth();
   const year = params.year !== undefined ? parseInt(params.year) : now.getFullYear();
 
-  const trades = await getTrades(month, year);
-  const metrics = calculateMetrics(trades);
+  const [trades, brokerReport] = await Promise.all([
+    getTrades(month, year),
+    getBrokerReportForMonth(month, year),
+  ]);
+  const calculatedMetrics = calculateMetrics(trades);
   const dailyResults = getDailyResults(trades);
+
+  // Prefer broker report data (from PDF) for financial summaries when available
+  const metrics = brokerReport
+    ? {
+        ...calculatedMetrics,
+        totalTrades: brokerReport.totalTrades ?? calculatedMetrics.totalTrades,
+        totalGain: brokerReport.totalGain ?? calculatedMetrics.totalGain,
+        totalLoss: brokerReport.totalLoss ?? calculatedMetrics.totalLoss,
+        netResult: brokerReport.netResult ?? calculatedMetrics.netResult,
+      }
+    : calculatedMetrics;
 
   const payoffRatio = metrics.losses > 0 && metrics.gains > 0
     ? Math.abs(metrics.totalGain / metrics.gains) / Math.abs(metrics.totalLoss / metrics.losses)

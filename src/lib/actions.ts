@@ -320,6 +320,18 @@ export async function getBrokerReports() {
   });
 }
 
+export async function getBrokerReportForMonth(month: number, year: number) {
+  const userId = await requireUserId();
+  const start = new Date(year, month, 1);
+  const end = new Date(year, month + 1, 0); // last day of month
+  return prisma.brokerReport.findFirst({
+    where: {
+      userId,
+      date: { gte: start, lte: end },
+    },
+  });
+}
+
 export async function deleteBrokerReport(id: string) {
   const userId = await requireUserId();
   await prisma.brokerReport.deleteMany({ where: { id, userId } });
