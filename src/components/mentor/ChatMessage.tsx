@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { cn } from "@/lib/utils";
 import { Brain, User, Volume2, VolumeX } from "lucide-react";
 import ReactMarkdown from "react-markdown";
@@ -14,6 +14,80 @@ interface ChatMessageProps {
 export function ChatMessage({ role, content, image }: ChatMessageProps) {
   const isUser = role === "user";
   const [speaking, setSpeaking] = useState(false);
+  const [, setVoicesLoaded] = useState(false);
+
+  // Force re-render when voices load (Chrome loads them async)
+  useEffect(() => {
+    function onVoices() { setVoicesLoaded(true); }
+    speechSynthesis?.addEventListener?.("voiceschanged", onVoices);
+    if (speechSynthesis?.getVoices?.().length > 0) setVoicesLoaded(true);
+    return () => speechSynthesis?.removeEventListener?.("voiceschanged", onVoices);
+  }, []);
+
+  function getBestVoice(): SpeechSynthesisVoice | null {
+    const voices = speechSynthesis.getVoices();
+    // Prefer high-quality pt-BR voices (Google/Microsoft tend to be more natural)
+    const preferred = [
+      "Google português do Brasil",
+      "Microsoft Francisca Online",
+      "Microsoft Francisca",
+      "Microsoft Antonio Online",
+      "Microsoft Antonio",
+      "Luciana",
+      "Fernanda",
+    ];
+    for (const name of preferred) {
+      const match = voices.find((v) => v.name.includes(name));
+      if (match) return match;
+    }
+    // Fallback: any pt-BR voice
+    return voices.find((v) => v.lang.startsWith("pt-BR") || v.lang === "pt_BR") || null;
+  }
+
+  function cleanForSpeech(text: string): string {
+    return text
+      // Remove markdown headers
+      .replace(/#{1,6}\s/g, "")
+      // Bold/italic → plain text
+      .replace(/\*{1,3}([^*]+)\*{1,3}/g, "$1")
+      // Inline code
+      .replace(/`([^`]+)`/g, "$1")
+      // Links → text only
+      .replace(/\[([^\]]+)\]\([^)]+\)/g, "$1")
+      // Horizontal rules → pause
+      .replace(/---+/g, ".")
+      // Bullet points → natural flow
+      .replace(/^[-*]\s+/gm, "")
+      .replace(/^\d+\.\s+/gm, "")
+      // Emojis that add nothing
+      .replace(/[📈📉💡🎯⚠️🔥✅❌🏆⭐🧠💪🙏✨🎖️]/g, "")
+      // Collapse whitespace
+      .replace(/\n{2,}/g, ". ")
+      .replace(/\n/g, ", ")
+      // Clean up multiple punctuation
+      .replace(/[.,]{2,}/g, ".")
+      .replace(/\s{2,}/g, " ")
+      .trim();
+  }
+
+  function splitIntoChunks(text: string): string[] {
+    // Split on sentence boundaries for natural pauses
+    const sentences = text.match(/[^.!?]+[.!?]+\s*/g) || [text];
+    const chunks: string[] = [];
+    let current = "";
+
+    for (const sentence of sentences) {
+      // Keep chunks under ~200 chars for smoother delivery
+      if (current.length + sentence.length > 200 && current.length > 0) {
+        chunks.push(current.trim());
+        current = "";
+      }
+      current += sentence;
+    }
+    if (current.trim()) chunks.push(current.trim());
+
+    return chunks;
+  }
 
   function toggleTTS() {
     if (speaking) {
@@ -22,26 +96,28 @@ export function ChatMessage({ role, content, image }: ChatMessageProps) {
       return;
     }
 
-    // Strip markdown for cleaner speech
-    const clean = content
-      .replace(/#{1,6}\s/g, "")
-      .replace(/\*{1,2}([^*]+)\*{1,2}/g, "$1")
-      .replace(/`[^`]+`/g, "")
-      .replace(/\[([^\]]+)\]\([^)]+\)/g, "$1")
-      .replace(/---/g, "")
-      .replace(/\n{2,}/g, ". ")
-      .replace(/\n/g, " ")
-      .trim();
-
-    const utterance = new SpeechSynthesisUtterance(clean);
-    utterance.lang = "pt-BR";
-    utterance.rate = 1.05;
-    utterance.pitch = 1;
-    utterance.onend = () => setSpeaking(false);
-    utterance.onerror = () => setSpeaking(false);
+    const clean = cleanForSpeech(content);
+    const chunks = splitIntoChunks(clean);
+    const voice = getBestVoice();
 
     setSpeaking(true);
-    speechSynthesis.speak(utterance);
+
+    chunks.forEach((chunk, i) => {
+      const utterance = new SpeechSynthesisUtterance(chunk);
+      utterance.lang = "pt-BR";
+      if (voice) utterance.voice = voice;
+      utterance.rate = 0.95;  // Slightly slower = more natural
+      utterance.pitch = 1.05; // Slightly higher = warmer
+      utterance.volume = 1;
+
+      // Only the last chunk triggers the end
+      if (i === chunks.length - 1) {
+        utterance.onend = () => setSpeaking(false);
+        utterance.onerror = () => setSpeaking(false);
+      }
+
+      speechSynthesis.speak(utterance);
+    });
   }
 
   return (
