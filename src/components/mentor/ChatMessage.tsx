@@ -1,8 +1,8 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useRef } from "react";
 import { cn } from "@/lib/utils";
-import { Brain, User, Volume2, VolumeX } from "lucide-react";
+import { Brain, User, Volume2, VolumeX, Loader2 } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 
 interface ChatMessageProps {
@@ -14,110 +14,68 @@ interface ChatMessageProps {
 export function ChatMessage({ role, content, image }: ChatMessageProps) {
   const isUser = role === "user";
   const [speaking, setSpeaking] = useState(false);
-  const [, setVoicesLoaded] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
 
-  // Force re-render when voices load (Chrome loads them async)
-  useEffect(() => {
-    function onVoices() { setVoicesLoaded(true); }
-    speechSynthesis?.addEventListener?.("voiceschanged", onVoices);
-    if (speechSynthesis?.getVoices?.().length > 0) setVoicesLoaded(true);
-    return () => speechSynthesis?.removeEventListener?.("voiceschanged", onVoices);
-  }, []);
-
-  function getBestVoice(): SpeechSynthesisVoice | null {
-    const voices = speechSynthesis.getVoices();
-    // Prefer high-quality pt-BR voices (Google/Microsoft tend to be more natural)
-    const preferred = [
-      "Google português do Brasil",
-      "Microsoft Francisca Online",
-      "Microsoft Francisca",
-      "Microsoft Antonio Online",
-      "Microsoft Antonio",
-      "Luciana",
-      "Fernanda",
-    ];
-    for (const name of preferred) {
-      const match = voices.find((v) => v.name.includes(name));
-      if (match) return match;
-    }
-    // Fallback: any pt-BR voice
-    return voices.find((v) => v.lang.startsWith("pt-BR") || v.lang === "pt_BR") || null;
-  }
-
-  function cleanForSpeech(text: string): string {
-    return text
-      // Remove markdown headers
-      .replace(/#{1,6}\s/g, "")
-      // Bold/italic → plain text
-      .replace(/\*{1,3}([^*]+)\*{1,3}/g, "$1")
-      // Inline code
-      .replace(/`([^`]+)`/g, "$1")
-      // Links → text only
-      .replace(/\[([^\]]+)\]\([^)]+\)/g, "$1")
-      // Horizontal rules → pause
-      .replace(/---+/g, ".")
-      // Bullet points → natural flow
-      .replace(/^[-*]\s+/gm, "")
-      .replace(/^\d+\.\s+/gm, "")
-      // Emojis that add nothing
-      .replace(/[📈📉💡🎯⚠️🔥✅❌🏆⭐🧠💪🙏✨🎖️]/g, "")
-      // Collapse whitespace
-      .replace(/\n{2,}/g, ". ")
-      .replace(/\n/g, ", ")
-      // Clean up multiple punctuation
-      .replace(/[.,]{2,}/g, ".")
-      .replace(/\s{2,}/g, " ")
-      .trim();
-  }
-
-  function splitIntoChunks(text: string): string[] {
-    // Split on sentence boundaries for natural pauses
-    const sentences = text.match(/[^.!?]+[.!?]+\s*/g) || [text];
-    const chunks: string[] = [];
-    let current = "";
-
-    for (const sentence of sentences) {
-      // Keep chunks under ~200 chars for smoother delivery
-      if (current.length + sentence.length > 200 && current.length > 0) {
-        chunks.push(current.trim());
-        current = "";
-      }
-      current += sentence;
-    }
-    if (current.trim()) chunks.push(current.trim());
-
-    return chunks;
-  }
-
-  function toggleTTS() {
+  async function toggleTTS() {
+    // Stop if playing
     if (speaking) {
-      speechSynthesis.cancel();
+      if (audioRef.current) {
+        audioRef.current.pause();
+        audioRef.current.currentTime = 0;
+        audioRef.current = null;
+      }
       setSpeaking(false);
       return;
     }
 
-    const clean = cleanForSpeech(content);
-    const chunks = splitIntoChunks(clean);
-    const voice = getBestVoice();
+    setLoading(true);
 
-    setSpeaking(true);
+    try {
+      const res = await fetch("/api/speech/tts", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ text: content }),
+      });
 
-    chunks.forEach((chunk, i) => {
-      const utterance = new SpeechSynthesisUtterance(chunk);
-      utterance.lang = "pt-BR";
-      if (voice) utterance.voice = voice;
-      utterance.rate = 0.95;  // Slightly slower = more natural
-      utterance.pitch = 1.05; // Slightly higher = warmer
-      utterance.volume = 1;
+      if (!res.ok) throw new Error("TTS failed");
 
-      // Only the last chunk triggers the end
-      if (i === chunks.length - 1) {
-        utterance.onend = () => setSpeaking(false);
-        utterance.onerror = () => setSpeaking(false);
+      const data = await res.json();
+
+      if (!data.audio) throw new Error("No audio data");
+
+      // Convert base64 to audio blob and play
+      const binaryStr = atob(data.audio);
+      const bytes = new Uint8Array(binaryStr.length);
+      for (let i = 0; i < binaryStr.length; i++) {
+        bytes[i] = binaryStr.charCodeAt(i);
       }
 
-      speechSynthesis.speak(utterance);
-    });
+      const blob = new Blob([bytes], { type: data.mimeType || "audio/mp3" });
+      const url = URL.createObjectURL(blob);
+
+      const audio = new Audio(url);
+      audioRef.current = audio;
+
+      audio.onended = () => {
+        setSpeaking(false);
+        audioRef.current = null;
+        URL.revokeObjectURL(url);
+      };
+
+      audio.onerror = () => {
+        setSpeaking(false);
+        audioRef.current = null;
+        URL.revokeObjectURL(url);
+      };
+
+      setSpeaking(true);
+      setLoading(false);
+      await audio.play();
+    } catch {
+      setLoading(false);
+      setSpeaking(false);
+    }
   }
 
   return (
@@ -146,7 +104,7 @@ export function ChatMessage({ role, content, image }: ChatMessageProps) {
           {image && (
             <img
               src={image}
-              alt="Gráfico enviado"
+              alt="Grafico enviado"
               className="rounded-lg mb-2 max-h-60 w-auto"
             />
           )}
@@ -214,17 +172,25 @@ export function ChatMessage({ role, content, image }: ChatMessageProps) {
           )}
         </div>
         {/* TTS button for assistant messages */}
-        {!isUser && typeof window !== "undefined" && "speechSynthesis" in window && (
+        {!isUser && (
           <button
             onClick={toggleTTS}
+            disabled={loading}
             className={cn(
               "self-start flex items-center gap-1 px-2 py-1 rounded-lg text-[10px] font-medium transition-colors cursor-pointer",
-              speaking
+              loading
+                ? "text-amber-500 bg-amber-50 dark:bg-amber-950"
+                : speaking
                 ? "text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-950"
                 : "text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300 opacity-0 group-hover:opacity-100"
             )}
           >
-            {speaking ? (
+            {loading ? (
+              <>
+                <Loader2 className="h-3 w-3 animate-spin" />
+                Gerando voz...
+              </>
+            ) : speaking ? (
               <>
                 <VolumeX className="h-3 w-3" />
                 Parar
