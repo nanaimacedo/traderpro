@@ -6,25 +6,46 @@ import { redirect } from "next/navigation";
 import { calculateAdvancedMetrics, getCumulativeResults } from "@/lib/calculations";
 import { formatCurrency } from "@/lib/utils";
 import { cn } from "@/lib/utils";
-import { BarChart3, TrendingUp, TrendingDown, Shield, Zap, Target, Clock, Calendar, Activity, Award } from "lucide-react";
+import { BarChart3, TrendingUp, TrendingDown, Shield, Zap, Target, Clock, Calendar, Activity, Award, ChevronLeft, ChevronRight } from "lucide-react";
 import Link from "next/link";
 
-export default async function AnalyticsPage() {
+const MONTH_NAMES = ["Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho", "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"];
+
+interface PageProps {
+  searchParams: Promise<{ month?: string; year?: string }>;
+}
+
+export default async function AnalyticsPage({ searchParams }: PageProps) {
   const session = await getSession();
   if (!session) redirect("/login");
+
+  const params = await searchParams;
+  const now = new Date();
+  const month = params.month !== undefined ? parseInt(params.month) : now.getMonth();
+  const year = params.year !== undefined ? parseInt(params.year) : now.getFullYear();
 
   const allTrades = await prisma.trade.findMany({
     where: { userId: session.userId },
     orderBy: [{ date: "asc" }, { time: "asc" }],
   });
 
-  const now = new Date();
-  const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
-  const monthTrades = allTrades.filter((t) => new Date(t.date) >= startOfMonth);
+  const startOfMonth = new Date(year, month, 1);
+  const endOfMonth = new Date(year, month + 1, 0, 23, 59, 59);
+  const monthTrades = allTrades.filter((t) => {
+    const d = new Date(t.date);
+    return d >= startOfMonth && d <= endOfMonth;
+  });
+
+  // Prev / next month params
+  const prevMonth = month === 0 ? 11 : month - 1;
+  const prevYear = month === 0 ? year - 1 : year;
+  const nextMonth = month === 11 ? 0 : month + 1;
+  const nextYear = month === 11 ? year + 1 : year;
+  const isCurrentMonth = month === now.getMonth() && year === now.getFullYear();
 
   const allMetrics = calculateAdvancedMetrics(allTrades);
   const monthMetrics = calculateAdvancedMetrics(monthTrades);
-  const equityCurve = getCumulativeResults(allTrades);
+  const equityCurve = getCumulativeResults(monthTrades);
 
   if (!allMetrics || allTrades.length === 0) {
     return (
@@ -74,8 +95,9 @@ export default async function AnalyticsPage() {
   const equityMax = Math.max(...equityPoints.map((p) => p.cumulative), 1);
   const equityRange = equityMax - equityMin || 1;
 
-  const hourMax = Math.max(...allMetrics.heatmap.map((h) => Math.abs(h.result)), 1);
-  const dayMax = Math.max(...allMetrics.dayHeatmap.map((d) => Math.abs(d.result)), 1);
+  const displayMetrics = monthMetrics || allMetrics;
+  const hourMax = Math.max(...displayMetrics.heatmap.map((h) => Math.abs(h.result)), 1);
+  const dayMax = Math.max(...displayMetrics.dayHeatmap.map((d) => Math.abs(d.result)), 1);
 
   return (
     <div className="space-y-6 max-w-2xl mx-auto">
@@ -93,62 +115,90 @@ export default async function AnalyticsPage() {
         </Link>
       </div>
 
+      {/* Month Navigator */}
+      <div className="flex items-center justify-between rounded-xl bg-zinc-50 dark:bg-zinc-800/80 border border-zinc-100 dark:border-zinc-700/50 px-4 py-3">
+        <Link
+          href={`/analytics?month=${prevMonth}&year=${prevYear}`}
+          className="flex items-center justify-center h-7 w-7 rounded-lg hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors"
+        >
+          <ChevronLeft className="h-4 w-4 text-zinc-500" />
+        </Link>
+        <div className="text-center">
+          <p className="text-sm font-semibold text-zinc-900 dark:text-zinc-100">{MONTH_NAMES[month]} {year}</p>
+          <p className="text-[10px] text-zinc-400">{monthTrades.length} operações</p>
+        </div>
+        <Link
+          href={isCurrentMonth ? "#" : `/analytics?month=${nextMonth}&year=${nextYear}`}
+          className={cn(
+            "flex items-center justify-center h-7 w-7 rounded-lg transition-colors",
+            isCurrentMonth ? "opacity-30 pointer-events-none" : "hover:bg-zinc-200 dark:hover:bg-zinc-700"
+          )}
+        >
+          <ChevronRight className="h-4 w-4 text-zinc-500" />
+        </Link>
+      </div>
+
+      {/* Métricas do Mês */}
+      {!monthMetrics ? (
+        <div className="text-center py-8 text-sm text-zinc-400">Nenhuma operação em {MONTH_NAMES[month]} {year}</div>
+      ) : (
+      <>
       {/* Métricas Institucionais */}
       <div>
-        <h2 className="text-xs font-semibold text-zinc-400 dark:text-zinc-500 uppercase tracking-wider mb-3">Métricas Institucionais</h2>
+        <h2 className="text-xs font-semibold text-zinc-400 dark:text-zinc-500 uppercase tracking-wider mb-3">Métricas do Mês</h2>
         <div className="grid grid-cols-2 gap-3">
           <MetricCard
-            label="Expectancy"
-            value={formatCurrency(allMetrics.expectancy)}
-            subtitle="Expectativa por trade"
+            label="Expectativa"
+            value={formatCurrency(monthMetrics.expectancy)}
+            subtitle="Por trade"
             icon={<Target className="h-3.5 w-3.5 text-white" />}
-            color={allMetrics.expectancy >= 0 ? "bg-emerald-500" : "bg-rose-500"}
+            color={monthMetrics.expectancy >= 0 ? "bg-emerald-500" : "bg-rose-500"}
           />
           <MetricCard
-            label="Profit Factor"
-            value={allMetrics.profitFactor === Infinity ? "∞" : allMetrics.profitFactor.toFixed(2)}
+            label="Fator de Lucro"
+            value={monthMetrics.profitFactor === Infinity ? "∞" : monthMetrics.profitFactor.toFixed(2)}
             subtitle="Ganho bruto / Perda bruta"
             icon={<Zap className="h-3.5 w-3.5 text-white" />}
-            color={allMetrics.profitFactor >= 1.5 ? "bg-emerald-500" : allMetrics.profitFactor >= 1 ? "bg-amber-500" : "bg-rose-500"}
+            color={monthMetrics.profitFactor >= 1.5 ? "bg-emerald-500" : monthMetrics.profitFactor >= 1 ? "bg-amber-500" : "bg-rose-500"}
           />
           <MetricCard
-            label="Sharpe Ratio"
-            value={allMetrics.sharpeRatio.toFixed(2)}
-            subtitle={allMetrics.sharpeRatio >= 2 ? "Excelente" : allMetrics.sharpeRatio >= 1 ? "Bom" : "Melhorar"}
+            label="Índice Sharpe"
+            value={monthMetrics.sharpeRatio.toFixed(2)}
+            subtitle={monthMetrics.sharpeRatio >= 2 ? "Excelente" : monthMetrics.sharpeRatio >= 1 ? "Bom" : "Melhorar"}
             icon={<Activity className="h-3.5 w-3.5 text-white" />}
-            color={allMetrics.sharpeRatio >= 2 ? "bg-emerald-500" : allMetrics.sharpeRatio >= 1 ? "bg-amber-500" : "bg-rose-500"}
+            color={monthMetrics.sharpeRatio >= 2 ? "bg-emerald-500" : monthMetrics.sharpeRatio >= 1 ? "bg-amber-500" : "bg-rose-500"}
           />
           <MetricCard
-            label="Max Drawdown"
-            value={formatCurrency(-allMetrics.maxDrawdown)}
-            subtitle={`${allMetrics.maxDrawdownPct.toFixed(1)}% do pico`}
+            label="Drawdown Máx."
+            value={formatCurrency(-monthMetrics.maxDrawdown)}
+            subtitle={`${monthMetrics.maxDrawdownPct.toFixed(1)}% do pico`}
             icon={<TrendingDown className="h-3.5 w-3.5 text-white" />}
-            color={allMetrics.maxDrawdownPct <= 10 ? "bg-emerald-500" : allMetrics.maxDrawdownPct <= 25 ? "bg-amber-500" : "bg-rose-500"}
+            color={monthMetrics.maxDrawdownPct <= 10 ? "bg-emerald-500" : monthMetrics.maxDrawdownPct <= 25 ? "bg-amber-500" : "bg-rose-500"}
           />
           <MetricCard
-            label="Recovery Factor"
-            value={allMetrics.recoveryFactor.toFixed(2)}
+            label="Fator Recuperação"
+            value={monthMetrics.recoveryFactor.toFixed(2)}
             subtitle="Retorno / Drawdown"
             icon={<TrendingUp className="h-3.5 w-3.5 text-white" />}
-            color={allMetrics.recoveryFactor >= 2 ? "bg-emerald-500" : allMetrics.recoveryFactor >= 1 ? "bg-amber-500" : "bg-rose-500"}
+            color={monthMetrics.recoveryFactor >= 2 ? "bg-emerald-500" : monthMetrics.recoveryFactor >= 1 ? "bg-amber-500" : "bg-rose-500"}
           />
           <MetricCard
             label="Disciplina"
-            value={`${allMetrics.disciplineScore}%`}
+            value={`${monthMetrics.disciplineScore}%`}
             subtitle="Dias dentro do limite"
             icon={<Shield className="h-3.5 w-3.5 text-white" />}
-            color={allMetrics.disciplineScore >= 90 ? "bg-emerald-500" : allMetrics.disciplineScore >= 70 ? "bg-amber-500" : "bg-rose-500"}
+            color={monthMetrics.disciplineScore >= 90 ? "bg-emerald-500" : monthMetrics.disciplineScore >= 70 ? "bg-amber-500" : "bg-rose-500"}
           />
         </div>
       </div>
 
-      {/* Equity Curve */}
+      {/* Curva de Capital */}
       <div className="rounded-xl bg-zinc-50 dark:bg-zinc-800/80 p-4 border border-zinc-100 dark:border-zinc-700/50">
         <div className="flex items-center gap-2 mb-3">
           <Award className="h-4 w-4 text-violet-500" />
-          <span className="text-xs font-semibold text-zinc-400 dark:text-zinc-500 uppercase tracking-wider">Curva de Equity</span>
-          <span className={cn("ml-auto text-sm font-bold", allMetrics.totalReturn >= 0 ? "text-emerald-600" : "text-rose-500")}>
-            {formatCurrency(allMetrics.totalReturn)}
+          <span className="text-xs font-semibold text-zinc-400 dark:text-zinc-500 uppercase tracking-wider">Curva de Capital</span>
+          <span className={cn("ml-auto text-sm font-bold", monthMetrics.totalReturn >= 0 ? "text-emerald-600" : "text-rose-500")}>
+            {formatCurrency(monthMetrics.totalReturn)}
           </span>
         </div>
         <div className="h-32 flex items-end gap-[2px]">
@@ -178,7 +228,7 @@ export default async function AnalyticsPage() {
           <span className="text-xs font-semibold text-zinc-400 dark:text-zinc-500 uppercase tracking-wider">Performance por Horário</span>
         </div>
         <div className="space-y-0.5">
-          {allMetrics.heatmap.map((h) => (
+          {displayMetrics.heatmap.map((h) => (
             <HeatmapBar key={h.hour} label={h.hour} value={h.result} max={hourMax} winRate={h.winRate} trades={h.trades} />
           ))}
         </div>
@@ -191,23 +241,23 @@ export default async function AnalyticsPage() {
           <span className="text-xs font-semibold text-zinc-400 dark:text-zinc-500 uppercase tracking-wider">Performance por Dia</span>
         </div>
         <div className="space-y-0.5">
-          {allMetrics.dayHeatmap.map((d) => (
+          {displayMetrics.dayHeatmap.map((d) => (
             <HeatmapBar key={d.day} label={d.day.slice(0, 3)} value={d.result} max={dayMax} winRate={d.winRate} trades={d.trades} />
           ))}
         </div>
       </div>
 
-      {/* Mês Atual vs Geral */}
-      {monthMetrics && (
+      {/* Mês vs Histórico Geral */}
+      {allMetrics && (
         <div className="rounded-xl bg-zinc-50 dark:bg-zinc-800/80 p-4 border border-zinc-100 dark:border-zinc-700/50">
           <div className="flex items-center gap-2 mb-3">
             <BarChart3 className="h-4 w-4 text-violet-500" />
-            <span className="text-xs font-semibold text-zinc-400 dark:text-zinc-500 uppercase tracking-wider">Mês Atual vs Geral</span>
+            <span className="text-xs font-semibold text-zinc-400 dark:text-zinc-500 uppercase tracking-wider">Mês vs Histórico Geral</span>
           </div>
           <div className="grid grid-cols-3 gap-4 text-center">
             {[
-              { label: "Expectancy", month: formatCurrency(monthMetrics.expectancy), all: formatCurrency(allMetrics.expectancy) },
-              { label: "Profit Factor", month: monthMetrics.profitFactor === Infinity ? "∞" : monthMetrics.profitFactor.toFixed(2), all: allMetrics.profitFactor === Infinity ? "∞" : allMetrics.profitFactor.toFixed(2) },
+              { label: "Expectativa", month: formatCurrency(monthMetrics.expectancy), all: formatCurrency(allMetrics.expectancy) },
+              { label: "Fator Lucro", month: monthMetrics.profitFactor === Infinity ? "∞" : monthMetrics.profitFactor.toFixed(2), all: allMetrics.profitFactor === Infinity ? "∞" : allMetrics.profitFactor.toFixed(2) },
               { label: "Disciplina", month: `${monthMetrics.disciplineScore}%`, all: `${allMetrics.disciplineScore}%` },
             ].map((row) => (
               <div key={row.label}>
@@ -218,6 +268,8 @@ export default async function AnalyticsPage() {
             ))}
           </div>
         </div>
+      )}
+      </>
       )}
     </div>
   );

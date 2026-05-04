@@ -25,6 +25,7 @@ import {
 
 const navigation = [
   { name: "Dashboard", href: "/", icon: LayoutDashboard },
+  { name: "Gemini", href: "/mentor", icon: Brain },
   { name: "Nova Operação", href: "/trades/new", icon: Plus },
   { name: "Histórico", href: "/trades", icon: History },
   { name: "Diário", href: "/diary", icon: BookOpen },
@@ -36,8 +37,7 @@ const navigation = [
   { name: "Conquistas", href: "/achievements", icon: Trophy },
   { name: "Importar", href: "/trades/import", icon: Upload },
   { name: "Leaderboard", href: "/leaderboard", icon: Medal },
-  { name: "Gemini", href: "/mentor", icon: Brain },
-  { name: "Planos", href: "/pricing", icon: Crown },
+  // { name: "Planos", href: "/pricing", icon: Crown },
 ];
 
 interface SidebarProps {
