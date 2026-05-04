@@ -40,18 +40,9 @@ export function ChatMessage({ role, content, image }: ChatMessageProps) {
 
       if (!res.ok) throw new Error("TTS failed");
 
-      const data = await res.json();
-
-      if (!data.audio) throw new Error("No audio data");
-
-      // Convert base64 to audio blob and play
-      const binaryStr = atob(data.audio);
-      const bytes = new Uint8Array(binaryStr.length);
-      for (let i = 0; i < binaryStr.length; i++) {
-        bytes[i] = binaryStr.charCodeAt(i);
-      }
-
-      const blob = new Blob([bytes], { type: data.mimeType || "audio/mp3" });
+      const contentType = res.headers.get("content-type") || "audio/wav";
+      const arrayBuffer = await res.arrayBuffer();
+      const blob = new Blob([arrayBuffer], { type: contentType });
       const url = URL.createObjectURL(blob);
 
       const audio = new Audio(url);
