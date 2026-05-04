@@ -11,7 +11,7 @@ interface Message {
   role: "user" | "assistant";
   content: string;
   createdAt: string;
-  image?: string;
+  images?: string[];
 }
 
 interface Conversation {
@@ -82,13 +82,14 @@ export function MentorChat({ tradesContext }: MentorChatProps) {
     fetchConversations();
   }
 
-  async function handleSend(message: string, image?: string) {
+  async function handleSend(message: string, images?: string[]) {
+    const hasImages = images && images.length > 0;
     const tempUserMsg: Message = {
       id: `temp-${Date.now()}`,
       role: "user",
-      content: image ? `[Imagem enviada]\n${message}` : message,
+      content: hasImages ? `[${images!.length} imagem${images!.length > 1 ? "ns" : ""} enviada${images!.length > 1 ? "s" : ""}]\n${message}` : message,
       createdAt: new Date().toISOString(),
-      image,
+      images,
     };
     setMessages((prev) => [...prev, tempUserMsg]);
     setLoading(true);
@@ -100,7 +101,7 @@ export function MentorChat({ tradesContext }: MentorChatProps) {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           message,
-          image,
+          images,
           conversationId: activeConversationId,
           tradesContext,
         }),
@@ -298,7 +299,7 @@ export function MentorChat({ tradesContext }: MentorChatProps) {
           ) : (
             <div className="space-y-4">
               {messages.map((msg) => (
-                <ChatMessage key={msg.id} role={msg.role} content={msg.content} image={msg.image} />
+                <ChatMessage key={msg.id} role={msg.role} content={msg.content} images={msg.images} />
               ))}
               {/* Streaming message — appears while Gemini is typing */}
               {streamingContent && (

@@ -185,9 +185,10 @@ export async function POST(request: NextRequest) {
     const session = await getSession();
     if (!session) return NextResponse.json({ error: "Não autenticado" }, { status: 401 });
 
-    const { message, image, conversationId, tradesContext } = await request.json();
+    const { message, images, conversationId, tradesContext } = await request.json();
+    const imageList: string[] = Array.isArray(images) ? images : images ? [images] : [];
 
-    if (!message?.trim() && !image) {
+    if (!message?.trim() && imageList.length === 0) {
       return NextResponse.json({ error: "Mensagem vazia" }, { status: 400 });
     }
 
@@ -210,12 +211,14 @@ export async function POST(request: NextRequest) {
     await prisma.mentorMessage.create({
       data: {
         role: "user",
-        content: image ? `[Imagem enviada]\n${message || "Analise este gráfico"}` : message,
+        content: imageList.length > 0
+          ? `[${imageList.length} imagem${imageList.length > 1 ? "ns" : ""} enviada${imageList.length > 1 ? "s" : ""}]\n${message || "Analise este gráfico"}`
+          : message,
         conversationId: conversation.id,
       },
     });
 
-    const hasImage = !!image;
+    const hasImage = imageList.length > 0;
     const isFirstMessage = conversation.messages.length <= 1;
     const msgLower = (message || "").toLowerCase();
 
@@ -278,16 +281,16 @@ ${traderProfile.motivation ? `- **Motivação:** ${traderProfile.motivation}` : 
     }
 
     if (hasImage) {
-      const imageData = image.replace(/^data:image\/\w+;base64,/, "");
-      const mimeMatch = image.match(/^data:(image\/\w+);base64,/);
-      const mimeType = mimeMatch ? mimeMatch[1] : "image/png";
-      contents.push({
-        role: "user",
-        parts: [
-          { text: message || "Analise este gráfico usando a metodologia Oliver Velez." },
-          { inlineData: { mimeType, data: imageData } },
-        ],
-      });
+      const parts: any[] = [
+        { text: message || "Analise este gráfico usando a metodologia Oliver Velez." },
+      ];
+      for (const img of imageList) {
+        const imageData = img.replace(/^data:image\/\w+;base64,/, "");
+        const mimeMatch = img.match(/^data:(image\/\w+);base64,/);
+        const mimeType = mimeMatch ? mimeMatch[1] : "image/png";
+        parts.push({ inlineData: { mimeType, data: imageData } });
+      }
+      contents.push({ role: "user", parts });
     } else {
       contents.push({ role: "user", parts: [{ text: message }] });
     }

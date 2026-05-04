@@ -8,10 +8,10 @@ import ReactMarkdown from "react-markdown";
 interface ChatMessageProps {
   role: "user" | "assistant";
   content: string;
-  image?: string;
+  images?: string[];
 }
 
-export function ChatMessage({ role, content, image }: ChatMessageProps) {
+export function ChatMessage({ role, content, images }: ChatMessageProps) {
   const isUser = role === "user";
   const [speaking, setSpeaking] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -92,12 +92,17 @@ export function ChatMessage({ role, content, image }: ChatMessageProps) {
               : "bg-zinc-100 dark:bg-zinc-800 text-zinc-800 dark:text-zinc-200"
           )}
         >
-          {image && (
-            <img
-              src={image}
-              alt="Grafico enviado"
-              className="rounded-lg mb-2 max-h-60 w-auto"
-            />
+          {images && images.length > 0 && (
+            <div className="flex flex-wrap gap-2 mb-2">
+              {images.map((src, i) => (
+                <img
+                  key={i}
+                  src={src}
+                  alt={`Gráfico ${i + 1}`}
+                  className="rounded-lg max-h-60 w-auto"
+                />
+              ))}
+            </div>
           )}
           {isUser ? (
             <div className="whitespace-pre-wrap break-words">{content}</div>

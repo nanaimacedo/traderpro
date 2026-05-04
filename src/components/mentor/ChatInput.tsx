@@ -5,7 +5,7 @@ import { Send, ImagePlus, X, Mic, Square, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface ChatInputProps {
-  onSend: (message: string, image?: string) => void;
+  onSend: (message: string, images?: string[]) => void;
   disabled?: boolean;
 }
 
@@ -15,17 +15,17 @@ export function ChatInput({ onSend, disabled }: ChatInputProps) {
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const chunksRef = useRef<Blob[]>([]);
 
-  const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [imagePreviews, setImagePreviews] = useState<string[]>([]);
   const [recording, setRecording] = useState(false);
   const [transcribing, setTranscribing] = useState(false);
 
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     const value = textareaRef.current?.value.trim();
-    if ((!value && !imagePreview) || disabled) return;
-    onSend(value || "Analise este gráfico", imagePreview || undefined);
+    if ((!value && imagePreviews.length === 0) || disabled) return;
+    onSend(value || "Analise este gráfico", imagePreviews.length > 0 ? imagePreviews : undefined);
     if (textareaRef.current) textareaRef.current.value = "";
-    setImagePreview(null);
+    setImagePreviews([]);
   }
 
   function handleKeyDown(e: React.KeyboardEvent) {
@@ -36,11 +36,14 @@ export function ChatInput({ onSend, disabled }: ChatInputProps) {
   }
 
   function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    const reader = new FileReader();
-    reader.onload = () => setImagePreview(reader.result as string);
-    reader.readAsDataURL(file);
+    const files = Array.from(e.target.files || []);
+    if (files.length === 0) return;
+    files.forEach((file) => {
+      const reader = new FileReader();
+      reader.onload = () =>
+        setImagePreviews((prev) => [...prev, reader.result as string]);
+      reader.readAsDataURL(file);
+    });
     e.target.value = "";
   }
 
@@ -147,19 +150,23 @@ export function ChatInput({ onSend, disabled }: ChatInputProps) {
 
   return (
     <div className="space-y-2">
-      {imagePreview && (
-        <div className="relative inline-block">
-          <img
-            src={imagePreview}
-            alt="Preview"
-            className="h-20 rounded-lg border border-zinc-200 dark:border-zinc-700 object-cover"
-          />
-          <button
-            onClick={() => setImagePreview(null)}
-            className="absolute -top-1.5 -right-1.5 flex h-5 w-5 items-center justify-center rounded-full bg-zinc-900 text-white cursor-pointer"
-          >
-            <X className="h-3 w-3" />
-          </button>
+      {imagePreviews.length > 0 && (
+        <div className="flex flex-wrap gap-2">
+          {imagePreviews.map((src, i) => (
+            <div key={i} className="relative inline-block">
+              <img
+                src={src}
+                alt={`Preview ${i + 1}`}
+                className="h-20 rounded-lg border border-zinc-200 dark:border-zinc-700 object-cover"
+              />
+              <button
+                onClick={() => setImagePreviews((prev) => prev.filter((_, idx) => idx !== i))}
+                className="absolute -top-1.5 -right-1.5 flex h-5 w-5 items-center justify-center rounded-full bg-zinc-900 text-white cursor-pointer"
+              >
+                <X className="h-3 w-3" />
+              </button>
+            </div>
+          ))}
         </div>
       )}
       <form onSubmit={handleSubmit} className="flex gap-2 items-end">
@@ -176,6 +183,7 @@ export function ChatInput({ onSend, disabled }: ChatInputProps) {
           ref={fileRef}
           type="file"
           accept="image/*"
+          multiple
           onChange={handleFileChange}
           className="sr-only"
         />
@@ -186,7 +194,7 @@ export function ChatInput({ onSend, disabled }: ChatInputProps) {
               ? "Transcrevendo áudio..."
               : recording
               ? "Gravando... clique no botão para parar"
-              : imagePreview
+              : imagePreviews.length > 0
               ? "Descreva o que quer analisar..."
               : "Pergunte ao seu mentor..."
           }
