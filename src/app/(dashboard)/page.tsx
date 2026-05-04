@@ -1,8 +1,8 @@
 export const revalidate = 300;
 
 import { getTrades, getBrokerReportForMonth } from "@/lib/actions";
-import { calculateMetrics, getDailyResults } from "@/lib/calculations";
-import { formatCurrency } from "@/lib/utils";
+import { calculateMetrics, getDailyResults, formatDuration } from "@/lib/calculations";
+import { formatCurrency, cn } from "@/lib/utils";
 import { MetricCard } from "@/components/dashboard/MetricCard";
 import { DailyResultChart } from "@/components/dashboard/Charts";
 import { EvolutionChart } from "@/components/dashboard/EvolutionChart";
@@ -20,6 +20,8 @@ import {
   AlertTriangle,
   Layers,
   Zap,
+  Calendar,
+  Clock,
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -157,6 +159,116 @@ export default async function Dashboard({ searchParams }: PageProps) {
           trend="down"
         />
       </div>
+
+      {/* Resumo do Período */}
+      <Card>
+        <CardHeader className="pb-3">
+          <CardTitle className="flex items-center gap-2 text-base">
+            <BarChart3 className="h-4 w-4 text-zinc-400" />
+            Resumo do Período
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
+            {/* Coluna 1: Operações */}
+            <div>
+              <p className="text-[10px] font-semibold uppercase tracking-wider text-zinc-400 mb-3 flex items-center gap-1.5">
+                <Calendar className="h-3 w-3" /> Operações
+              </p>
+              {[
+                { label: "Dias Operados", value: metrics.tradingDays.toString(), color: "" },
+                { label: "Total Operações", value: metrics.totalTrades.toString(), color: "" },
+                { label: "Quant. Gain", value: metrics.gains.toString(), color: "text-emerald-600 dark:text-emerald-400" },
+                { label: "Quant. Loss", value: metrics.losses.toString(), color: "text-rose-500" },
+                { label: "Zeradas", value: metrics.zeros.toString(), color: "text-zinc-400" },
+              ].map(({ label, value, color }) => (
+                <div key={label} className="flex items-center justify-between py-2 border-b border-zinc-100 dark:border-zinc-800 last:border-0">
+                  <span className="text-xs text-zinc-500">{label}</span>
+                  <span className={cn("text-sm font-semibold tabular-nums", color || "text-zinc-900 dark:text-zinc-100")}>{value}</span>
+                </div>
+              ))}
+            </div>
+
+            {/* Coluna 2: Extremos */}
+            <div>
+              <p className="text-[10px] font-semibold uppercase tracking-wider text-zinc-400 mb-3 flex items-center gap-1.5">
+                <Zap className="h-3 w-3" /> Extremos
+              </p>
+              <div className="flex items-center justify-between py-2 border-b border-zinc-100 dark:border-zinc-800">
+                <span className="text-xs text-zinc-500">Maior Gain Diário</span>
+                <span className="text-sm font-semibold tabular-nums text-emerald-600 dark:text-emerald-400">{metrics.maxDailyGain > 0 ? formatCurrency(metrics.maxDailyGain) : "—"}</span>
+              </div>
+              <div className="flex items-center justify-between py-2 border-b border-zinc-100 dark:border-zinc-800">
+                <span className="text-xs text-zinc-500">Maior Loss Diário</span>
+                <span className="text-sm font-semibold tabular-nums text-rose-500">{metrics.maxDailyLoss < 0 ? formatCurrency(metrics.maxDailyLoss) : "—"}</span>
+              </div>
+              <div className="flex items-center justify-between py-2 border-b border-zinc-100 dark:border-zinc-800">
+                <span className="text-xs text-zinc-500">Maior Gain por Op.</span>
+                <span className="text-sm font-semibold tabular-nums text-emerald-600 dark:text-emerald-400">{metrics.maxGainPerOp > 0 ? formatCurrency(metrics.maxGainPerOp) : "—"}</span>
+              </div>
+              <div className="flex items-center justify-between py-2 border-b border-zinc-100 dark:border-zinc-800">
+                <span className="text-xs text-zinc-500">Maior Loss por Op.</span>
+                <span className="text-sm font-semibold tabular-nums text-rose-500">{metrics.maxLossPerOp < 0 ? formatCurrency(metrics.maxLossPerOp) : "—"}</span>
+              </div>
+              <div className="flex items-center justify-between py-2 border-b border-zinc-100 dark:border-zinc-800">
+                <span className="text-xs text-zinc-500 flex items-center gap-1"><Clock className="h-3 w-3" /> Maior Tempo</span>
+                <div className="text-right">
+                  <span className="text-sm font-semibold tabular-nums text-zinc-900 dark:text-zinc-100">
+                    {metrics.maxDurationTrade ? formatDuration(metrics.maxDurationTrade.minutes) : "—"}
+                  </span>
+                  {metrics.maxDurationTrade && (
+                    <span className={cn("text-xs ml-2", metrics.maxDurationTrade.financialResult >= 0 ? "text-emerald-600 dark:text-emerald-400" : "text-rose-500")}>
+                      {formatCurrency(metrics.maxDurationTrade.financialResult)}
+                    </span>
+                  )}
+                </div>
+              </div>
+              <div className="flex items-center justify-between py-2">
+                <span className="text-xs text-zinc-500 flex items-center gap-1"><Clock className="h-3 w-3" /> Menor Tempo</span>
+                <div className="text-right">
+                  <span className="text-sm font-semibold tabular-nums text-zinc-900 dark:text-zinc-100">
+                    {metrics.minDurationTrade ? formatDuration(metrics.minDurationTrade.minutes) : "—"}
+                  </span>
+                  {metrics.minDurationTrade && (
+                    <span className={cn("text-xs ml-2", metrics.minDurationTrade.financialResult >= 0 ? "text-emerald-600 dark:text-emerald-400" : "text-rose-500")}>
+                      {formatCurrency(metrics.minDurationTrade.financialResult)}
+                    </span>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            {/* Coluna 3: Resultado */}
+            <div>
+              <p className="text-[10px] font-semibold uppercase tracking-wider text-zinc-400 mb-3 flex items-center gap-1.5">
+                <TrendingUp className="h-3 w-3" /> Resultado
+              </p>
+              <div className="flex items-center justify-between py-2 border-b border-zinc-100 dark:border-zinc-800">
+                <span className="text-xs text-zinc-500">Valor Total Gain</span>
+                <span className="text-sm font-semibold tabular-nums text-emerald-600 dark:text-emerald-400">{formatCurrency(metrics.totalGain)}</span>
+              </div>
+              <div className="flex items-center justify-between py-2 border-b border-zinc-100 dark:border-zinc-800">
+                <span className="text-xs text-zinc-500">Valor Total Loss</span>
+                <span className="text-sm font-semibold tabular-nums text-rose-500">{formatCurrency(metrics.totalLoss)}</span>
+              </div>
+              <div className={cn(
+                "flex items-center justify-between mt-4 p-3 rounded-xl",
+                metrics.netResult >= 0
+                  ? "bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800"
+                  : "bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-800"
+              )}>
+                <span className="text-xs font-bold text-zinc-700 dark:text-zinc-300 uppercase tracking-wide">Resultado Final</span>
+                <span className={cn(
+                  "text-lg font-bold tabular-nums",
+                  metrics.netResult >= 0 ? "text-emerald-600 dark:text-emerald-400" : "text-rose-500"
+                )}>
+                  {formatCurrency(metrics.netResult)}
+                </span>
+              </div>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
 
       {/* Charts */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">

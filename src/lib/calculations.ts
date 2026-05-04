@@ -3,6 +3,16 @@ interface TradeData {
   points: number;
   financialResult: number;
   contracts: number;
+  date?: Date | string;
+  durationMinutes?: number | null;
+}
+
+export function formatDuration(minutes: number): string {
+  if (minutes < 1) return "< 1 min";
+  if (minutes < 60) return `${minutes} min`;
+  const h = Math.floor(minutes / 60);
+  const m = minutes % 60;
+  return m > 0 ? `${h}h${m}min` : `${h}h`;
 }
 
 export function calculateMetrics(trades: TradeData[]) {
@@ -23,6 +33,13 @@ export function calculateMetrics(trades: TradeData[]) {
       maxWinStreak: 0,
       maxLossStreak: 0,
       currentStreak: { type: "none" as const, count: 0 },
+      tradingDays: 0,
+      maxDailyGain: 0,
+      maxDailyLoss: 0,
+      maxGainPerOp: 0,
+      maxLossPerOp: 0,
+      maxDurationTrade: null as { minutes: number; financialResult: number } | null,
+      minDurationTrade: null as { minutes: number; financialResult: number } | null,
     };
   }
 
@@ -70,6 +87,43 @@ export function calculateMetrics(trades: TradeData[]) {
     count: lastTrade.result === "GAIN" ? currentWin : lastTrade.result === "LOSS" ? currentLoss : 0,
   };
 
+  // Trading days
+  const tradingDaysSet = new Set<string>();
+  for (const t of trades) {
+    if (t.date) tradingDaysSet.add(new Date(t.date as Date).toISOString().split("T")[0]);
+  }
+  const tradingDays = tradingDaysSet.size;
+
+  // Daily extremes
+  const dailyNetMap = new Map<string, number>();
+  for (const t of trades) {
+    if (!t.date) continue;
+    const key = new Date(t.date as Date).toISOString().split("T")[0];
+    dailyNetMap.set(key, (dailyNetMap.get(key) || 0) + t.financialResult);
+  }
+  const dailyValues = Array.from(dailyNetMap.values());
+  const positiveDaily = dailyValues.filter((v) => v > 0);
+  const negativeDaily = dailyValues.filter((v) => v < 0);
+  const maxDailyGain = positiveDaily.length > 0 ? Math.max(...positiveDaily) : 0;
+  const maxDailyLoss = negativeDaily.length > 0 ? Math.min(...negativeDaily) : 0;
+
+  // Per-op extremes
+  const gainResults = trades.filter((t) => t.result === "GAIN").map((t) => t.financialResult);
+  const lossResults = trades.filter((t) => t.result === "LOSS").map((t) => t.financialResult);
+  const maxGainPerOp = gainResults.length > 0 ? Math.max(...gainResults) : 0;
+  const maxLossPerOp = lossResults.length > 0 ? Math.min(...lossResults) : 0;
+
+  // Duration extremes
+  const tradesWithDuration = trades.filter((t) => t.durationMinutes != null && t.durationMinutes > 0);
+  let maxDurationTrade: { minutes: number; financialResult: number } | null = null;
+  let minDurationTrade: { minutes: number; financialResult: number } | null = null;
+  if (tradesWithDuration.length > 0) {
+    const maxDur = tradesWithDuration.reduce((a, b) => (a.durationMinutes! > b.durationMinutes! ? a : b));
+    const minDur = tradesWithDuration.reduce((a, b) => (a.durationMinutes! < b.durationMinutes! ? a : b));
+    maxDurationTrade = { minutes: maxDur.durationMinutes!, financialResult: maxDur.financialResult };
+    minDurationTrade = { minutes: minDur.durationMinutes!, financialResult: minDur.financialResult };
+  }
+
   return {
     totalTrades: total,
     gains,
@@ -85,6 +139,13 @@ export function calculateMetrics(trades: TradeData[]) {
     maxWinStreak,
     maxLossStreak,
     currentStreak,
+    tradingDays,
+    maxDailyGain,
+    maxDailyLoss,
+    maxGainPerOp,
+    maxLossPerOp,
+    maxDurationTrade,
+    minDurationTrade,
   };
 }
 
