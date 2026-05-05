@@ -177,26 +177,20 @@ export async function createTradeWithDiary(formData: FormData) {
     }
   }
 
-  await prisma.trade.create({
-    data: { userId, date: tradeDate, time, asset, direction, entryPrice, exitPrice, contracts, result, points, financialResult, pointValue, setup, durationMinutes, notes },
-  });
-
-  // Optional diary entry — only if mood or note provided
-  const diaryMood = (formData.get("diaryMood") as string) || null;
-  const diaryNote = (formData.get("diaryNote") as string).trim() || null;
-
-  if (diaryMood || diaryNote) {
-    const setupLabel = setup ? ` [${setup}]` : "";
-    const resultLabel = result === "GAIN" ? "Gain" : result === "LOSS" ? "Loss" : "Zero";
-    const title = `${direction}${setupLabel} — ${resultLabel} ${points > 0 ? "+" : ""}${points.toFixed(1)}pts`;
-    const content = diaryNote || `${direction} ${asset}${setupLabel}. Resultado: ${resultLabel} (${points > 0 ? "+" : ""}${points.toFixed(1)} pts).`;
-
-    await prisma.diaryEntry.create({
-      data: { userId, date: tradeDate, title, content, mood: diaryMood as any },
-    });
-
-    revalidatePath("/diary");
+  const emotionsRaw = (formData.get("emotions") as string) || null;
+  let emotions: string | null = null;
+  if (emotionsRaw) {
+    try {
+      const parsed = JSON.parse(emotionsRaw);
+      if (Array.isArray(parsed) && parsed.length > 0) emotions = emotionsRaw;
+    } catch {}
   }
+  const whatWentRight = (formData.get("whatWentRight") as string)?.trim() || null;
+  const whereToImprove = (formData.get("whereToImprove") as string)?.trim() || null;
+
+  await prisma.trade.create({
+    data: { userId, date: tradeDate, time, asset, direction, entryPrice, exitPrice, contracts, result, points, financialResult, pointValue, setup, durationMinutes, notes, emotions, whatWentRight, whereToImprove },
+  });
 
   revalidatePath("/");
   revalidatePath("/trades");

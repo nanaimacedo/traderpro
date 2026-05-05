@@ -9,14 +9,18 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { SETUP_TAGS, GENERIC_SETUPS } from "@/lib/methodology-plugins";
 import { cn } from "@/lib/utils";
-import { TrendingUp, TrendingDown, Minus, Target, Activity } from "lucide-react";
 
-const moods = [
-  { value: "OTIMISTA", label: "Otimista", icon: TrendingUp },
-  { value: "DISCIPLINADO", label: "Disciplinado", icon: Target },
-  { value: "NEUTRO", label: "Neutro", icon: Minus },
-  { value: "FRUSTRADO", label: "Frustrado", icon: TrendingDown },
-  { value: "ANSIOSO", label: "Ansioso", icon: Activity },
+const EMOTIONS = [
+  { value: "ANSIEDADE", label: "Ansiedade" },
+  { value: "FURIA", label: "Fúria" },
+  { value: "FRUSTRACAO", label: "Frustração" },
+  { value: "MEDO", label: "Medo" },
+  { value: "EUFORIA", label: "Euforia" },
+  { value: "INSEGURANCA", label: "Insegurança" },
+  { value: "SEGURANCA", label: "Segurança" },
+  { value: "CONFIANCA", label: "Confiança" },
+  { value: "ALEGRIA", label: "Alegria" },
+  { value: "TRANQUILIDADE", label: "Tranquilidade" },
 ];
 
 export default function NewTradePage() {
@@ -25,7 +29,7 @@ export default function NewTradePage() {
   const [error, setError] = useState("");
   const [methodology, setMethodology] = useState("oliver-velez");
   const [selectedSetup, setSelectedSetup] = useState("");
-  const [selectedMood, setSelectedMood] = useState("");
+  const [selectedEmotions, setSelectedEmotions] = useState<string[]>([]);
 
   useEffect(() => {
     fetch("/api/profile/check")
@@ -136,28 +140,57 @@ export default function NewTradePage() {
               </div>
             </div>
 
-            {/* Diário comentado — Gemini lê os dados direto da aba Nova Operação */}
-            {/* <div className="border-t border-zinc-100 dark:border-zinc-800 pt-4">
-              <p className="text-xs font-semibold text-zinc-400 dark:text-zinc-500 uppercase tracking-wider mb-3">
-                Como você está? <span className="normal-case font-normal text-zinc-400">(opcional — salva no diário)</span>
+            {/* Diário */}
+            <div className="border-t border-zinc-100 dark:border-zinc-800 pt-4 space-y-4">
+              <p className="text-xs font-semibold text-zinc-400 dark:text-zinc-500 uppercase tracking-wider">
+                Diário <span className="normal-case font-normal">(opcional)</span>
               </p>
-              <div className="flex gap-2 flex-wrap mb-3">
-                <input type="hidden" name="diaryMood" value={selectedMood} />
-                {moods.map((mood) => (
-                  <button key={mood.value} type="button"
-                    onClick={() => setSelectedMood(selectedMood === mood.value ? "" : mood.value)}
-                    className={cn("flex items-center gap-1.5 rounded-full border-2 px-3 py-1.5 text-xs font-medium transition-all cursor-pointer",
-                      selectedMood === mood.value
-                        ? "border-zinc-900 bg-zinc-900 text-white dark:border-zinc-100 dark:bg-zinc-100 dark:text-zinc-900"
-                        : "border-zinc-200 dark:border-zinc-700 text-zinc-600 dark:text-zinc-400 hover:border-zinc-400 dark:hover:border-zinc-500"
-                    )}>
-                    <mood.icon className="h-3 w-3" />
-                    {mood.label}
-                  </button>
-                ))}
+
+              {/* Emoções */}
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-zinc-700 dark:text-zinc-300">Como você se sentiu?</label>
+                <input type="hidden" name="emotions" value={JSON.stringify(selectedEmotions)} />
+                <div className="flex flex-wrap gap-1.5">
+                  {EMOTIONS.map((e) => {
+                    const selected = selectedEmotions.includes(e.value);
+                    const isNegative = ["ANSIEDADE", "FURIA", "FRUSTRACAO", "MEDO", "INSEGURANCA"].includes(e.value);
+                    return (
+                      <button
+                        key={e.value}
+                        type="button"
+                        onClick={() =>
+                          setSelectedEmotions(
+                            selected ? selectedEmotions.filter((v) => v !== e.value) : [...selectedEmotions, e.value]
+                          )
+                        }
+                        className={cn(
+                          "rounded-full px-2.5 py-1 text-xs font-medium border transition-all cursor-pointer",
+                          selected
+                            ? isNegative
+                              ? "bg-rose-500 text-white border-rose-500"
+                              : "bg-emerald-500 text-white border-emerald-500"
+                            : "bg-white dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 border-zinc-200 dark:border-zinc-700 hover:border-zinc-400 dark:hover:border-zinc-500"
+                        )}
+                      >
+                        {e.label}
+                      </button>
+                    );
+                  })}
+                </div>
               </div>
-              <Textarea name="diaryNote" placeholder="O que rolou nessa operação? Observações rápidas..." rows={2} className="text-sm" />
-            </div> */}
+
+              {/* O que fiz certo */}
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-zinc-700 dark:text-zinc-300">O que eu fiz certo?</label>
+                <Textarea name="whatWentRight" placeholder="Ex: Respeitei o setup, aguardei a confirmação..." rows={2} className="text-sm" />
+              </div>
+
+              {/* Onde posso melhorar */}
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-zinc-700 dark:text-zinc-300">Onde posso melhorar?</label>
+                <Textarea name="whereToImprove" placeholder="Ex: Entrei cedo demais, não esperei o fechamento da barra..." rows={2} className="text-sm" />
+              </div>
+            </div>
 
             {error && (
               <p className="text-sm text-rose-500 bg-rose-50 dark:bg-rose-950 rounded-lg px-3 py-2">{error}</p>

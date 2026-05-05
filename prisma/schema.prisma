@@ -62,6 +62,9 @@ model Trade {
   source          String   @default("manual") // manual | csv-profit | csv-tryd | csv-metatrader
   notes           String?
   screenshotUrl   String? // URL da screenshot anotada
+  emotions        String? // emoções sentidas (JSON array: ["ANSIEDADE","MEDO",...])
+  whatWentRight   String? // o que fiz certo
+  whereToImprove  String? // onde posso melhorar
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
 
