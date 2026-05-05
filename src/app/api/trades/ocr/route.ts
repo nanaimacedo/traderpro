@@ -62,7 +62,7 @@ export async function POST(req: NextRequest) {
       try {
         const body = {
           contents: [{ parts: [{ inlineData: { mimeType, data: base64 } }, { text: OCR_PROMPT }] }],
-          generationConfig: { temperature: 0.1, maxOutputTokens: 2048, responseMimeType: "application/json" },
+          generationConfig: { temperature: 0.1, maxOutputTokens: 4096 },
         };
 
         const res = await fetch(
@@ -89,28 +89,34 @@ export async function POST(req: NextRequest) {
           continue;
         }
 
-        const arrMatch = text.match(/\[[\s\S]*\]/);
-        const objMatch = text.match(/\{[\s\S]*\}/);
-        if (!arrMatch && !objMatch) {
-          const msg = `[${model}] no JSON: ${text.slice(0, 150)}`;
-          console.error("Gemini OCR", msg);
-          errors.push(msg);
-          continue;
-        }
-
         let trades: any[];
         try {
-          if (arrMatch) {
-            trades = JSON.parse(arrMatch[0]);
-            if (!Array.isArray(trades)) trades = [trades];
-          } else {
-            trades = [JSON.parse(objMatch![0])];
+          // Tenta parse direto (modelo retornou JSON limpo)
+          const parsed = JSON.parse(text.trim());
+          trades = Array.isArray(parsed) ? parsed : [parsed];
+        } catch {
+          // Extrai o array ou objeto do texto via regex
+          const arrMatch = text.match(/\[[\s\S]*\]/);
+          const objMatch = text.match(/\{[\s\S]*?\}/);
+          if (!arrMatch && !objMatch) {
+            const msg = `[${model}] no JSON: ${text.slice(0, 200)}`;
+            console.error("Gemini OCR", msg);
+            errors.push(msg);
+            continue;
           }
-        } catch (parseErr) {
-          const msg = `[${model}] JSON parse error: ${parseErr}`;
-          console.error("Gemini OCR", msg);
-          errors.push(msg);
-          continue;
+          try {
+            if (arrMatch) {
+              trades = JSON.parse(arrMatch[0]);
+              if (!Array.isArray(trades)) trades = [trades];
+            } else {
+              trades = [JSON.parse(objMatch![0])];
+            }
+          } catch (parseErr) {
+            const msg = `[${model}] JSON parse error: ${parseErr} | text: ${text.slice(0, 200)}`;
+            console.error("Gemini OCR", msg);
+            errors.push(msg);
+            continue;
+          }
         }
 
         if (!trades.length) { errors.push(`[${model}] empty trades array`); continue; }
