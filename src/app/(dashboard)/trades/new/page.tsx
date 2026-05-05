@@ -143,7 +143,7 @@ export default function NewTradePage() {
             {/* Diário */}
             <div className="border-t border-zinc-100 dark:border-zinc-800 pt-4 space-y-4">
               <p className="text-xs font-semibold text-zinc-400 dark:text-zinc-500 uppercase tracking-wider">
-                Diário <span className="normal-case font-normal">(opcional)</span>
+                Registre a Operação <span className="normal-case font-normal">(opcional)</span>
               </p>
 
               {/* Emoções */}

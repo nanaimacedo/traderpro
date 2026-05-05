@@ -27,7 +27,7 @@ const navigation = [
   { name: "Dashboard", href: "/", icon: LayoutDashboard },
   { name: "Gemini", href: "/mentor", icon: Brain },
   { name: "Nova Operação", href: "/trades/new", icon: Plus },
-  { name: "Diário", href: "/diary", icon: BookOpen },
+  // { name: "Diário", href: "/diary", icon: BookOpen },
   { name: "Replays", href: "/replays", icon: PlayCircle },
   { name: "Insights", href: "/insights", icon: Lightbulb },
   { name: "Analytics", href: "/analytics", icon: BarChart3 },
