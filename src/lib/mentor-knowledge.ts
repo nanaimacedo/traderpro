@@ -326,6 +326,171 @@ export const KNOWLEDGE_MODULES = {
 - Rejeicao de TOPO: padrao com 80% do corpo ACIMA da regiao.
 - Rejeicao de FUNDO: padrao com 80% do corpo ABAIXO da regiao.`,
   },
+  abertura_operacoes: {
+    keywords: ['fab4', 'fabulous', 'barra 1', 'barra1', 'gap', 'abertura', 'primeiro movimento', 'rasgando', 'rasgar', 'regiao de abertura', 'operacao de abertura', 'contra a media', 'contra ma', 'vwap abertura', 'fab 4', 'pre pregao', 'pré pregão', 'pre-pregao', 'abertura de mercado', 'barra elefante abertura', 'congestao', 'congestão', 'abertura compradora', 'abertura vendedora', 'busca de liquidez'],
+    content: `## EBOOK — OPERACOES DE ABERTURA (Flavia Figueiredo)
+
+**Regra geral:** Antes de operar a abertura, analisar o 60min para definir ciclo macro e regioes de interesse.
+
+---
+
+**OPERACAO CONTRA A MA20 NA ABERTURA:**
+- Mercado abre longe da MA20. Se estiver no inicio do Ciclo B ou D, ou em FAB4, nao precisa da MA20.
+- Se afastado, probabilidade de buscar a MA20 para continuar o movimento.
+- Se faz finta ou pullback profundo antes de chegar na MA20 → probabilidade de romper.
+- Se lateraliza acima da MA20 → rompimento ate a regiao mais proxima.
+- Contexto do grafico e sempre soberano.
+
+---
+
+**ABERTURA RASGANDO UMA REGIAO:**
+- Mercado abre cortando regiao de interesse ou simetria — "ja nasce rasgando a regiao".
+- Entrada nos primeiros minutos da barra. Pega todo o "boom" do movimento.
+- Exemplos: rasgar MA20 + simetria do ultimo topo/fundo do dia anterior, rasgar MA200, rasgar VWAP dia anterior.
+
+---
+
+**OPERACAO CONTRA A MA200 NA ABERTURA:**
+- MA200 inclinada: muito mais dificil de romper — operacao contraria pouco provavel.
+- MA200 plana: mais provavel o rompimento.
+- MA200 pode agir como ima quando abertura esta sobrecomprada/sobrevendida.
+- Se preco abre longe da MA200 → tendencia e buscar essa media.
+- Observar se dia anterior houve rejeicao da MA200, ou se mercado acabou de iniciar novo ciclo (nesses casos nao busca a MA200).
+
+---
+
+**OPERACOES DE ABERTURA COM VWAP:**
+- VWAP = preco medio ponderado por volume. Se preco acima do VWAP do dia anterior → candles abrem acima.
+- Na abertura: VWAP do dia anterior e o VWAP atual sao grandes aliados.
+- VWAP longe do preco na abertura → tendencia de o preco ir ate ele (busca de liquidez).
+- VWAP serve como suporte ou resistencia (trava o movimento).
+- Barra 1 "no meio do nada" (sem regiao/simetria): observar o VWAP — para qual lado ele segura e se ha espaco. Entrar na barra 3 apos confirmacao.
+- Abertura rasgando VWAP do dia anterior = inicio de movimento direcional.
+- SEMPRE AVALIE SEU RISCO mesmo que a barra 1 seja ativada — stop normalmente e alto.
+
+---
+
+**FAB4 (Fabulous 4 — Metodo Oliver Velez):**
+- Operacional de abertura preferido do Oliver Velez. Preco tende a seguir a tendencia da FAB4.
+- **4 elementos obrigatorios (todos proximos):**
+  1. MA20 aritmetica
+  2. MA200 aritmetica
+  3. Preco de fechamento do dia anterior
+  4. Ultima zona de congestao do dia anterior (nem sempre existe)
+- Quanto mais proximos, maior a qualidade. Indicam potencial de explodir para um lado.
+- **NAO tem qualidade em ciclos laterais (A e C).** Melhor nos ciclos B e D.
+- Demarcar a regiao de FAB4 ANTES do pregao abrir. FAB4 so ocorre em aberturas.
+- Quando FAB4 e ativada (confirmacao): tende a cumprir 100% da projecao da barra 1. Apos o 100%: reverte ou da continuidade.
+- Observar sempre as regioes de interesse proximas.
+
+**Operacoes CONTRA a FAB4:**
+- Mercado abre distante da regiao de FAB4, nao seguindo a tendencia do gap.
+- Gap a favor do ciclo → mercado vai contra FAB4 para buscar liquidez ate a regiao de FAB4 ou proxima.
+- Gap contrario ao movimento principal → operacao tende a dar continuidade.`,
+  },
+
+  fibonacci: {
+    keywords: ['fibonacci', 'fibonnaci', 'fibonaci', 'projecao', 'projeção', '61.8', '61,8', '100%', '161.8', '161,8', 'extensao', 'extensão', 'alvo', 'target', 'pernada', 'primeiro movimento', 'barra 1', 'barra1', 'reversao projecao', 'projecao reversao', 'nivel fib', 'nivel fibonacci'],
+    content: `## EBOOK — PROJECAO DE FIBONACCI (Flavia Figueiredo)
+
+**Niveis utilizados:** 61,8% | 100% | 161,8%
+
+**61,8%:** Zona de retracao/suporte — preco pode parar ou reverter (reversao ocasional: busca liquidez antes de continuar).
+**100%:** Extensao completa — possivel alvo de realizacao. Na maioria das vezes o preco reverte aqui.
+**161,8%:** Extensao alem do 100% — identifica resistencias/suportes mais distantes. Pode reverter ou e pullback profundo para regiao macro.
+
+---
+
+**COMO TRACAR — ABERTURA COM GAP:**
+- Se a barra 1 for de forca (barra elefante): projetar a barra 1.
+- Se nao for barra imponente: projetar a primeira pernada do dia.
+- Quando barra 1 cumpriu todos os alvos e mercado continua: alterar projecao para o primeiro movimento do dia.
+
+**COMO TRACAR — ABERTURA SEM GAP:**
+- Projetar do ultimo topo/fundo do dia anterior com o fundo/topo da barra 1.
+
+**CONTINUIDADE (mercado ja cumpriu alvos da barra 1):**
+- Mudar projecao para a primeira pernada do movimento, ou na pernada do ultimo pullback realizado antes do 161,8%.
+- Depois: alterar para o primeiro movimento do dia.
+
+---
+
+**PROJECAO DE REVERSAO:**
+Quando mercado atinge todos os alvos e da cenario de reversao → nova projecao do novo movimento.
+
+**Cenario 1 — Pernada inicial da reversao:**
+- Usar quando a pernada inicial da reversao e MENOR do que a ultima pernada do movimento contrario.
+- Projetar a pernada inicial da reversao.
+
+**Cenario 2 — Ultima pernada do movimento contrario:**
+- Usar quando houve QUEBRA DE ESTRUTURA.
+- Projetar a ultima pernada do movimento contrario.
+
+**Reversao por simetria:**
+- Mercado faz agressao na abertura que e rejeitada pela simetria do ultimo fundo → reversao.
+- Projetar a primeira pernada do dia.
+
+---
+
+**Regra importante:** Nao e regra que ao chegar no 100% ou 161,8% o preco ira reverter. Atencao ao ciclo e regioes de interesse proximas — se houver regiao relevante proximo em macrotendencia, o mercado pode usar o 100%/161,8% como pullback profundo para alcancar aquela regiao.`,
+  },
+
+  gerenciamento: {
+    keywords: ['gerenciamento', 'risco', 'loss', 'perda', 'prejuizo', 'prejuízo', 'lucro', 'meta', 'stop', 'limite', 'diario de trade', 'diário de trade', 'plano de trade', 'circuit breaker', 'contratos', 'lotes', 'posicao', 'posição', 'parcial', 'gestao', 'gestão', 'imposto', 'fiscal', 'declaracao', 'simulador', 'aumento progressivo', 'mao maxima', 'drawdown', 'quanto arriscar', 'quanto operar'],
+    content: `## EBOOK — GERENCIAMENTO DE RISCO E PLANO DE TRADE (Flavia Figueiredo)
+
+**Trader profissional = empresa.** Precisa de plano para funcionar: lucros, custos, perdas, impostos.
+
+**Perguntas para definir seu gerenciamento de risco:**
+1. Quanto e o minimo de dinheiro que disponibilizo para esta operacao?
+2. Quanto posso perder em cada trade?
+3. Quanto posso perder por dia, semana ou mes?
+4. Quanto posso ganhar nessa operacao? E proporcional ao que arrisco?
+5. Quantas operacoes posso fazer no dia?
+
+**Principio do Aumento Progressivo:**
+- Comece com o MINIMO possivel. A cada etapa superada, aumente o risco.
+- Nao disponibilize valores altos no inicio — sem as 3 bases (tecnica + emocional + gerenciamento), perde tudo rapido.
+- E mais viavel perder R$100 no inicio do que R$1.000 — o cerebro nao esta preparado para perda grande.
+- Primeiro seja consistente com 1-3 contratos. Depois pense em 10 ou 100.
+
+**Para iniciantes:**
+- Use o simulador — e o melhor aliado. Jogadores treinam antes de jogar.
+- Maximo 3 contratos inicialmente — permite parciais e protecao durante a operacao.
+- Nao adianta alavancar sem dominio da tecnica — voce alavanca tambem os prejuizos.
+
+---
+
+**RESPONSABILIDADE FISCAL:**
+- Ganhos E perdas devem ser declarados mensalmente. Procure um contador.
+- Nao declarar = risco de sancoes e bloqueio de CPF.
+- So se aplica a conta real. Simulador nao precisa de conduta contabil.
+
+---
+
+**DIARIO DE TRADE — ferramenta fundamental:**
+- Monitora o gerenciamento de risco no dia a dia.
+- Registra: entradas, conducoes, erros, acertos, lucros, prejuizos.
+- Campos do diario: data, ativo, tipo (compra/venda), candle de entrada/saida, motivo da operacao, resultado (pontos + lucro financeiro), emocoes sentidas, o que fiz certo, onde posso melhorar.
+
+**5 Beneficios do diario de trade:**
+1. **Autoconhecimento e consistencia:** Identifica padroes de comportamento — ansiedade pre-noticias, impulsividade pos-perda, excesso de confianca pos-ganho.
+2. **Analise e melhoria continua:** Banco de dados real do desempenho. Identifica o que funciona vs nao funciona. Diferencia erros tecnicos de erros emocionais.
+3. **Responsabilidade e disciplina:** Impoe rotina de reflexao. Para de operar no "piloto automatico". Saber que precisara justificar a entrada evita operacoes fora do plano.
+4. **Clareza nos resultados:** Responde: qual operacao e mais lucrativa? Em que horario opero melhor? Estou respeitando o gerenciamento? Qual e meu maior erro recorrente?
+5. **Acompanhamento da evolucao:** Linha do tempo da jornada. Mostra evolucao tecnica e emocional. Cada erro analisado = passo a mais rumo a consistencia.
+
+---
+
+**PASSO A PASSO PARA SE TORNAR TRADER (7 passos):**
+1. Entender que trade e profissao — exige dedicacao, tempo, processo. Nao ha lucro da noite para o dia.
+2. Escolher o metodo operacional — buscar metodo simples, pratico e claro. NAO EXISTE metodo milagroso.
+3. Comprometer-se e criar rotina de estudos constante e pontual.
+4. Criar plano de trade — estrategia + execucao + gerenciamento + lado mental. Meditacao, ressignificacao de crencas, bons habitos.
+5. Treino — pratica de qualidade, estudo consciente, corrigir erros. Mentor acelera a jornada (conhece atalhos).
+6. Enfrentar o mercado ao vivo — simulador e importante, mas conta real traz emocoes reais (medo de perder/ganhar, ansiedade, ganancia). Nao colocar muito capital ou usar mesa proprietaria.
+7. Confiar no processo e ter fe em si — mercado tem altos e baixos, nunca linear. Fe + acao persistente = formula do sucesso.`,
+  },
 } as const;
 
 export type KnowledgeModuleKey = keyof typeof KNOWLEDGE_MODULES;
