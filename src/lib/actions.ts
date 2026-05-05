@@ -243,6 +243,11 @@ export async function getAllTrades(page = 1, limit = 50) {
   return { trades, total, pages: Math.ceil(total / limit) };
 }
 
+export async function getTradeById(id: string) {
+  const userId = await requireUserId();
+  return prisma.trade.findFirst({ where: { id, userId } });
+}
+
 export async function createDiaryEntry(formData: FormData) {
   const userId = await requireUserId();
 

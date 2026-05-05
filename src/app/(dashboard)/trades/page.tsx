@@ -68,39 +68,47 @@ export default async function TradesPage({ searchParams }: PageProps) {
                   </thead>
                   <tbody className="divide-y divide-zinc-50 dark:divide-zinc-800">
                     {trades.map((trade: any) => (
-                      <tr key={trade.id} className="hover:bg-zinc-50/50 dark:hover:bg-zinc-800/50 transition-colors">
-                        <td className="px-4 py-3 text-sm text-zinc-700 dark:text-zinc-300">{formatDate(trade.date)}</td>
-                        <td className="px-4 py-3 text-sm text-zinc-500">{trade.time}</td>
+                      <tr key={trade.id} className="hover:bg-zinc-50/50 dark:hover:bg-zinc-800/50 transition-colors group">
+                        <td className="px-4 py-3 text-sm text-zinc-700 dark:text-zinc-300">
+                          <Link href={`/trades/${trade.id}`} className="block">{formatDate(trade.date)}</Link>
+                        </td>
+                        <td className="px-4 py-3 text-sm text-zinc-500">
+                          <Link href={`/trades/${trade.id}`} className="block">{trade.time}</Link>
+                        </td>
                         <td className="px-4 py-3">
-                          <span className={`text-xs font-medium px-2 py-0.5 rounded ${
-                            trade.direction === "COMPRA"
-                              ? "bg-emerald-50 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-400"
-                              : "bg-rose-50 text-rose-700 dark:bg-rose-950 dark:text-rose-400"
-                          }`}>
-                            {trade.direction}
-                          </span>
+                          <Link href={`/trades/${trade.id}`} className="block">
+                            <span className={`text-xs font-medium px-2 py-0.5 rounded ${
+                              trade.direction === "COMPRA"
+                                ? "bg-emerald-50 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-400"
+                                : "bg-rose-50 text-rose-700 dark:bg-rose-950 dark:text-rose-400"
+                            }`}>{trade.direction}</span>
+                          </Link>
                         </td>
                         <td className="px-4 py-3 text-sm text-zinc-700 dark:text-zinc-300 text-right font-mono">
-                          {trade.entryPrice.toLocaleString("pt-BR")}
+                          <Link href={`/trades/${trade.id}`} className="block">{trade.entryPrice.toLocaleString("pt-BR")}</Link>
                         </td>
                         <td className="px-4 py-3 text-sm text-zinc-700 dark:text-zinc-300 text-right font-mono">
-                          {trade.exitPrice.toLocaleString("pt-BR")}
+                          <Link href={`/trades/${trade.id}`} className="block">{trade.exitPrice.toLocaleString("pt-BR")}</Link>
                         </td>
-                        <td className="px-4 py-3 text-sm text-zinc-700 dark:text-zinc-300 text-center">{trade.contracts}</td>
+                        <td className="px-4 py-3 text-sm text-zinc-700 dark:text-zinc-300 text-center">
+                          <Link href={`/trades/${trade.id}`} className="block">{trade.contracts}</Link>
+                        </td>
                         <td className="px-4 py-3 text-center">
-                          <Badge variant={trade.result === "GAIN" ? "gain" : trade.result === "LOSS" ? "loss" : "zero"}>
-                            {trade.result}
-                          </Badge>
+                          <Link href={`/trades/${trade.id}`} className="block">
+                            <Badge variant={trade.result === "GAIN" ? "gain" : trade.result === "LOSS" ? "loss" : "zero"}>
+                              {trade.result}
+                            </Badge>
+                          </Link>
                         </td>
                         <td className={`px-4 py-3 text-sm text-right font-mono font-medium ${
                           trade.points > 0 ? "text-emerald-600" : trade.points < 0 ? "text-rose-500" : "text-zinc-500"
                         }`}>
-                          {trade.points > 0 ? "+" : ""}{trade.points.toFixed(1)}
+                          <Link href={`/trades/${trade.id}`} className="block">{trade.points > 0 ? "+" : ""}{trade.points.toFixed(1)}</Link>
                         </td>
                         <td className={`px-4 py-3 text-sm text-right font-semibold ${
                           trade.financialResult > 0 ? "text-emerald-600" : trade.financialResult < 0 ? "text-rose-500" : "text-zinc-500"
                         }`}>
-                          {formatCurrency(trade.financialResult)}
+                          <Link href={`/trades/${trade.id}`} className="block">{formatCurrency(trade.financialResult)}</Link>
                         </td>
                         <td className="px-4 py-3 text-right">
                           <DeleteTradeButton id={trade.id} />
@@ -116,7 +124,7 @@ export default async function TradesPage({ searchParams }: PageProps) {
                 {trades.map((trade: any) => (
                   <div key={trade.id} className="p-4 space-y-2">
                     <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-2">
+                      <Link href={`/trades/${trade.id}`} className="flex items-center gap-2">
                         <Badge variant={trade.result === "GAIN" ? "gain" : trade.result === "LOSS" ? "loss" : "zero"}>
                           {trade.result}
                         </Badge>
@@ -124,17 +132,16 @@ export default async function TradesPage({ searchParams }: PageProps) {
                           trade.direction === "COMPRA"
                             ? "bg-emerald-50 text-emerald-700"
                             : "bg-rose-50 text-rose-700"
-                        }`}>
-                          {trade.direction}
-                        </span>
-                      </div>
+                        }`}>{trade.direction}</span>
+                        {trade.setup && (
+                          <span className="text-xs px-1.5 py-0.5 rounded bg-violet-50 dark:bg-violet-950 text-violet-600 dark:text-violet-400">{trade.setup}</span>
+                        )}
+                      </Link>
                       <DeleteTradeButton id={trade.id} />
                     </div>
-                    <div className="flex items-center justify-between">
+                    <Link href={`/trades/${trade.id}`} className="flex items-center justify-between">
                       <div>
-                        <p className="text-xs text-zinc-400">
-                          {formatDate(trade.date)} {trade.time}
-                        </p>
+                        <p className="text-xs text-zinc-400">{formatDate(trade.date)} {trade.time}</p>
                         <p className="text-xs text-zinc-500 mt-0.5">
                           {trade.contracts}ct | {trade.entryPrice.toLocaleString("pt-BR")} → {trade.exitPrice.toLocaleString("pt-BR")}
                         </p>
@@ -142,16 +149,12 @@ export default async function TradesPage({ searchParams }: PageProps) {
                       <div className="text-right">
                         <p className={`text-sm font-semibold ${
                           trade.financialResult > 0 ? "text-emerald-600" : trade.financialResult < 0 ? "text-rose-500" : "text-zinc-500"
-                        }`}>
-                          {formatCurrency(trade.financialResult)}
-                        </p>
+                        }`}>{formatCurrency(trade.financialResult)}</p>
                         <p className={`text-xs ${
                           trade.points > 0 ? "text-emerald-600" : trade.points < 0 ? "text-rose-500" : "text-zinc-500"
-                        }`}>
-                          {trade.points > 0 ? "+" : ""}{trade.points.toFixed(1)} pts
-                        </p>
+                        }`}>{trade.points > 0 ? "+" : ""}{trade.points.toFixed(1)} pts</p>
                       </div>
-                    </div>
+                    </Link>
                   </div>
                 ))}
               </div>

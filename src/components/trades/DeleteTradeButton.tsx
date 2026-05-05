@@ -3,9 +3,11 @@
 import { deleteTrade } from "@/lib/actions";
 import { Trash2 } from "lucide-react";
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 
-export function DeleteTradeButton({ id }: { id: string }) {
+export function DeleteTradeButton({ id, redirectTo }: { id: string; redirectTo?: string }) {
   const [confirming, setConfirming] = useState(false);
+  const router = useRouter();
 
   if (confirming) {
     return (
@@ -13,7 +15,8 @@ export function DeleteTradeButton({ id }: { id: string }) {
         <button
           onClick={async () => {
             await deleteTrade(id);
-            setConfirming(false);
+            if (redirectTo) router.push(redirectTo);
+            else setConfirming(false);
           }}
           className="text-xs text-rose-600 hover:text-rose-700 font-medium cursor-pointer"
         >
