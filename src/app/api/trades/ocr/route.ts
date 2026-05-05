@@ -121,6 +121,7 @@ export async function POST(req: NextRequest) {
         }
 
         if (!trades.length) { errors.push(`[${model}] empty trades array`); continue; }
+        console.log("Gemini OCR success", JSON.stringify(trades.map(t => ({ asset: t.asset, financialResult: t.financialResult }))));
         return NextResponse.json({ ok: true, trades });
       } catch (err) {
         const msg = `[${model}] exception: ${err}`;
