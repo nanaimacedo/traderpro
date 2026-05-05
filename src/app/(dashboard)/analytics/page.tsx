@@ -3,7 +3,7 @@ export const dynamic = "force-dynamic";
 import { prisma } from "@/lib/prisma";
 import { getSession } from "@/lib/auth";
 import { redirect } from "next/navigation";
-import { calculateAdvancedMetrics, getCumulativeResults } from "@/lib/calculations";
+import { calculateAdvancedMetrics, calculateMetrics, getCumulativeResults, formatDuration } from "@/lib/calculations";
 import { formatCurrency } from "@/lib/utils";
 import { cn } from "@/lib/utils";
 import { BarChart3, TrendingUp, TrendingDown, Shield, Zap, Target, Clock, Calendar, Activity, Award, ChevronLeft, ChevronRight } from "lucide-react";
@@ -45,6 +45,7 @@ export default async function AnalyticsPage({ searchParams }: PageProps) {
 
   const allMetrics = calculateAdvancedMetrics(allTrades);
   const monthMetrics = calculateAdvancedMetrics(monthTrades);
+  const monthBasic = calculateMetrics(monthTrades);
   const equityCurve = getCumulativeResults(monthTrades);
 
   if (!allMetrics || allTrades.length === 0) {
@@ -143,6 +144,78 @@ export default async function AnalyticsPage({ searchParams }: PageProps) {
         <div className="text-center py-8 text-sm text-zinc-400">Nenhuma operação em {MONTH_NAMES[month]} {year}</div>
       ) : (
       <>
+      {/* Painel Básico */}
+      <div className="rounded-xl bg-zinc-50 dark:bg-zinc-800/80 border border-zinc-100 dark:border-zinc-700/50 p-4">
+        <div className="grid grid-cols-3 gap-4 text-center mb-4">
+          <div>
+            <p className="text-2xl font-bold text-zinc-900 dark:text-zinc-100">{monthBasic.totalTrades}</p>
+            <p className="text-[10px] text-zinc-400 uppercase tracking-wider">Operações</p>
+          </div>
+          <div>
+            <p className="text-2xl font-bold text-zinc-900 dark:text-zinc-100">{monthBasic.tradingDays}</p>
+            <p className="text-[10px] text-zinc-400 uppercase tracking-wider">Dias Op.</p>
+          </div>
+          <div>
+            <p className={cn("text-2xl font-bold", monthBasic.totalPoints >= 0 ? "text-emerald-600" : "text-rose-500")}>
+              {monthBasic.totalPoints > 0 ? "+" : ""}{monthBasic.totalPoints.toFixed(0)}
+            </p>
+            <p className="text-[10px] text-zinc-400 uppercase tracking-wider">Pontos</p>
+          </div>
+        </div>
+        <div className="grid grid-cols-3 gap-3 text-center border-t border-zinc-200 dark:border-zinc-700 pt-4">
+          <div>
+            <p className="text-sm font-bold text-emerald-600">{monthBasic.gains}</p>
+            <p className="text-[10px] text-zinc-400 uppercase">Gains</p>
+          </div>
+          <div>
+            <p className="text-sm font-bold text-rose-500">{monthBasic.losses}</p>
+            <p className="text-[10px] text-zinc-400 uppercase">Losses</p>
+          </div>
+          <div>
+            <p className="text-sm font-bold text-zinc-400">{monthBasic.zeros}</p>
+            <p className="text-[10px] text-zinc-400 uppercase">Zeros</p>
+          </div>
+        </div>
+        <div className="grid grid-cols-2 gap-3 text-center border-t border-zinc-200 dark:border-zinc-700 pt-4 mt-1">
+          <div>
+            <p className="text-sm font-bold text-emerald-600">{monthBasic.maxWinStreak}</p>
+            <p className="text-[10px] text-zinc-400 uppercase">Seq. Gains</p>
+          </div>
+          <div>
+            <p className="text-sm font-bold text-rose-500">{monthBasic.maxLossStreak}</p>
+            <p className="text-[10px] text-zinc-400 uppercase">Seq. Losses</p>
+          </div>
+          <div>
+            <p className="text-sm font-bold text-emerald-600">{formatCurrency(monthBasic.maxDailyGain)}</p>
+            <p className="text-[10px] text-zinc-400 uppercase">Melhor Dia</p>
+          </div>
+          <div>
+            <p className="text-sm font-bold text-rose-500">{formatCurrency(monthBasic.maxDailyLoss)}</p>
+            <p className="text-[10px] text-zinc-400 uppercase">Pior Dia</p>
+          </div>
+          <div>
+            <p className="text-sm font-bold text-emerald-600">{formatCurrency(monthBasic.maxGainPerOp)}</p>
+            <p className="text-[10px] text-zinc-400 uppercase">Melhor Op.</p>
+          </div>
+          <div>
+            <p className="text-sm font-bold text-rose-500">{formatCurrency(monthBasic.maxLossPerOp)}</p>
+            <p className="text-[10px] text-zinc-400 uppercase">Pior Op.</p>
+          </div>
+          {monthBasic.maxDurationTrade && (
+            <div>
+              <p className="text-sm font-bold text-zinc-700 dark:text-zinc-300">{formatDuration(monthBasic.maxDurationTrade.minutes)}</p>
+              <p className="text-[10px] text-zinc-400 uppercase">Dur. Máx.</p>
+            </div>
+          )}
+          {monthBasic.minDurationTrade && (
+            <div>
+              <p className="text-sm font-bold text-zinc-700 dark:text-zinc-300">{formatDuration(monthBasic.minDurationTrade.minutes)}</p>
+              <p className="text-[10px] text-zinc-400 uppercase">Dur. Mín.</p>
+            </div>
+          )}
+        </div>
+      </div>
+
       {/* Métricas Institucionais */}
       <div>
         <h2 className="text-xs font-semibold text-zinc-400 dark:text-zinc-500 uppercase tracking-wider mb-3">Métricas do Mês</h2>
