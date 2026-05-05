@@ -3,28 +3,34 @@ import { getSession } from "@/lib/auth";
 
 const GEMINI_KEYS = (process.env.GEMINI_API_KEYS || process.env.GEMINI_API_KEY || "").split(",").filter(Boolean);
 
-const OCR_PROMPT = `Você é um extrator de dados de operações de day trade.
+const OCR_PROMPT = `Você é um extrator preciso de dados de operações de day trade.
 
-Analise a imagem (pode ser screenshot do Profit/Nelogica, MT5, Tryd, ou qualquer plataforma de trading brasileira) e extraia os dados da operação de trading visível.
+Analise a imagem (screenshot do Profit/Nelogica, MT5, Tryd ou similar) e extraia TODAS as operações visíveis.
 
-Se houver múltiplas operações, retorne a primeira ou a mais destacada.
+REGRAS CRÍTICAS:
+- Preserve TODOS os dígitos dos preços. Ex: 128.500 → 128500, nunca 12850 ou 1285.
+- Preços de futuros brasileiros (WIN, WDO) têm 5-6 dígitos. Se parece pouco, revise.
+- Duração: se mostrada em segundos (ex: "125s"), converta para minutos arredondando (125s → 2). Se em HH:MM, converta para minutos totais.
+- Direção: "C" ou "Compra" → "COMPRA". "V" ou "Venda" → "VENDA".
+- Data: use a data do header/título da tela se não estiver por operação.
 
-Retorne APENAS um JSON válido, sem markdown, sem explicação, sem texto extra:
-{
-  "date": "YYYY-MM-DD",
-  "time": "HH:MM",
-  "asset": "WIN" ou "WDO" ou ticker do ativo (ex: "PETR4", "VALE3", "BTC"),
-  "direction": "COMPRA" ou "VENDA",
-  "entryPrice": número (sem separador de milhar, use ponto decimal se necessário),
-  "exitPrice": número,
-  "contracts": número inteiro (quantidade de contratos/lotes),
-  "durationMinutes": número inteiro ou null,
-  "confidence": "high" se todos os campos foram extraídos com certeza, "medium" se alguns campos são estimativas, "low" se a imagem não é clara
-}
+Retorne APENAS um JSON array válido, sem markdown, sem texto extra:
+[
+  {
+    "date": "YYYY-MM-DD",
+    "time": "HH:MM",
+    "asset": "WIN" | "WDO" | ticker (ex: "PETR4"),
+    "direction": "COMPRA" | "VENDA",
+    "entryPrice": número inteiro ou decimal (ex: 128500),
+    "exitPrice": número inteiro ou decimal,
+    "contracts": número inteiro,
+    "durationMinutes": número inteiro ou null,
+    "confidence": "high" | "medium" | "low"
+  }
+]
 
-Se não conseguir extrair um campo, use null para ele.
-Data no formato YYYY-MM-DD.
-Horário no formato HH:MM (24h).`;
+Se houver apenas uma operação, retorne array com um elemento.
+Se não conseguir extrair um campo, use null.`;
 
 export async function POST(req: NextRequest) {
   const session = await getSession();
@@ -78,11 +84,19 @@ export async function POST(req: NextRequest) {
           break;
         }
 
-        const match = text.match(/\{[\s\S]*\}/);
-        if (!match) { console.error(`Gemini OCR [${model}]: no JSON in response:`, text.slice(0, 200)); break; }
+        // Try array first, then single object fallback
+        const arrMatch = text.match(/\[[\s\S]*\]/);
+        const objMatch = text.match(/\{[\s\S]*\}/);
+        if (!arrMatch && !objMatch) { console.error(`Gemini OCR [${model}]: no JSON:`, text.slice(0, 200)); break; }
 
-        const trade = JSON.parse(match[0]);
-        return NextResponse.json({ ok: true, trade });
+        let trades: any[];
+        if (arrMatch) {
+          trades = JSON.parse(arrMatch[0]);
+          if (!Array.isArray(trades)) trades = [trades];
+        } else {
+          trades = [JSON.parse(objMatch![0])];
+        }
+        return NextResponse.json({ ok: true, trades });
       } catch (err) {
         console.error(`OCR [${model}] exception:`, err);
         break;
