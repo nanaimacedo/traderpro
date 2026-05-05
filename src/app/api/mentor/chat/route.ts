@@ -6,6 +6,9 @@ import { getRelevantKnowledge } from "@/lib/mentor-knowledge";
 import { getMethodologyPrompt } from "@/lib/methodology-plugins";
 import { getRecentMemories, generateConversationSummary } from "@/lib/mentor-memory";
 import { getTodayEvents, formatEventsForMentor } from "@/lib/economic-calendar";
+import { calculateMetrics } from "@/lib/calculations";
+import { generateWeeklyInsights } from "@/lib/insights";
+import { formatCurrency, formatDate } from "@/lib/utils";
 
 const VISION_PROMPT = `\n\n## ANÁLISE DE GRÁFICO — INSTRUÇÕES ESPECIAIS
 Quando receber uma imagem de gráfico/tela de mercado, analise como um ORGANISMO VIVO:
@@ -168,6 +171,155 @@ function parseGroqStream(
   })();
 }
 
+// --- Trade context builder (always fresh, server-side) ---
+
+async function buildTradesContext(userId: string): Promise<string> {
+  const now = new Date();
+  const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+  const endOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59);
+
+  const dayOfWeek = now.getDay();
+  const startOfWeek = new Date(now);
+  startOfWeek.setDate(now.getDate() - (dayOfWeek === 0 ? 6 : dayOfWeek - 1));
+  startOfWeek.setHours(0, 0, 0, 0);
+  const endOfWeek = new Date(startOfWeek);
+  endOfWeek.setDate(startOfWeek.getDate() + 4);
+  endOfWeek.setHours(23, 59, 59, 999);
+
+  const [monthTrades, lastTrades, diaryEntries, replays, reports, profile] = await Promise.all([
+    prisma.trade.findMany({
+      where: { userId, date: { gte: startOfMonth, lte: endOfMonth } },
+      orderBy: { date: "asc" },
+    }),
+    prisma.trade.findMany({
+      where: { userId },
+      orderBy: [{ date: "desc" }, { time: "desc" }],
+      take: 12,
+    }),
+    prisma.diaryEntry.findMany({
+      where: { userId },
+      orderBy: { date: "desc" },
+      take: 5,
+    }),
+    prisma.replay.findMany({
+      where: { userId },
+      orderBy: { date: "desc" },
+      take: 5,
+    }),
+    prisma.brokerReport.findMany({
+      where: { userId },
+      orderBy: { date: "desc" },
+      take: 3,
+    }),
+    prisma.traderProfile.findUnique({ where: { userId } }),
+  ]);
+
+  const weekTrades = monthTrades.filter(
+    (t) => new Date(t.date) >= startOfWeek && new Date(t.date) <= endOfWeek
+  );
+
+  let context = "";
+
+  // Monthly metrics
+  if (monthTrades.length > 0) {
+    const metrics = calculateMetrics(monthTrades);
+    const payoff =
+      metrics.losses > 0 && metrics.gains > 0
+        ? Math.abs(metrics.totalGain / metrics.gains) / Math.abs(metrics.totalLoss / metrics.losses)
+        : 0;
+    const monthlyGoal = profile?.monthlyGoal ?? 4400;
+
+    context += `## MÉTRICAS DO MÊS (${now.toLocaleDateString("pt-BR", { month: "long", year: "numeric" })})\n`;
+    context += `- Total de trades: ${metrics.totalTrades}\n`;
+    context += `- Win rate: ${metrics.winRate.toFixed(1)}%\n`;
+    context += `- Resultado líquido: ${formatCurrency(metrics.netResult)}\n`;
+    context += `- Gains: ${metrics.gains} | Losses: ${metrics.losses} | Zeros: ${metrics.zeros}\n`;
+    context += `- Total pontos: ${metrics.totalPoints.toFixed(1)}\n`;
+    context += `- Média pts/trade: ${metrics.avgPointsPerTrade.toFixed(1)}\n`;
+    context += `- Payoff ratio: ${payoff > 0 ? payoff.toFixed(2) : "—"}\n`;
+    context += `- Sequência vencedora max: ${metrics.maxWinStreak}\n`;
+    context += `- Sequência perdedora max: ${metrics.maxLossStreak}\n`;
+    context += `- Meta mensal: ${formatCurrency(monthlyGoal)} | Progresso: ${formatCurrency(metrics.netResult)} (${((metrics.netResult / monthlyGoal) * 100).toFixed(0)}%)\n\n`;
+  }
+
+  // Weekly insights
+  if (weekTrades.length > 0) {
+    const weekInsights = generateWeeklyInsights(weekTrades);
+    if (weekInsights) {
+      context += `## INSIGHTS DA SEMANA\n`;
+      context += `- Trades: ${weekInsights.total} | Win rate: ${weekInsights.winRate.toFixed(1)}%\n`;
+      context += `- Resultado: ${formatCurrency(weekInsights.netResult)}\n`;
+      context += `- Payoff: ${weekInsights.payoff > 0 ? weekInsights.payoff.toFixed(2) : "—"}\n`;
+      if (weekInsights.bestHour)
+        context += `- Melhor horário: ${weekInsights.bestHour.hour} (${formatCurrency(weekInsights.bestHour.result)})\n`;
+      if (weekInsights.worstHour && weekInsights.worstHour.result < 0)
+        context += `- Pior horário: ${weekInsights.worstHour.hour} (${formatCurrency(weekInsights.worstHour.result)})\n`;
+      weekInsights.insights.forEach((i) => { context += `- ${i}\n`; });
+      context += "\n";
+    }
+  }
+
+  // Recent trades — full detail
+  if (lastTrades.length > 0) {
+    context += `## OPERAÇÕES RECENTES (últimas ${lastTrades.length})\n`;
+    for (const t of lastTrades) {
+      const emotions = (() => {
+        try { return (JSON.parse(t.emotions || "[]") as string[]).join(", "); } catch { return ""; }
+      })();
+      context += `- ${formatDate(t.date)} ${t.time} | ${t.asset} | ${t.direction} | ${t.contracts}ct`;
+      context += ` | E:${t.entryPrice}→${t.exitPrice}`;
+      context += ` | ${t.result} ${t.points > 0 ? "+" : ""}${t.points.toFixed(1)}pts ${formatCurrency(t.financialResult)}`;
+      if (t.setup) context += ` | Setup:${t.setup}`;
+      if (t.durationMinutes) context += ` | ${t.durationMinutes}min`;
+      if (emotions) context += ` | Emocoes:[${emotions}]`;
+      context += "\n";
+      if (t.whatWentRight) context += `  Certo: "${t.whatWentRight.slice(0, 200)}"\n`;
+      if (t.whereToImprove) context += `  Melhorar: "${t.whereToImprove.slice(0, 200)}"\n`;
+      if (t.notes) context += `  Obs: "${t.notes.slice(0, 200)}"\n`;
+    }
+    context += "\n";
+  }
+
+  // Diary entries
+  if (diaryEntries.length > 0) {
+    context += `## DIÁRIO DO TRADER (últimas ${diaryEntries.length} entradas)\n`;
+    for (const d of diaryEntries) {
+      context += `### ${formatDate(d.date)} — ${d.title}${d.mood ? ` [${d.mood}]` : ""}\n`;
+      context += `${d.content.slice(0, 400)}${d.content.length > 400 ? "..." : ""}\n\n`;
+    }
+  }
+
+  // Replays
+  if (replays.length > 0) {
+    context += `## REPLAYS (últimos ${replays.length} estudos)\n`;
+    for (const r of replays) {
+      const wr = r.entries > 0 ? ((r.gains / r.entries) * 100).toFixed(0) : "0";
+      context += `- ${formatDate(r.date)} | "${r.title}" | ${r.entries} ent | ${r.gains}G/${r.losses}L | WR:${wr}% | ${r.points > 0 ? "+" : ""}${r.points.toFixed(1)}pts${r.mood ? ` | [${r.mood}]` : ""}\n`;
+      if (r.content) context += `  ${r.content.slice(0, 300)}${r.content.length > 300 ? "..." : ""}\n`;
+    }
+    context += "\n";
+  }
+
+  // Broker reports
+  if (reports.length > 0) {
+    context += `## RELATÓRIOS DA CORRETORA\n`;
+    for (const r of reports) {
+      context += `- ${formatDate(r.date)} | ${r.originalName} | ${r.totalTrades ?? "?"}t | Ganhos:${r.totalGain ? formatCurrency(r.totalGain) : "?"} | Perdas:${r.totalLoss ? formatCurrency(Math.abs(r.totalLoss)) : "?"} | Líquido:${r.netResult ? formatCurrency(r.netResult) : "?"}\n`;
+    }
+    context += "\n";
+  }
+
+  if (!context) {
+    return "O trader ainda não registrou nenhuma operação no sistema.";
+  }
+
+  context += `## SITUAÇÃO ATUAL\n`;
+  context += `- Data/hora: ${now.toLocaleDateString("pt-BR", { weekday: "long", day: "2-digit", month: "long", year: "numeric" })} ${now.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" })}\n`;
+  context += `- Replays realizados: ${replays.length} | Entradas no diário: ${diaryEntries.length}\n`;
+
+  return context;
+}
+
 // --- Main handler ---
 
 export async function POST(request: NextRequest) {
@@ -185,7 +337,7 @@ export async function POST(request: NextRequest) {
     const session = await getSession();
     if (!session) return NextResponse.json({ error: "Não autenticado" }, { status: 401 });
 
-    const { message, images, conversationId, tradesContext } = await request.json();
+    const { message, images, conversationId } = await request.json();
     const imageList: string[] = Array.isArray(images) ? images : images ? [images] : [];
 
     if (!message?.trim() && imageList.length === 0) {
@@ -267,7 +419,8 @@ ${traderProfile.motivation ? `- **Motivação:** ${traderProfile.motivation}` : 
       hasImage ||
       /\b(bom dia|fechei|acabou|resultado|meta|trade|operac|semana|m[eê]s|win rate|payoff|como (foi|estou|ta|tá)|review|p[oó]s.?mercado|diario|diary|replay|relat[oó]rio)\b/i.test(msgLower);
 
-    if (tradesContext && needsContext) {
+    if (needsContext) {
+      const tradesContext = await buildTradesContext(session.userId);
       systemContent += `\n\n## DADOS ATUAIS DO TRADER\n${tradesContext}`;
     }
 

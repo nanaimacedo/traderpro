@@ -21,11 +21,7 @@ interface Conversation {
   _count: { messages: number };
 }
 
-interface MentorChatProps {
-  tradesContext: string;
-}
-
-export function MentorChat({ tradesContext }: MentorChatProps) {
+export function MentorChat() {
   const [conversations, setConversations] = useState<Conversation[]>([]);
   const [activeConversationId, setActiveConversationId] = useState<string | null>(null);
   const [messages, setMessages] = useState<Message[]>([]);
@@ -103,7 +99,6 @@ export function MentorChat({ tradesContext }: MentorChatProps) {
           message,
           images,
           conversationId: activeConversationId,
-          tradesContext,
         }),
       });
 
