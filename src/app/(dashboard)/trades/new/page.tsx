@@ -97,11 +97,11 @@ export default function NewTradePage() {
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
                 <label className="text-sm font-medium text-zinc-700 dark:text-zinc-300">Entrada</label>
-                <Input type="number" name="entryPrice" placeholder="Ex: 128500" step="5" required />
+                <Input type="number" name="entryPrice" placeholder="Ex: 128500" step="any" required />
               </div>
               <div className="space-y-2">
                 <label className="text-sm font-medium text-zinc-700 dark:text-zinc-300">Saída</label>
-                <Input type="number" name="exitPrice" placeholder="Ex: 128650" step="5" required />
+                <Input type="number" name="exitPrice" placeholder="Ex: 128650" step="any" required />
               </div>
             </div>
 
