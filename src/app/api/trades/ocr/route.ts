@@ -13,6 +13,7 @@ REGRAS CRÍTICAS:
 - Duração: se mostrada em segundos (ex: "125s"), converta para minutos arredondando (125s → 2). Se em HH:MM, converta para minutos totais.
 - Direção: "C" ou "Compra" → "COMPRA". "V" ou "Venda" → "VENDA".
 - Data: use a data do header/título da tela se não estiver por operação.
+- Resultado financeiro: procure colunas chamadas "Resultado", "Lucro", "P&L", "Ganho", "Prejuízo" ou similar. O valor em R$ pode aparecer como "+120,00" ou "-45,80" — converta para número decimal (120.00 ou -45.80). Se a tela mostrar pontos (ex: "93 pts") e NÃO mostrar R$, use null.
 
 Retorne APENAS um JSON array válido, sem markdown, sem texto extra:
 [
