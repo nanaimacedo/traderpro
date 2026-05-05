@@ -47,44 +47,46 @@ export async function POST(req: NextRequest) {
   const base64 = Buffer.from(bytes).toString("base64");
   const mimeType = file.type || "image/jpeg";
 
-  for (const key of GEMINI_KEYS) {
-    try {
-      const res = await fetch(
-        `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${key}`,
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            contents: [
-              {
-                parts: [
-                  { text: OCR_PROMPT },
-                  { inlineData: { mimeType, data: base64 } },
-                ],
-              },
-            ],
-            generationConfig: { temperature: 0.1, maxOutputTokens: 512 },
-          }),
+  const MODELS = ["gemini-2.5-flash", "gemini-2.0-flash", "gemini-1.5-flash"];
+
+  for (const model of MODELS) {
+    for (const key of GEMINI_KEYS) {
+      try {
+        const body: any = {
+          contents: [{ parts: [{ text: OCR_PROMPT }, { inlineData: { mimeType, data: base64 } }] }],
+          generationConfig: { temperature: 0.1, maxOutputTokens: 512 },
+        };
+        if (model === "gemini-2.5-flash") body.generationConfig.thinkingConfig = { thinkingBudget: 0 };
+
+        const res = await fetch(
+          `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${key}`,
+          { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) }
+        );
+
+        if (!res.ok) {
+          const errText = await res.text();
+          console.error(`Gemini OCR [${model}] ${res.status}:`, errText.slice(0, 300));
+          if (res.status === 429) continue;
+          break; // try next model
         }
-      );
 
-      if (!res.ok) {
-        if (res.status === 429) continue;
-        console.error("Gemini OCR error:", res.status);
-        continue;
+        const data = await res.json();
+        const text = data.candidates?.[0]?.content?.parts?.[0]?.text ?? "";
+
+        if (!text) {
+          console.error(`Gemini OCR [${model}]: empty text, finish=${data.candidates?.[0]?.finishReason}`);
+          break;
+        }
+
+        const match = text.match(/\{[\s\S]*\}/);
+        if (!match) { console.error(`Gemini OCR [${model}]: no JSON in response:`, text.slice(0, 200)); break; }
+
+        const trade = JSON.parse(match[0]);
+        return NextResponse.json({ ok: true, trade });
+      } catch (err) {
+        console.error(`OCR [${model}] exception:`, err);
+        break;
       }
-
-      const data = await res.json();
-      const text = data.candidates?.[0]?.content?.parts?.[0]?.text ?? "";
-
-      const match = text.match(/\{[\s\S]*\}/);
-      if (!match) continue;
-
-      const trade = JSON.parse(match[0]);
-      return NextResponse.json({ ok: true, trade });
-    } catch (err) {
-      console.error("OCR parse error:", err);
-      continue;
     }
   }
 
