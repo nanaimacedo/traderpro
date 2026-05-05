@@ -10,6 +10,7 @@ import { useEffect, useRef, useState } from "react";
 import { SETUP_TAGS, GENERIC_SETUPS } from "@/lib/methodology-plugins";
 import { cn } from "@/lib/utils";
 import { ScanLine, Loader2, CheckCircle2, AlertTriangle, X, ImagePlus, ChevronLeft, ChevronRight } from "lucide-react";
+import { ASSET_CONFIG } from "@/lib/asset-config";
 
 const EMOTIONS = [
   { value: "ANSIEDADE", label: "Ansiedade" },
@@ -32,6 +33,29 @@ interface OcrTrade {
 
 interface Subjective {
   setup: string; emotions: string[]; whatWentRight: string; whereToImprove: string;
+}
+
+function timeToSecs(t: string): number | null {
+  const parts = t.split(":").map(Number);
+  if (parts.length < 2 || parts.some(isNaN)) return null;
+  const [h, m, s = 0] = parts;
+  return h * 3600 + m * 60 + s;
+}
+
+function calcDurationSecs(entry: string, exit: string): number | null {
+  if (!entry || !exit) return null;
+  const a = timeToSecs(entry), b = timeToSecs(exit);
+  if (a == null || b == null) return null;
+  const diff = b - a;
+  return diff > 0 ? diff : null;
+}
+
+function formatDuration(secs: number): string {
+  if (secs < 60) return `${secs}s`;
+  const m = Math.floor(secs / 60), s = secs % 60;
+  if (m < 60) return s > 0 ? `${m}m ${s}s` : `${m}m`;
+  const h = Math.floor(m / 60), rem = m % 60;
+  return rem > 0 ? `${h}h ${rem}m` : `${h}h`;
 }
 
 function defaultSubjective(): Subjective {
@@ -75,7 +99,9 @@ export default function NewTradePage() {
   const [selectedSetup, setSelectedSetup] = useState("");
   const [selectedEmotions, setSelectedEmotions] = useState<string[]>([]);
   const [date, setDate] = useState(new Date().toISOString().split("T")[0]);
-  const [time, setTime] = useState(new Date().toTimeString().slice(0, 5));
+  const [time, setTime] = useState(new Date().toTimeString().slice(0, 8));
+  const [exitTime, setExitTime] = useState("");
+  const [financialResultOverride, setFinancialResultOverride] = useState("");
   const [direction, setDirection] = useState("COMPRA");
   const [asset, setAsset] = useState("WIN");
   const [entryPrice, setEntryPrice] = useState("");
@@ -166,6 +192,13 @@ export default function NewTradePage() {
     setLoading(true);
     try {
       const formData = new FormData(e.currentTarget);
+      // Auto-fill durationMinutes if calculated from entry/exit time and not manually set
+      if (!durationMinutes) {
+        const calcSecs = calcDurationSecs(time, exitTime);
+        if (calcSecs != null) {
+          formData.set("durationMinutes", String(Math.max(1, Math.round(calcSecs / 60))));
+        }
+      }
       await createTradeWithDiary(formData);
       router.push("/trades");
     } catch (err: any) {
@@ -476,8 +509,38 @@ export default function NewTradePage() {
                 <Input type="date" name="date" required value={date} onChange={(e) => setDate(e.target.value)} />
               </div>
               <div className="space-y-2">
-                <label className="text-sm font-medium text-zinc-700 dark:text-zinc-300">Horário</label>
-                <Input type="time" name="time" required value={time} onChange={(e) => setTime(e.target.value)} />
+                <label className="text-sm font-medium text-zinc-700 dark:text-zinc-300">Entrada</label>
+                <Input type="time" name="time" step="1" required value={time} onChange={(e) => setTime(e.target.value)} />
+              </div>
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-zinc-700 dark:text-zinc-300">Saída</label>
+                <Input type="time" step="1" value={exitTime} onChange={(e) => setExitTime(e.target.value)} placeholder="Opcional" />
+              </div>
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-zinc-700 dark:text-zinc-300">Duração</label>
+                {(() => {
+                  const calcSecs = calcDurationSecs(time, exitTime);
+                  const autoVal = calcSecs != null ? String(Math.max(1, Math.round(calcSecs / 60))) : "";
+                  return (
+                    <div className="relative">
+                      <Input
+                        type="number"
+                        name="durationMinutes"
+                        min="0"
+                        placeholder={calcSecs != null ? formatDuration(calcSecs) : "min"}
+                        value={durationMinutes || autoVal}
+                        onChange={(e) => setDurationMinutes(e.target.value)}
+                        className={calcSecs != null && !durationMinutes ? "text-zinc-400" : ""}
+                        readOnly={calcSecs != null && !durationMinutes}
+                      />
+                      {calcSecs != null && (
+                        <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-zinc-400 pointer-events-none">
+                          {formatDuration(calcSecs)}
+                        </span>
+                      )}
+                    </div>
+                  );
+                })()}
               </div>
             </div>
 
@@ -509,16 +572,40 @@ export default function NewTradePage() {
               </div>
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <label className="text-sm font-medium text-zinc-700 dark:text-zinc-300">Contratos</label>
-                <Input type="number" name="contracts" min="1" required value={contracts} onChange={(e) => setContracts(e.target.value)} />
-              </div>
-              <div className="space-y-2">
-                <label className="text-sm font-medium text-zinc-700 dark:text-zinc-300">Duração (min)</label>
-                <Input type="number" name="durationMinutes" placeholder="Opcional" min="0" value={durationMinutes} onChange={(e) => setDurationMinutes(e.target.value)} />
-              </div>
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-zinc-700 dark:text-zinc-300">Contratos</label>
+              <Input type="number" name="contracts" min="1" required value={contracts} onChange={(e) => setContracts(e.target.value)} />
             </div>
+
+            {/* Resultado financeiro */}
+            {(() => {
+              const ep = parseFloat(entryPrice); const xp = parseFloat(exitPrice);
+              const ct = parseInt(contracts) || 1;
+              const pv = (ASSET_CONFIG[asset] || ASSET_CONFIG.WIN).pointValue;
+              const pts = direction === "COMPRA" ? xp - ep : ep - xp;
+              const calc = !isNaN(pts) && !isNaN(ep) && !isNaN(xp) ? pts * pv * ct : null;
+              return (
+                <div className="space-y-2">
+                  <label className="text-sm font-medium text-zinc-700 dark:text-zinc-300">
+                    Resultado (R$)
+                    {calc != null && !financialResultOverride && (
+                      <span className={cn("ml-2 text-xs font-normal", calc > 0 ? "text-emerald-500" : calc < 0 ? "text-rose-500" : "text-zinc-400")}>
+                        calculado: {calc > 0 ? "+" : ""}{calc.toLocaleString("pt-BR", { style: "currency", currency: "BRL" })}
+                      </span>
+                    )}
+                  </label>
+                  <Input
+                    type="number"
+                    name="financialResultOverride"
+                    step="0.01"
+                    placeholder={calc != null ? `${calc >= 0 ? "+" : ""}${calc.toFixed(2)} (automático)` : "Ex: -45.80"}
+                    value={financialResultOverride}
+                    onChange={(e) => setFinancialResultOverride(e.target.value)}
+                  />
+                  <p className="text-xs text-zinc-400">Opcional — preencha apenas se o valor da corretora for diferente do calculado</p>
+                </div>
+              );
+            })()}
 
             <div className="space-y-2">
               <label className="text-sm font-medium text-zinc-700 dark:text-zinc-300">Setup</label>

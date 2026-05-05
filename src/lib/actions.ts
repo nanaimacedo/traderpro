@@ -166,8 +166,12 @@ export async function createTradeWithDiary(formData: FormData) {
 
   const points = direction === "COMPRA" ? exitPrice - entryPrice : entryPrice - exitPrice;
   const pointValue = assetCfg.pointValue;
-  const financialResult = points * pointValue * contracts;
-  const result = points > 0 ? "GAIN" : points < 0 ? "LOSS" : "ZERO";
+  const financialResultOverrideRaw = (formData.get("financialResultOverride") as string)?.trim();
+  const financialResultOverride = financialResultOverrideRaw ? parseFloat(financialResultOverrideRaw) : null;
+  const financialResult = (financialResultOverride != null && !isNaN(financialResultOverride))
+    ? financialResultOverride
+    : points * pointValue * contracts;
+  const result = financialResult > 0 ? "GAIN" : financialResult < 0 ? "LOSS" : "ZERO";
 
   if (profile?.dailyLossLimit) {
     const todayTrades = await prisma.trade.findMany({ where: { userId, date: { gte: dayStart, lte: dayEnd } }, select: { financialResult: true } });
