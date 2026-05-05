@@ -21,16 +21,23 @@ export function NewReplayForm() {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [selectedMood, setSelectedMood] = useState("");
+  const [error, setError] = useState("");
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
+    setError("");
     setLoading(true);
-    const formData = new FormData(e.currentTarget);
-    await createReplay(formData);
-    setLoading(false);
-    setSelectedMood("");
-    (e.target as HTMLFormElement).reset();
-    router.refresh();
+    try {
+      const formData = new FormData(e.currentTarget);
+      await createReplay(formData);
+      setSelectedMood("");
+      (e.target as HTMLFormElement).reset();
+      router.refresh();
+    } catch (err: any) {
+      setError(err.message || "Erro ao salvar replay");
+    } finally {
+      setLoading(false);
+    }
   }
 
   return (
@@ -111,6 +118,10 @@ export function NewReplayForm() {
               required
             />
           </div>
+
+          {error && (
+            <p className="text-sm text-rose-500 bg-rose-50 dark:bg-rose-950 rounded-lg px-3 py-2">{error}</p>
+          )}
 
           <Button type="submit" disabled={loading}>
             {loading ? "Salvando..." : "Registrar Replay"}
