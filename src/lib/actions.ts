@@ -377,7 +377,8 @@ export async function createReplay(formData: FormData) {
 
   const { date, title, content, mood, entries, gains, losses, points } = parsed.data;
   const zeros = entries - gains - losses;
-  const result = points * 0.2;
+  const financialResult = formData.get("financialResult");
+  const result = financialResult ? parseFloat(financialResult as string) : points * 0.2;
 
   const replay = await prisma.replay.create({
     data: { userId, date: new Date(date), title, content, mood, entries, gains, losses, zeros, points, result },

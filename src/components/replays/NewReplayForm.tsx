@@ -102,7 +102,7 @@ export function NewReplayForm() {
             </div>
           </div>
 
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
             <div className="space-y-2">
               <label className="text-sm font-medium text-zinc-700 dark:text-zinc-300">Entradas</label>
               <Input type="number" name="entries" min="0" defaultValue="0" required />
@@ -118,6 +118,10 @@ export function NewReplayForm() {
             <div className="space-y-2">
               <label className="text-sm font-medium text-zinc-700 dark:text-zinc-300">Pontos Totais</label>
               <Input type="number" name="points" step="0.5" defaultValue="0" required />
+            </div>
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-zinc-700 dark:text-zinc-300">Resultado (R$)</label>
+              <Input type="number" name="financialResult" step="0.01" placeholder="0,00" />
             </div>
           </div>
 
