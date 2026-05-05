@@ -53,7 +53,7 @@ export async function POST(req: NextRequest) {
   const base64 = Buffer.from(bytes).toString("base64");
   const mimeType = file.type || "image/jpeg";
 
-  const MODELS = ["gemini-2.0-flash", "gemini-1.5-flash", "gemini-2.5-flash"];
+  const MODELS = ["gemini-2.5-flash", "gemini-2.0-flash", "gemini-2.0-flash-lite"];
   const errors: string[] = [];
 
   for (const model of MODELS) {
