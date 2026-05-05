@@ -273,9 +273,9 @@ async function buildTradesContext(userId: string): Promise<string> {
       if (t.durationMinutes) context += ` | ${t.durationMinutes}min`;
       if (emotions) context += ` | Emocoes:[${emotions}]`;
       context += "\n";
-      if (t.notes) context += `  Relato: "${t.notes.slice(0, 300)}"\n`;
-      if (t.whatWentRight) context += `  Certo: "${t.whatWentRight.slice(0, 200)}"\n`;
-      if (t.whereToImprove) context += `  Melhorar: "${t.whereToImprove.slice(0, 200)}"\n`;
+      if (t.notes) context += `  Relato: "${t.notes}"\n`;
+      if (t.whatWentRight) context += `  Certo: "${t.whatWentRight}"\n`;
+      if (t.whereToImprove) context += `  Melhorar: "${t.whereToImprove}"\n`;
     }
     context += "\n";
   }
@@ -285,7 +285,7 @@ async function buildTradesContext(userId: string): Promise<string> {
     context += `## DIÁRIO DO TRADER (últimas ${diaryEntries.length} entradas)\n`;
     for (const d of diaryEntries) {
       context += `### ${formatDate(d.date)} — ${d.title}${d.mood ? ` [${d.mood}]` : ""}\n`;
-      context += `${d.content.slice(0, 400)}${d.content.length > 400 ? "..." : ""}\n\n`;
+      context += `${d.content}\n\n`;
     }
   }
 
@@ -295,7 +295,7 @@ async function buildTradesContext(userId: string): Promise<string> {
     for (const r of replays) {
       const wr = r.entries > 0 ? ((r.gains / r.entries) * 100).toFixed(0) : "0";
       context += `- ${formatDate(r.date)} | "${r.title}" | ${r.entries} ent | ${r.gains}G/${r.losses}L | WR:${wr}% | ${r.points > 0 ? "+" : ""}${r.points.toFixed(1)}pts${r.mood ? ` | [${r.mood}]` : ""}\n`;
-      if (r.content) context += `  ${r.content.slice(0, 300)}${r.content.length > 300 ? "..." : ""}\n`;
+      if (r.content) context += `  ${r.content}\n`;
     }
     context += "\n";
   }
