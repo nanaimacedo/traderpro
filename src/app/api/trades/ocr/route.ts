@@ -53,14 +53,15 @@ export async function POST(req: NextRequest) {
   const base64 = Buffer.from(bytes).toString("base64");
   const mimeType = file.type || "image/jpeg";
 
-  const MODELS = ["gemini-2.5-flash", "gemini-2.0-flash", "gemini-1.5-flash"];
+  const MODELS = ["gemini-2.0-flash", "gemini-1.5-flash", "gemini-2.5-flash"];
+  const errors: string[] = [];
 
   for (const model of MODELS) {
     for (const key of GEMINI_KEYS) {
       try {
         const body = {
-          contents: [{ parts: [{ text: OCR_PROMPT }, { inlineData: { mimeType, data: base64 } }] }],
-          generationConfig: { temperature: 0.1, maxOutputTokens: 2048 },
+          contents: [{ parts: [{ inlineData: { mimeType, data: base64 } }, { text: OCR_PROMPT }] }],
+          generationConfig: { temperature: 0.1, maxOutputTokens: 2048, responseMimeType: "application/json" },
         };
 
         const res = await fetch(
@@ -70,24 +71,29 @@ export async function POST(req: NextRequest) {
 
         if (!res.ok) {
           const errText = await res.text();
-          console.error(`Gemini OCR [${model}] ${res.status}:`, errText.slice(0, 400));
-          if (res.status === 429 || res.status >= 500) continue; // try next key
-          break; // 4xx client error → try next model
+          const msg = `[${model}] HTTP ${res.status}: ${errText.slice(0, 200)}`;
+          console.error("Gemini OCR", msg);
+          errors.push(msg);
+          if (res.status === 429 || res.status >= 500) continue;
+          break;
         }
 
         const data = await res.json();
         const text = data.candidates?.[0]?.content?.parts?.[0]?.text ?? "";
 
         if (!text) {
-          console.error(`Gemini OCR [${model}]: empty text, finish=${data.candidates?.[0]?.finishReason}`);
+          const msg = `[${model}] empty text, finish=${data.candidates?.[0]?.finishReason}`;
+          console.error("Gemini OCR", msg);
+          errors.push(msg);
           continue;
         }
 
-        // Try array first, then single object fallback
         const arrMatch = text.match(/\[[\s\S]*\]/);
         const objMatch = text.match(/\{[\s\S]*\}/);
         if (!arrMatch && !objMatch) {
-          console.error(`Gemini OCR [${model}]: no JSON in response:`, text.slice(0, 300));
+          const msg = `[${model}] no JSON: ${text.slice(0, 150)}`;
+          console.error("Gemini OCR", msg);
+          errors.push(msg);
           continue;
         }
 
@@ -100,21 +106,25 @@ export async function POST(req: NextRequest) {
             trades = [JSON.parse(objMatch![0])];
           }
         } catch (parseErr) {
-          console.error(`Gemini OCR [${model}]: JSON parse error:`, parseErr);
+          const msg = `[${model}] JSON parse error: ${parseErr}`;
+          console.error("Gemini OCR", msg);
+          errors.push(msg);
           continue;
         }
 
-        if (!trades.length) continue;
+        if (!trades.length) { errors.push(`[${model}] empty trades array`); continue; }
         return NextResponse.json({ ok: true, trades });
       } catch (err) {
-        console.error(`OCR [${model}] exception:`, err);
+        const msg = `[${model}] exception: ${err}`;
+        console.error("Gemini OCR", msg);
+        errors.push(msg);
         continue;
       }
     }
   }
 
   return NextResponse.json(
-    { error: "Não foi possível extrair os dados. Preencha manualmente." },
+    { error: "Não foi possível extrair os dados. Preencha manualmente.", debug: errors },
     { status: 500 }
   );
 }
