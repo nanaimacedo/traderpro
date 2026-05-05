@@ -4,13 +4,13 @@ import { createTradeWithDiary } from "@/lib/actions";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { SETUP_TAGS, GENERIC_SETUPS } from "@/lib/methodology-plugins";
 import { cn } from "@/lib/utils";
 import { ScanLine, Loader2, CheckCircle2, AlertTriangle, X, ImagePlus, ChevronLeft, ChevronRight } from "lucide-react";
 import { ASSET_CONFIG } from "@/lib/asset-config";
+import { RelatoEditor } from "@/components/trades/RelatoEditor";
 
 const EMOTIONS = [
   { value: "ANSIEDADE", label: "Ansiedade" },
@@ -102,6 +102,7 @@ export default function NewTradePage() {
   const [time, setTime] = useState(new Date().toTimeString().slice(0, 8));
   const [exitTime, setExitTime] = useState("");
   const [financialResultOverride, setFinancialResultOverride] = useState("");
+  const [relato, setRelato] = useState("");
   const [direction, setDirection] = useState("COMPRA");
   const [asset, setAsset] = useState("WIN");
   const [entryPrice, setEntryPrice] = useState("");
@@ -401,7 +402,7 @@ export default function NewTradePage() {
 
               <div className="space-y-2">
                 <label className="text-sm font-medium text-zinc-700 dark:text-zinc-300">Relato da operação</label>
-                <Textarea value={curS.relato} onChange={(e) => updateSubjective("relato", e.target.value)} placeholder="Descreva o que aconteceu: contexto, execução, o que funcionou, o que pode melhorar..." rows={4} className="text-sm" />
+                <RelatoEditor value={curS.relato} onChange={(v) => updateSubjective("relato", v)} placeholder="Descreva o que aconteceu: contexto, execução, o que funcionou, o que pode melhorar... Cole prints com Ctrl+V" rows={4} />
               </div>
             </div>
 
@@ -640,7 +641,8 @@ export default function NewTradePage() {
               </div>
               <div className="space-y-2">
                 <label className="text-sm font-medium text-zinc-700 dark:text-zinc-300">Relato da operação</label>
-                <Textarea name="notes" placeholder="Descreva o que aconteceu: contexto, execução, o que funcionou, o que pode melhorar..." rows={4} className="text-sm" />
+                <input type="hidden" name="notes" value={relato} />
+                <RelatoEditor value={relato} onChange={setRelato} placeholder="Descreva o que aconteceu: contexto, execução, o que funcionou, o que pode melhorar... Cole prints com Ctrl+V" rows={4} />
               </div>
             </div>
 

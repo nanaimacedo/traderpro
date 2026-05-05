@@ -5,6 +5,7 @@ import { formatCurrency, formatDate } from "@/lib/utils";
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { ArrowLeft, TrendingUp, TrendingDown, Minus, Clock, BarChart2, Camera } from "lucide-react";
+import ReactMarkdown from "react-markdown";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { DeleteTradeButton } from "@/components/trades/DeleteTradeButton";
@@ -143,7 +144,9 @@ export default async function TradeDetailPage({ params }: PageProps) {
           </CardHeader>
           <CardContent className="space-y-4">
             {trade.notes && (
-              <p className="text-sm text-zinc-700 dark:text-zinc-300 leading-relaxed whitespace-pre-wrap">{trade.notes}</p>
+              <div className="text-sm text-zinc-700 dark:text-zinc-300 leading-relaxed prose prose-sm dark:prose-invert max-w-none prose-img:rounded-lg prose-img:border prose-img:border-zinc-200 dark:prose-img:border-zinc-700 prose-img:w-full prose-img:max-h-96 prose-img:object-contain">
+                <ReactMarkdown>{trade.notes}</ReactMarkdown>
+              </div>
             )}
             {trade.whatWentRight && (
               <div>

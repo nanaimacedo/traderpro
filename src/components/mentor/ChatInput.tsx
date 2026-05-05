@@ -189,6 +189,16 @@ export function ChatInput({ onSend, disabled }: ChatInputProps) {
         />
         <textarea
           ref={textareaRef}
+          onPaste={(e) => {
+            const images = Array.from(e.clipboardData.files).filter((f) => f.type.startsWith("image/"));
+            if (!images.length) return;
+            e.preventDefault();
+            images.forEach((file) => {
+              const reader = new FileReader();
+              reader.onload = () => setImagePreviews((prev) => [...prev, reader.result as string]);
+              reader.readAsDataURL(file);
+            });
+          }}
           placeholder={
             transcribing
               ? "Transcrevendo áudio..."
