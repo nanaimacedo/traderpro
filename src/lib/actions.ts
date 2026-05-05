@@ -34,8 +34,8 @@ const diarySchema = z.object({
 
 const replaySchema = z.object({
   date: z.string().min(1),
-  title: z.string().min(1).max(200),
-  content: z.string().min(1).max(10000),
+  title: z.string().min(1).max(500),
+  content: z.string().min(1),
   mood: z.enum(["OTIMISTA", "NEUTRO", "FRUSTRADO", "DISCIPLINADO", "ANSIOSO"]).nullable(),
   entries: z.number().int().min(0),
   gains: z.number().int().min(0),
@@ -379,17 +379,19 @@ export async function createReplay(formData: FormData) {
   const zeros = entries - gains - losses;
   const result = points * 0.2;
 
-  await prisma.replay.create({
+  const replay = await prisma.replay.create({
     data: { userId, date: new Date(date), title, content, mood, entries, gains, losses, zeros, points, result },
   });
 
   revalidatePath("/replays");
+  return { id: replay.id };
 }
 
 export async function getReplays() {
   const userId = await requireUserId();
   return prisma.replay.findMany({
     where: { userId },
+    include: { images: { orderBy: { createdAt: "asc" } } },
     orderBy: { date: "desc" },
   });
 }

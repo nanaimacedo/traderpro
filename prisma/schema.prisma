@@ -192,7 +192,20 @@ model Replay {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
+  images ReplayImage[]
+
   @@index([userId, date])
+}
+
+model ReplayImage {
+  id           String   @id @default(cuid())
+  filename     String
+  originalName String
+  path         String
+  createdAt    DateTime @default(now())
+
+  replay   Replay @relation(fields: [replayId], references: [id], onDelete: Cascade)
+  replayId String
 }
 
 model PushSubscription {

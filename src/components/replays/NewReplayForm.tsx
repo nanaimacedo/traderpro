@@ -7,7 +7,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
-import { PlayCircle, TrendingUp, Minus, TrendingDown, Target, Activity, type LucideIcon } from "lucide-react";
+import { PlayCircle, TrendingUp, Minus, TrendingDown, Target, Activity, Upload, X, CheckCircle, type LucideIcon } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 const moods: { value: string; label: string; icon: LucideIcon }[] = [
   { value: "OTIMISTA", label: "Otimista", icon: TrendingUp },
@@ -17,11 +18,21 @@ const moods: { value: string; label: string; icon: LucideIcon }[] = [
   { value: "ANSIOSO", label: "Ansioso", icon: Activity },
 ];
 
+interface UploadedImage {
+  id: string;
+  filename: string;
+  originalName: string;
+  path: string;
+}
+
 export function NewReplayForm() {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [selectedMood, setSelectedMood] = useState("");
   const [error, setError] = useState("");
+  const [savedReplayId, setSavedReplayId] = useState<string | null>(null);
+  const [images, setImages] = useState<UploadedImage[]>([]);
+  const [uploading, setUploading] = useState(false);
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -29,15 +40,102 @@ export function NewReplayForm() {
     setLoading(true);
     try {
       const formData = new FormData(e.currentTarget);
-      await createReplay(formData);
+      const result = await createReplay(formData);
+      setSavedReplayId(result.id);
       setSelectedMood("");
       (e.target as HTMLFormElement).reset();
-      router.refresh();
     } catch (err: any) {
       setError(err.message || "Erro ao salvar replay");
     } finally {
       setLoading(false);
     }
+  }
+
+  async function handleImageUpload(e: React.ChangeEvent<HTMLInputElement>) {
+    if (!savedReplayId || !e.target.files) return;
+    setUploading(true);
+
+    for (const file of Array.from(e.target.files)) {
+      const fd = new FormData();
+      fd.append("file", file);
+      fd.append("replayId", savedReplayId);
+
+      const res = await fetch("/api/upload-replay", { method: "POST", body: fd });
+      if (res.ok) {
+        const img = await res.json();
+        setImages((prev) => [...prev, img]);
+      }
+    }
+
+    setUploading(false);
+    e.target.value = "";
+  }
+
+  function removeImage(id: string) {
+    setImages((prev) => prev.filter((img) => img.id !== id));
+  }
+
+  function handleDone() {
+    setSavedReplayId(null);
+    setImages([]);
+    router.refresh();
+  }
+
+  // Estado pós-save: uploader de imagens
+  if (savedReplayId) {
+    return (
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2 text-emerald-600">
+            <CheckCircle className="h-5 w-5" />
+            Replay salvo! Adicione screenshots
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <label className="cursor-pointer block">
+            <input
+              type="file"
+              accept="image/*"
+              multiple
+              onChange={handleImageUpload}
+              className="sr-only"
+            />
+            <div className="flex items-center gap-3 rounded-lg border-2 border-dashed border-zinc-200 dark:border-zinc-700 p-4 transition-colors hover:border-violet-400 dark:hover:border-violet-600">
+              <Upload className="h-5 w-5 text-zinc-400" />
+              <span className="text-sm text-zinc-500 dark:text-zinc-400">
+                {uploading ? "Enviando..." : "Clique para selecionar prints do estudo"}
+              </span>
+            </div>
+          </label>
+
+          {images.length > 0 && (
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+              {images.map((img) => (
+                <div key={img.id} className="relative group rounded-lg overflow-hidden border border-zinc-100 dark:border-zinc-800">
+                  <img src={img.path} alt={img.originalName} className="w-full h-36 object-cover" />
+                  <button
+                    type="button"
+                    onClick={() => removeImage(img.id)}
+                    className="absolute top-1.5 right-1.5 rounded-full bg-black/60 p-0.5 opacity-0 group-hover:opacity-100 transition-opacity"
+                  >
+                    <X className="h-3 w-3 text-white" />
+                  </button>
+                  <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/50 to-transparent p-2">
+                    <p className="text-[10px] text-white truncate">{img.originalName}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+
+          <div className="flex gap-3">
+            <Button onClick={handleDone} className="flex-1">
+              {images.length > 0 ? `Concluído (${images.length} print${images.length > 1 ? "s" : ""})` : "Concluído sem prints"}
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+    );
   }
 
   return (
@@ -66,7 +164,6 @@ export function NewReplayForm() {
             </div>
           </div>
 
-          {/* Resultados do replay */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             <div className="space-y-2">
               <label className="text-sm font-medium text-zinc-700 dark:text-zinc-300">Entradas</label>
@@ -86,7 +183,6 @@ export function NewReplayForm() {
             </div>
           </div>
 
-          {/* Mood selector */}
           <div className="space-y-2">
             <label className="text-sm font-medium text-zinc-700 dark:text-zinc-300">Estado Emocional</label>
             <div className="flex gap-2 flex-wrap">
