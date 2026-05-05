@@ -38,6 +38,14 @@ export function ReplayCard({ replay, moodLabels }: ReplayCardProps) {
   const [images, setImages] = useState<ReplayImage[]>(replay.images);
   const [uploading, setUploading] = useState(false);
   const [lightbox, setLightbox] = useState<string | null>(null);
+  const [deletingImageId, setDeletingImageId] = useState<string | null>(null);
+
+  async function handleDeleteImage(imageId: string) {
+    setDeletingImageId(imageId);
+    const res = await fetch(`/api/replay-image/${imageId}`, { method: "DELETE" });
+    if (res.ok) setImages((prev) => prev.filter((img) => img.id !== imageId));
+    setDeletingImageId(null);
+  }
 
   const mood = replay.mood ? moodLabels[replay.mood] : null;
   const winRate = replay.entries > 0 ? (replay.gains / replay.entries) * 100 : 0;
@@ -148,10 +156,23 @@ export function ReplayCard({ replay, moodLabels }: ReplayCardProps) {
                   {images.map((img) => (
                     <div
                       key={img.id}
-                      className="relative group rounded-lg overflow-hidden border border-zinc-100 dark:border-zinc-800 cursor-pointer"
-                      onClick={() => setLightbox(img.path)}
+                      className="relative group rounded-lg overflow-hidden border border-zinc-100 dark:border-zinc-800"
                     >
-                      <img src={img.path} alt={img.originalName} className="w-full h-36 object-cover transition-transform group-hover:scale-105" />
+                      <img
+                        src={img.path}
+                        alt={img.originalName}
+                        className="w-full h-36 object-cover transition-transform group-hover:scale-105 cursor-pointer"
+                        onClick={() => setLightbox(img.path)}
+                      />
+                      <button
+                        type="button"
+                        onClick={() => handleDeleteImage(img.id)}
+                        disabled={deletingImageId === img.id}
+                        className="absolute top-1.5 right-1.5 rounded-full bg-black/60 p-1 hover:bg-rose-600 transition-colors disabled:opacity-50"
+                        title="Excluir imagem"
+                      >
+                        <X className="h-3 w-3 text-white" />
+                      </button>
                       <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/50 to-transparent p-2">
                         <p className="text-[10px] text-white truncate">{img.originalName}</p>
                       </div>
