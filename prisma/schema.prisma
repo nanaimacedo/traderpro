@@ -114,6 +114,19 @@ model BrokerReport {
   netResult    Float?
   fees         Float? // taxas e emolumentos
   rawData      String? // dados brutos extraidos do PDF
+  // Estatísticas detalhadas do resumo da corretora
+  gains              Int?
+  losses             Int?
+  zeros              Int?
+  tradingDays        Int?
+  maxDailyGain       Float?
+  maxDailyLoss       Float?
+  maxGainPerOp       Float?
+  maxLossPerOp       Float?
+  maxDurationMinutes Int?
+  maxDurationResult  Float?
+  minDurationMinutes Int?
+  minDurationResult  Float?
   createdAt    DateTime @default(now())
 
   @@index([userId])

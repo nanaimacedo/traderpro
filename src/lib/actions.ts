@@ -299,14 +299,31 @@ export async function createBrokerReport(formData: FormData) {
   const date = new Date(formData.get("date") as string);
   const filename = formData.get("filename") as string;
   const originalName = formData.get("originalName") as string;
-  const totalTrades = formData.get("totalTrades") ? parseInt(formData.get("totalTrades") as string) : null;
-  const totalGain = formData.get("totalGain") ? parseFloat(formData.get("totalGain") as string) : null;
-  const totalLoss = formData.get("totalLoss") ? parseFloat(formData.get("totalLoss") as string) : null;
-  const netResult = formData.get("netResult") ? parseFloat(formData.get("netResult") as string) : null;
-  const fees = formData.get("fees") ? parseFloat(formData.get("fees") as string) : null;
+
+  const int = (key: string) => formData.get(key) ? parseInt(formData.get(key) as string) : null;
+  const float = (key: string) => formData.get(key) ? parseFloat(formData.get(key) as string) : null;
 
   await prisma.brokerReport.create({
-    data: { userId, date, filename, originalName, totalTrades, totalGain, totalLoss, netResult, fees },
+    data: {
+      userId, date, filename, originalName,
+      totalTrades:        int("totalTrades"),
+      totalGain:          float("totalGain"),
+      totalLoss:          float("totalLoss"),
+      netResult:          float("netResult"),
+      fees:               float("fees"),
+      gains:              int("gains"),
+      losses:             int("losses"),
+      zeros:              int("zeros"),
+      tradingDays:        int("tradingDays"),
+      maxDailyGain:       float("maxDailyGain"),
+      maxDailyLoss:       float("maxDailyLoss"),
+      maxGainPerOp:       float("maxGainPerOp"),
+      maxLossPerOp:       float("maxLossPerOp"),
+      maxDurationMinutes: int("maxDurationMinutes"),
+      maxDurationResult:  float("maxDurationResult"),
+      minDurationMinutes: int("minDurationMinutes"),
+      minDurationResult:  float("minDurationResult"),
+    },
   });
 
   revalidatePath("/reports");

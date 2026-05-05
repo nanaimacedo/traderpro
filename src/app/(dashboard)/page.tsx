@@ -45,14 +45,28 @@ export default async function Dashboard({ searchParams }: PageProps) {
   const calculatedMetrics = calculateMetrics(trades);
   const dailyResults = getDailyResults(trades);
 
-  // Prefer broker report data (from PDF) for financial summaries when available
+  // Prefer broker report data for all available fields when a report exists
   const metrics = brokerReport
     ? {
         ...calculatedMetrics,
-        totalTrades: brokerReport.totalTrades ?? calculatedMetrics.totalTrades,
-        totalGain: brokerReport.totalGain ?? calculatedMetrics.totalGain,
-        totalLoss: brokerReport.totalLoss ?? calculatedMetrics.totalLoss,
-        netResult: brokerReport.netResult ?? calculatedMetrics.netResult,
+        totalTrades:      brokerReport.totalTrades      ?? calculatedMetrics.totalTrades,
+        gains:            brokerReport.gains            ?? calculatedMetrics.gains,
+        losses:           brokerReport.losses           ?? calculatedMetrics.losses,
+        zeros:            brokerReport.zeros            ?? calculatedMetrics.zeros,
+        totalGain:        brokerReport.totalGain        ?? calculatedMetrics.totalGain,
+        totalLoss:        brokerReport.totalLoss        ?? calculatedMetrics.totalLoss,
+        netResult:        brokerReport.netResult        ?? calculatedMetrics.netResult,
+        tradingDays:      brokerReport.tradingDays      ?? calculatedMetrics.tradingDays,
+        maxDailyGain:     brokerReport.maxDailyGain     ?? calculatedMetrics.maxDailyGain,
+        maxDailyLoss:     brokerReport.maxDailyLoss     ?? calculatedMetrics.maxDailyLoss,
+        maxGainPerOp:     brokerReport.maxGainPerOp     ?? calculatedMetrics.maxGainPerOp,
+        maxLossPerOp:     brokerReport.maxLossPerOp     ?? calculatedMetrics.maxLossPerOp,
+        maxDurationTrade: brokerReport.maxDurationMinutes != null
+          ? { minutes: brokerReport.maxDurationMinutes, financialResult: brokerReport.maxDurationResult ?? 0 }
+          : calculatedMetrics.maxDurationTrade,
+        minDurationTrade: brokerReport.minDurationMinutes != null
+          ? { minutes: brokerReport.minDurationMinutes, financialResult: brokerReport.minDurationResult ?? 0 }
+          : calculatedMetrics.minDurationTrade,
       }
     : calculatedMetrics;
 
