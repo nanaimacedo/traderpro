@@ -133,15 +133,18 @@ export default async function TradeDetailPage({ params }: PageProps) {
       )}
 
       {/* Diary fields */}
-      {(trade.whatWentRight || trade.whereToImprove || trade.notes) && (
+      {(trade.notes || trade.whatWentRight || trade.whereToImprove) && (
         <Card>
           <CardHeader className="pb-2">
             <CardTitle className="text-sm flex items-center gap-2">
               <BarChart2 className="h-4 w-4 text-zinc-400" />
-              Análise da operação
+              Relato da operação
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
+            {trade.notes && (
+              <p className="text-sm text-zinc-700 dark:text-zinc-300 leading-relaxed whitespace-pre-wrap">{trade.notes}</p>
+            )}
             {trade.whatWentRight && (
               <div>
                 <p className="text-xs font-semibold text-emerald-600 dark:text-emerald-400 uppercase tracking-wide mb-1">O que fiz certo</p>
@@ -150,14 +153,8 @@ export default async function TradeDetailPage({ params }: PageProps) {
             )}
             {trade.whereToImprove && (
               <div>
-                <p className="text-xs font-semibold text-amber-600 dark:text-amber-400 uppercase tracking-wide mb-1">Onde posso melhorar</p>
+                <p className="text-xs font-semibold text-amber-600 dark:text-amber-400 uppercase tracking-wide mb-1">Onde melhorar</p>
                 <p className="text-sm text-zinc-700 dark:text-zinc-300 leading-relaxed">{trade.whereToImprove}</p>
-              </div>
-            )}
-            {trade.notes && (
-              <div>
-                <p className="text-xs font-semibold text-zinc-500 uppercase tracking-wide mb-1">Observações</p>
-                <p className="text-sm text-zinc-700 dark:text-zinc-300 leading-relaxed">{trade.notes}</p>
               </div>
             )}
           </CardContent>

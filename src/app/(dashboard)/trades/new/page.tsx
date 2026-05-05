@@ -32,7 +32,7 @@ interface OcrTrade {
 }
 
 interface Subjective {
-  setup: string; emotions: string[]; whatWentRight: string; whereToImprove: string;
+  setup: string; emotions: string[]; relato: string;
 }
 
 function timeToSecs(t: string): number | null {
@@ -59,7 +59,7 @@ function formatDuration(secs: number): string {
 }
 
 function defaultSubjective(): Subjective {
-  return { setup: "", emotions: [], whatWentRight: "", whereToImprove: "" };
+  return { setup: "", emotions: [], relato: "" };
 }
 
 function normalizeOcrTrade(t: any): OcrTrade {
@@ -232,8 +232,7 @@ export default function NewTradePage() {
         if (t.durationMinutes) fd.set("durationMinutes", t.durationMinutes);
         fd.set("setup", s.setup);
         fd.set("emotions", JSON.stringify(s.emotions));
-        fd.set("whatWentRight", s.whatWentRight);
-        fd.set("whereToImprove", s.whereToImprove);
+        fd.set("notes", s.relato);
         await createTradeWithDiary(fd);
         saved++;
       } catch (err: any) {
@@ -401,12 +400,8 @@ export default function NewTradePage() {
               </div>
 
               <div className="space-y-2">
-                <label className="text-sm font-medium text-zinc-700 dark:text-zinc-300">O que eu fiz certo?</label>
-                <Textarea value={curS.whatWentRight} onChange={(e) => updateSubjective("whatWentRight", e.target.value)} placeholder="Ex: Respeitei o setup, aguardei a confirmação..." rows={2} className="text-sm" />
-              </div>
-              <div className="space-y-2">
-                <label className="text-sm font-medium text-zinc-700 dark:text-zinc-300">Onde posso melhorar?</label>
-                <Textarea value={curS.whereToImprove} onChange={(e) => updateSubjective("whereToImprove", e.target.value)} placeholder="Ex: Entrei cedo demais, não esperei o fechamento da barra..." rows={2} className="text-sm" />
+                <label className="text-sm font-medium text-zinc-700 dark:text-zinc-300">Relato da operação</label>
+                <Textarea value={curS.relato} onChange={(e) => updateSubjective("relato", e.target.value)} placeholder="Descreva o que aconteceu: contexto, execução, o que funcionou, o que pode melhorar..." rows={4} className="text-sm" />
               </div>
             </div>
 
@@ -644,12 +639,8 @@ export default function NewTradePage() {
                 </div>
               </div>
               <div className="space-y-2">
-                <label className="text-sm font-medium text-zinc-700 dark:text-zinc-300">O que eu fiz certo?</label>
-                <Textarea name="whatWentRight" placeholder="Ex: Respeitei o setup, aguardei a confirmação..." rows={2} className="text-sm" />
-              </div>
-              <div className="space-y-2">
-                <label className="text-sm font-medium text-zinc-700 dark:text-zinc-300">Onde posso melhorar?</label>
-                <Textarea name="whereToImprove" placeholder="Ex: Entrei cedo demais, não esperei o fechamento da barra..." rows={2} className="text-sm" />
+                <label className="text-sm font-medium text-zinc-700 dark:text-zinc-300">Relato da operação</label>
+                <Textarea name="notes" placeholder="Descreva o que aconteceu: contexto, execução, o que funcionou, o que pode melhorar..." rows={4} className="text-sm" />
               </div>
             </div>
 

@@ -273,9 +273,9 @@ async function buildTradesContext(userId: string): Promise<string> {
       if (t.durationMinutes) context += ` | ${t.durationMinutes}min`;
       if (emotions) context += ` | Emocoes:[${emotions}]`;
       context += "\n";
+      if (t.notes) context += `  Relato: "${t.notes.slice(0, 300)}"\n`;
       if (t.whatWentRight) context += `  Certo: "${t.whatWentRight.slice(0, 200)}"\n`;
       if (t.whereToImprove) context += `  Melhorar: "${t.whereToImprove.slice(0, 200)}"\n`;
-      if (t.notes) context += `  Obs: "${t.notes.slice(0, 200)}"\n`;
     }
     context += "\n";
   }
