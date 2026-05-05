@@ -299,7 +299,7 @@ export function MentorChat({ tradesContext }: MentorChatProps) {
           ) : (
             <div className="space-y-4">
               {messages.map((msg) => (
-                <ChatMessage key={msg.id} role={msg.role} content={msg.content} images={msg.images} />
+                <ChatMessage key={msg.id} role={msg.role} content={msg.content} images={msg.images} createdAt={msg.createdAt} />
               ))}
               {/* Streaming message — appears while Gemini is typing */}
               {streamingContent && (

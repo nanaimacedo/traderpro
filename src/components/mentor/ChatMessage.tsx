@@ -9,9 +9,13 @@ interface ChatMessageProps {
   role: "user" | "assistant";
   content: string;
   images?: string[];
+  createdAt?: string;
 }
 
-export function ChatMessage({ role, content, images }: ChatMessageProps) {
+export function ChatMessage({ role, content, images, createdAt }: ChatMessageProps) {
+  const timeLabel = createdAt
+    ? new Date(createdAt).toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" })
+    : null;
   const isUser = role === "user";
   const [speaking, setSpeaking] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -167,6 +171,13 @@ export function ChatMessage({ role, content, images }: ChatMessageProps) {
             </div>
           )}
         </div>
+        {/* Timestamp */}
+        {timeLabel && (
+          <span className={cn("text-[10px] text-zinc-400 dark:text-zinc-500 px-1", isUser && "self-end")}>
+            {timeLabel}
+          </span>
+        )}
+
         {/* TTS button for assistant messages */}
         {!isUser && (
           <button
