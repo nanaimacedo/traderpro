@@ -28,7 +28,7 @@ const EMOTIONS = [
 interface OcrTrade {
   date: string; time: string; asset: string; direction: string;
   entryPrice: string; exitPrice: string; contracts: string; durationMinutes: string;
-  confidence: string;
+  financialResult: string; confidence: string;
 }
 
 interface Subjective {
@@ -72,6 +72,7 @@ function normalizeOcrTrade(t: any): OcrTrade {
     exitPrice: t.exitPrice != null ? String(t.exitPrice) : "",
     contracts: t.contracts != null ? String(t.contracts) : "1",
     durationMinutes: t.durationMinutes != null ? String(t.durationMinutes) : "",
+    financialResult: t.financialResult != null ? String(t.financialResult) : "",
     confidence: t.confidence ?? "medium",
   };
 }
@@ -162,6 +163,7 @@ export default function NewTradePage() {
         setDate(t.date); setTime(t.time); setDirection(t.direction); setAsset(t.asset);
         setEntryPrice(t.entryPrice); setExitPrice(t.exitPrice);
         setContracts(t.contracts); setDurationMinutes(t.durationMinutes);
+        if (t.financialResult) setFinancialResultOverride(t.financialResult);
         setOcrConfidence(t.confidence);
         setOcrStatus("done");
       }

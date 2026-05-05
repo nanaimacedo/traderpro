@@ -25,6 +25,7 @@ Retorne APENAS um JSON array válido, sem markdown, sem texto extra:
     "exitPrice": número inteiro ou decimal,
     "contracts": número inteiro,
     "durationMinutes": número inteiro ou null,
+    "financialResult": número decimal (resultado líquido em R$ como aparece na tela, ex: -45.80 ou 120.00) ou null,
     "confidence": "high" | "medium" | "low"
   }
 ]
