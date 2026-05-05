@@ -15,14 +15,14 @@ import { ASSET_CONFIG } from "@/lib/asset-config";
 
 const tradeSchema = z.object({
   date: z.string().min(1),
-  time: z.string().regex(/^\d{2}:\d{2}$/),
+  time: z.string().regex(/^\d{2}:\d{2}(:\d{2})?$/),
   direction: z.enum(["COMPRA", "VENDA"]),
   entryPrice: z.number().positive(),
   exitPrice: z.number().positive(),
   contracts: z.number().int().min(1).max(100),
   durationMinutes: z.number().int().positive().nullable(),
   setup: z.string().max(50).nullable(),
-  notes: z.string().max(1000).nullable(),
+  notes: z.string().nullable(),
 });
 
 const diarySchema = z.object({
