@@ -160,9 +160,14 @@ export default function NewTradePage() {
       } else {
         // Single trade → pre-fill form
         const t = trades[0];
-        setDate(t.date); setTime(t.time); setDirection(t.direction); setAsset(t.asset);
-        setEntryPrice(t.entryPrice); setExitPrice(t.exitPrice);
-        setContracts(t.contracts); setDurationMinutes(t.durationMinutes);
+        if (t.date) setDate(t.date);
+        if (t.time) setTime(t.time);
+        if (t.direction) setDirection(t.direction);
+        if (t.asset) setAsset(t.asset);
+        if (t.entryPrice) setEntryPrice(t.entryPrice);
+        if (t.exitPrice) setExitPrice(t.exitPrice);
+        if (t.contracts) setContracts(t.contracts);
+        if (t.durationMinutes) setDurationMinutes(t.durationMinutes);
         if (t.financialResult) setFinancialResultOverride(t.financialResult);
         setOcrConfidence(t.confidence);
         setOcrStatus("done");
