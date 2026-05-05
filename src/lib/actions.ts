@@ -187,9 +187,10 @@ export async function createTradeWithDiary(formData: FormData) {
   }
   const whatWentRight = (formData.get("whatWentRight") as string)?.trim() || null;
   const whereToImprove = (formData.get("whereToImprove") as string)?.trim() || null;
+  const screenshotUrl = (formData.get("screenshotUrl") as string)?.trim() || null;
 
   await prisma.trade.create({
-    data: { userId, date: tradeDate, time, asset, direction, entryPrice, exitPrice, contracts, result, points, financialResult, pointValue, setup, durationMinutes, notes, emotions, whatWentRight, whereToImprove },
+    data: { userId, date: tradeDate, time, asset, direction, entryPrice, exitPrice, contracts, result, points, financialResult, pointValue, setup, durationMinutes, notes, emotions, whatWentRight, whereToImprove, screenshotUrl },
   });
 
   revalidatePath("/");

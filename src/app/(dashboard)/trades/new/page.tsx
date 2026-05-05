@@ -9,7 +9,7 @@ import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { SETUP_TAGS, GENERIC_SETUPS } from "@/lib/methodology-plugins";
 import { cn } from "@/lib/utils";
-import { ScanLine, Loader2, CheckCircle2, AlertTriangle, X } from "lucide-react";
+import { ScanLine, Loader2, CheckCircle2, AlertTriangle, X, ImagePlus } from "lucide-react";
 
 const EMOTIONS = [
   { value: "ANSIEDADE", label: "Ansiedade" },
@@ -37,6 +37,12 @@ export default function NewTradePage() {
   const [ocrConfidence, setOcrConfidence] = useState<"high" | "medium" | "low" | null>(null);
   const [ocrError, setOcrError] = useState("");
   const fileRef = useRef<HTMLInputElement>(null);
+
+  // Screenshot do gráfico
+  const [screenshotUrl, setScreenshotUrl] = useState("");
+  const [screenshotPreview, setScreenshotPreview] = useState("");
+  const [screenshotUploading, setScreenshotUploading] = useState(false);
+  const screenshotRef = useRef<HTMLInputElement>(null);
 
   // Controlled fields (needed for OCR pre-fill)
   const [date, setDate] = useState(new Date().toISOString().split("T")[0]);
@@ -93,6 +99,22 @@ export default function NewTradePage() {
       setOcrError("Erro de conexão. Tente novamente.");
       setOcrStatus("error");
     }
+  }
+
+  async function uploadScreenshot(file: File) {
+    setScreenshotUploading(true);
+    setScreenshotPreview(URL.createObjectURL(file));
+    const fd = new FormData();
+    fd.append("file", file);
+    try {
+      const res = await fetch("/api/upload-trade-screenshot", { method: "POST", body: fd });
+      const data = await res.json();
+      if (res.ok) setScreenshotUrl(data.url);
+      else setScreenshotPreview("");
+    } catch {
+      setScreenshotPreview("");
+    }
+    setScreenshotUploading(false);
   }
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
@@ -379,6 +401,48 @@ export default function NewTradePage() {
                 <label className="text-sm font-medium text-zinc-700 dark:text-zinc-300">Onde posso melhorar?</label>
                 <Textarea name="whereToImprove" placeholder="Ex: Entrei cedo demais, não esperei o fechamento da barra..." rows={2} className="text-sm" />
               </div>
+            </div>
+
+            {/* Screenshot do gráfico */}
+            <div className="border-t border-zinc-100 dark:border-zinc-800 pt-4 space-y-2">
+              <label className="text-sm font-medium text-zinc-700 dark:text-zinc-300">Print do gráfico</label>
+              <input type="hidden" name="screenshotUrl" value={screenshotUrl} />
+              <input
+                ref={screenshotRef}
+                type="file"
+                accept="image/*"
+                className="sr-only"
+                onChange={(e) => { const f = e.target.files?.[0]; if (f) uploadScreenshot(f); e.target.value = ""; }}
+              />
+
+              {screenshotPreview ? (
+                <div className="relative group w-full rounded-xl overflow-hidden border border-zinc-200 dark:border-zinc-700">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img src={screenshotPreview} alt="Print do gráfico" className="w-full max-h-64 object-contain bg-zinc-50 dark:bg-zinc-900" />
+                  {screenshotUploading && (
+                    <div className="absolute inset-0 flex items-center justify-center bg-black/40">
+                      <Loader2 className="h-6 w-6 animate-spin text-white" />
+                    </div>
+                  )}
+                  <button
+                    type="button"
+                    onClick={() => { setScreenshotPreview(""); setScreenshotUrl(""); }}
+                    className="absolute top-2 right-2 flex h-7 w-7 items-center justify-center rounded-full bg-black/60 text-white opacity-0 group-hover:opacity-100 transition-opacity"
+                  >
+                    <X className="h-4 w-4" />
+                  </button>
+                </div>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => screenshotRef.current?.click()}
+                  onPaste={(e) => { const f = e.clipboardData.files[0]; if (f?.type.startsWith("image/")) { e.preventDefault(); uploadScreenshot(f); } }}
+                  className="w-full flex flex-col items-center justify-center gap-1.5 rounded-xl border-2 border-dashed border-zinc-200 dark:border-zinc-700 py-6 text-zinc-400 hover:border-zinc-400 dark:hover:border-zinc-500 hover:text-zinc-500 transition-all cursor-pointer focus:outline-none focus:border-violet-400"
+                >
+                  <ImagePlus className="h-5 w-5" />
+                  <span className="text-xs">Clique para selecionar ou cole com Ctrl+V</span>
+                </button>
+              )}
             </div>
 
             {error && (
