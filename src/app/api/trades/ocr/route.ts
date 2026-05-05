@@ -58,11 +58,10 @@ export async function POST(req: NextRequest) {
   for (const model of MODELS) {
     for (const key of GEMINI_KEYS) {
       try {
-        const body: any = {
+        const body = {
           contents: [{ parts: [{ text: OCR_PROMPT }, { inlineData: { mimeType, data: base64 } }] }],
-          generationConfig: { temperature: 0.1, maxOutputTokens: 512 },
+          generationConfig: { temperature: 0.1, maxOutputTokens: 2048 },
         };
-        if (model === "gemini-2.5-flash") body.generationConfig.thinkingConfig = { thinkingBudget: 0 };
 
         const res = await fetch(
           `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${key}`,
@@ -71,9 +70,9 @@ export async function POST(req: NextRequest) {
 
         if (!res.ok) {
           const errText = await res.text();
-          console.error(`Gemini OCR [${model}] ${res.status}:`, errText.slice(0, 300));
-          if (res.status === 429) continue;
-          break; // try next model
+          console.error(`Gemini OCR [${model}] ${res.status}:`, errText.slice(0, 400));
+          if (res.status === 429 || res.status >= 500) continue; // try next key
+          break; // 4xx client error → try next model
         }
 
         const data = await res.json();
@@ -81,25 +80,35 @@ export async function POST(req: NextRequest) {
 
         if (!text) {
           console.error(`Gemini OCR [${model}]: empty text, finish=${data.candidates?.[0]?.finishReason}`);
-          break;
+          continue;
         }
 
         // Try array first, then single object fallback
         const arrMatch = text.match(/\[[\s\S]*\]/);
         const objMatch = text.match(/\{[\s\S]*\}/);
-        if (!arrMatch && !objMatch) { console.error(`Gemini OCR [${model}]: no JSON:`, text.slice(0, 200)); break; }
+        if (!arrMatch && !objMatch) {
+          console.error(`Gemini OCR [${model}]: no JSON in response:`, text.slice(0, 300));
+          continue;
+        }
 
         let trades: any[];
-        if (arrMatch) {
-          trades = JSON.parse(arrMatch[0]);
-          if (!Array.isArray(trades)) trades = [trades];
-        } else {
-          trades = [JSON.parse(objMatch![0])];
+        try {
+          if (arrMatch) {
+            trades = JSON.parse(arrMatch[0]);
+            if (!Array.isArray(trades)) trades = [trades];
+          } else {
+            trades = [JSON.parse(objMatch![0])];
+          }
+        } catch (parseErr) {
+          console.error(`Gemini OCR [${model}]: JSON parse error:`, parseErr);
+          continue;
         }
+
+        if (!trades.length) continue;
         return NextResponse.json({ ok: true, trades });
       } catch (err) {
         console.error(`OCR [${model}] exception:`, err);
-        break;
+        continue;
       }
     }
   }
