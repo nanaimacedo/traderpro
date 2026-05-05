@@ -25,8 +25,11 @@ export function ConversationList({
   onNew,
   onDelete,
 }: ConversationListProps) {
+  const today = new Date().toLocaleDateString("pt-BR", { weekday: "long", day: "numeric", month: "long" });
+
   return (
     <div className="flex h-full flex-col">
+      <p className="mb-3 text-xs text-zinc-400 dark:text-zinc-500 capitalize">{today}</p>
       <button
         onClick={onNew}
         className="flex items-center gap-2 rounded-xl border border-dashed border-zinc-300 dark:border-zinc-600 px-4 py-3 text-sm font-medium text-zinc-600 dark:text-zinc-400 transition-colors hover:border-zinc-400 dark:hover:border-zinc-500 hover:bg-zinc-50 dark:hover:bg-zinc-800 cursor-pointer"
