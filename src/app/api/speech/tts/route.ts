@@ -35,38 +35,76 @@ function pcmToWav(pcmBase64: string, sampleRate = 24000): Buffer {
   return wav;
 }
 
-export async function POST(request: NextRequest) {
-  const geminiKeys = (process.env.GEMINI_API_KEYS || process.env.GEMINI_API_KEY || "")
-    .split(",")
-    .map((k) => k.trim())
-    .filter(Boolean);
+function cleanText(text: string, maxChars = 1200): string {
+  let t = text
+    .replace(/#{1,6}\s/g, "")
+    .replace(/\*{1,3}([^*]+)\*{1,3}/g, "$1")
+    .replace(/`([^`]+)`/g, "$1")
+    .replace(/\[([^\]]+)\]\([^)]+\)/g, "$1")
+    .replace(/---+/g, "")
+    .replace(/^[-*]\s+/gm, "")
+    .replace(/^\d+\.\s+/gm, "")
+    .replace(/[📈📉💡🎯⚠️🔥✅❌🏆⭐🧠💪🙏✨🎖️🛡️]/g, "")
+    .replace(/\n{2,}/g, ". ")
+    .replace(/\n/g, " ")
+    .replace(/\s{2,}/g, " ")
+    .trim();
 
-  if (geminiKeys.length === 0) {
-    return NextResponse.json({ error: "GEMINI_API_KEY nao configurada" }, { status: 500 });
-  }
+  if (t.length <= maxChars) return t;
+
+  // Truncate at last sentence boundary within limit
+  const cut = t.slice(0, maxChars);
+  const lastDot = Math.max(cut.lastIndexOf(". "), cut.lastIndexOf("! "), cut.lastIndexOf("? "));
+  return lastDot > maxChars * 0.6 ? cut.slice(0, lastDot + 1) : cut;
+}
+
+export async function POST(request: NextRequest) {
+  const groqKey = process.env.GROQ_API_KEY;
+  const geminiKeys = (process.env.GEMINI_API_KEYS || process.env.GEMINI_API_KEY || "")
+    .split(",").map((k) => k.trim()).filter(Boolean);
 
   try {
     const { text } = await request.json();
+    if (!text?.trim()) return NextResponse.json({ error: "Texto vazio" }, { status: 400 });
 
-    if (!text?.trim()) {
-      return NextResponse.json({ error: "Texto vazio" }, { status: 400 });
+    const clean = cleanText(text);
+
+    // --- 1. Groq TTS (PlayAI) — muito mais rápido ---
+    if (groqKey) {
+      try {
+        const res = await fetch("https://api.groq.com/openai/v1/audio/speech", {
+          method: "POST",
+          headers: {
+            "Authorization": `Bearer ${groqKey}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            model: "playai-tts",
+            input: clean,
+            voice: "Celeste-PlayAI",
+            response_format: "wav",
+          }),
+        });
+
+        if (res.ok) {
+          const audioBuffer = Buffer.from(await res.arrayBuffer());
+          return new Response(audioBuffer as unknown as BodyInit, {
+            headers: {
+              "Content-Type": "audio/wav",
+              "Content-Length": audioBuffer.length.toString(),
+            },
+          });
+        }
+        console.warn("Groq TTS failed, falling back to Gemini:", res.status);
+      } catch (e) {
+        console.warn("Groq TTS error, falling back to Gemini:", e);
+      }
     }
 
-    // Clean markdown for natural speech
-    const clean = text
-      .replace(/#{1,6}\s/g, "")
-      .replace(/\*{1,3}([^*]+)\*{1,3}/g, "$1")
-      .replace(/`([^`]+)`/g, "$1")
-      .replace(/\[([^\]]+)\]\([^)]+\)/g, "$1")
-      .replace(/---+/g, "")
-      .replace(/^[-*]\s+/gm, "")
-      .replace(/^\d+\.\s+/gm, "")
-      .replace(/[📈📉💡🎯⚠️🔥✅❌🏆⭐🧠💪🙏✨🎖️🛡️]/g, "")
-      .replace(/\n{2,}/g, ". ")
-      .replace(/\n/g, " ")
-      .replace(/\s{2,}/g, " ")
-      .trim()
-      .slice(0, 4000);
+    // --- 2. Gemini TTS — fallback ---
+    if (geminiKeys.length === 0) {
+      return NextResponse.json({ error: "Nenhuma chave TTS configurada" }, { status: 500 });
+    }
 
     for (const key of geminiKeys) {
       try {
@@ -76,62 +114,37 @@ export async function POST(request: NextRequest) {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
-              contents: [
-                {
-                  parts: [{ text: clean }],
-                },
-              ],
+              contents: [{ parts: [{ text: clean }] }],
               generationConfig: {
                 responseModalities: ["AUDIO"],
                 speechConfig: {
-                  voiceConfig: {
-                    prebuiltVoiceConfig: {
-                      voiceName: "Charon",
-                    },
-                  },
+                  voiceConfig: { prebuiltVoiceConfig: { voiceName: "Charon" } },
                 },
               },
             }),
           }
         );
 
-        if (!res.ok) {
-          if (res.status === 429) continue;
-          const err = await res.text();
-          console.error(`Gemini TTS error ${res.status}:`, err.slice(0, 200));
-          continue;
-        }
+        if (!res.ok) { if (res.status === 429) continue; continue; }
 
         const data = await res.json();
         const part = data.candidates?.[0]?.content?.parts?.[0];
         const audioData = part?.inlineData?.data;
         const mimeType = part?.inlineData?.mimeType || "";
+        if (!audioData) continue;
 
-        if (!audioData) {
-          console.error("Gemini TTS: no audio in response");
-          continue;
-        }
-
-        // Gemini returns PCM L16 — convert to WAV for browser playback
         if (mimeType.includes("L16") || mimeType.includes("pcm")) {
           const rateMatch = mimeType.match(/rate=(\d+)/);
           const sampleRate = rateMatch ? parseInt(rateMatch[1]) : 24000;
           const wavBuffer = pcmToWav(audioData, sampleRate);
           return new Response(wavBuffer as unknown as BodyInit, {
-            headers: {
-              "Content-Type": "audio/wav",
-              "Content-Length": wavBuffer.length.toString(),
-            },
+            headers: { "Content-Type": "audio/wav", "Content-Length": wavBuffer.length.toString() },
           });
         }
 
-        // If already a playable format, return as-is
         const audioBuffer = Buffer.from(audioData, "base64");
         return new Response(audioBuffer as unknown as BodyInit, {
-          headers: {
-            "Content-Type": mimeType || "audio/mpeg",
-            "Content-Length": audioBuffer.length.toString(),
-          },
+          headers: { "Content-Type": mimeType || "audio/mpeg", "Content-Length": audioBuffer.length.toString() },
         });
       } catch (e) {
         console.error("Gemini TTS key error:", e);
@@ -139,10 +152,7 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    return NextResponse.json(
-      { error: "TTS indisponivel — todas as keys falharam" },
-      { status: 503 }
-    );
+    return NextResponse.json({ error: "TTS indisponivel" }, { status: 503 });
   } catch (err) {
     console.error("TTS error:", err);
     return NextResponse.json({ error: "Erro interno" }, { status: 500 });
