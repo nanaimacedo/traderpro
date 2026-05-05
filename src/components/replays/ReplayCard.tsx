@@ -44,19 +44,18 @@ export function ReplayCard({ replay, moodLabels }: ReplayCardProps) {
   const isPositive = replay.points >= 0;
 
   async function handleImageUpload(e: React.ChangeEvent<HTMLInputElement>) {
-    if (!e.target.files) return;
+    if (!e.target.files?.length) return;
     setUploading(true);
 
-    for (const file of Array.from(e.target.files)) {
-      const fd = new FormData();
-      fd.append("file", file);
-      fd.append("replayId", replay.id);
+    const fd = new FormData();
+    fd.append("replayId", replay.id);
+    Array.from(e.target.files).forEach((file) => fd.append("file", file));
 
-      const res = await fetch("/api/upload-replay", { method: "POST", body: fd });
-      if (res.ok) {
-        const img = await res.json();
-        setImages((prev) => [...prev, img]);
-      }
+    const res = await fetch("/api/upload-replay", { method: "POST", body: fd });
+    if (res.ok) {
+      const data = await res.json();
+      const uploaded: ReplayImage[] = Array.isArray(data) ? data : [data];
+      setImages((prev) => [...prev, ...uploaded]);
     }
 
     setUploading(false);

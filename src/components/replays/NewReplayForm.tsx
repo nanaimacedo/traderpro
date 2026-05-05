@@ -57,16 +57,12 @@ export function NewReplayForm() {
       const formData = new FormData(e.currentTarget);
       const result = await createReplay(formData);
 
-      // Upload das imagens staged após salvar o replay
+      // Upload de todas as imagens em uma única request
       if (stagedFiles.length > 0) {
-        await Promise.all(
-          stagedFiles.map(({ file }) => {
-            const fd = new FormData();
-            fd.append("file", file);
-            fd.append("replayId", result.id);
-            return fetch("/api/upload-replay", { method: "POST", body: fd });
-          })
-        );
+        const fd = new FormData();
+        fd.append("replayId", result.id);
+        stagedFiles.forEach(({ file }) => fd.append("file", file));
+        await fetch("/api/upload-replay", { method: "POST", body: fd });
         stagedFiles.forEach((sf) => URL.revokeObjectURL(sf.preview));
       }
 
