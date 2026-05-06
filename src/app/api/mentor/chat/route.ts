@@ -171,6 +171,69 @@ function parseGroqStream(
   })();
 }
 
+// --- Historical patterns builder ---
+
+async function buildHistoricalPatterns(userId: string, allTrades: any[]): Promise<string> {
+  if (allTrades.length < 5) return "";
+
+  let out = `## PADRÕES HISTÓRICOS (${allTrades.length} trades no total)\n`;
+
+  // By setup
+  const bySetup = new Map<string, { wins: number; losses: number; zeros: number; total: number; pnl: number }>();
+  for (const t of allTrades) {
+    const key = t.setup || "(sem setup)";
+    const s = bySetup.get(key) || { wins: 0, losses: 0, zeros: 0, total: 0, pnl: 0 };
+    s.total++;
+    s.pnl += t.financialResult;
+    if (t.result === "GAIN") s.wins++;
+    else if (t.result === "LOSS") s.losses++;
+    else s.zeros++;
+    bySetup.set(key, s);
+  }
+  const setupLines = Array.from(bySetup.entries())
+    .filter(([, s]) => s.total >= 3)
+    .sort((a, b) => b[1].pnl - a[1].pnl)
+    .map(([name, s]) => {
+      const wr = ((s.wins / s.total) * 100).toFixed(0);
+      return `  • ${name}: ${s.total}t | WR ${wr}% | ${s.pnl >= 0 ? "+" : ""}${formatCurrency(s.pnl)}`;
+    });
+  if (setupLines.length > 0) {
+    out += `**Por setup** (mín 3 trades):\n${setupLines.join("\n")}\n`;
+  }
+
+  // By hour
+  const byHour = new Map<string, { wins: number; total: number; pnl: number }>();
+  for (const t of allTrades) {
+    const hour = t.time?.slice(0, 2) + "h";
+    const h = byHour.get(hour) || { wins: 0, total: 0, pnl: 0 };
+    h.total++;
+    h.pnl += t.financialResult;
+    if (t.result === "GAIN") h.wins++;
+    byHour.set(hour, h);
+  }
+  const hourLines = Array.from(byHour.entries())
+    .filter(([, h]) => h.total >= 3)
+    .sort((a, b) => b[1].pnl - a[1].pnl)
+    .slice(0, 6)
+    .map(([hour, h]) => `  • ${hour}: WR ${((h.wins / h.total) * 100).toFixed(0)}% | ${h.pnl >= 0 ? "+" : ""}${formatCurrency(h.pnl)}`);
+  if (hourLines.length > 0) {
+    out += `**Por horário** (top 6):\n${hourLines.join("\n")}\n`;
+  }
+
+  // Top 3 best and worst individual trades ever
+  const sorted = [...allTrades].sort((a, b) => b.financialResult - a.financialResult);
+  const best3 = sorted.slice(0, 3);
+  const worst3 = sorted.slice(-3).reverse();
+  const fmt = (t: any) => {
+    const d = new Date(t.date).toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit", year: "2-digit" });
+    return `  • ${d} ${t.time} | ${t.asset} ${t.direction} ${t.contracts}ct | E:${t.entryPrice}→${t.exitPrice}${t.setup ? ` | ${t.setup}` : ""} | ${formatCurrency(t.financialResult)}${t.notes ? ` — "${t.notes.slice(0, 80)}"` : ""}`;
+  };
+  out += `**3 melhores trades de todos os tempos:**\n${best3.map(fmt).join("\n")}\n`;
+  out += `**3 piores trades de todos os tempos:**\n${worst3.map(fmt).join("\n")}\n`;
+
+  return out + "\n";
+}
+
 // --- Trade context builder (always fresh, server-side) ---
 
 async function buildTradesContext(userId: string): Promise<string> {
@@ -189,7 +252,7 @@ async function buildTradesContext(userId: string): Promise<string> {
   const todayStart = new Date(now); todayStart.setHours(0, 0, 0, 0);
   const todayEnd = new Date(now); todayEnd.setHours(23, 59, 59, 999);
 
-  const [monthTrades, lastTrades, todayTrades, diaryEntries, replays, reports, profile] = await Promise.all([
+  const [monthTrades, lastTrades, todayTrades, allTrades, diaryEntries, replays, reports, profile] = await Promise.all([
     prisma.trade.findMany({
       where: { userId, date: { gte: startOfMonth, lte: endOfMonth } },
       orderBy: { date: "asc" },
@@ -202,6 +265,11 @@ async function buildTradesContext(userId: string): Promise<string> {
     prisma.trade.findMany({
       where: { userId, date: { gte: todayStart, lte: todayEnd } },
       orderBy: { time: "asc" },
+    }),
+    prisma.trade.findMany({
+      where: { userId },
+      orderBy: { date: "asc" },
+      select: { date: true, time: true, asset: true, direction: true, entryPrice: true, exitPrice: true, contracts: true, result: true, points: true, financialResult: true, setup: true, notes: true },
     }),
     prisma.diaryEntry.findMany({
       where: { userId },
@@ -304,6 +372,12 @@ async function buildTradesContext(userId: string): Promise<string> {
       if (t.whereToImprove) context += `  Melhorar: "${t.whereToImprove}"\n`;
     }
     context += "\n";
+  }
+
+  // Historical patterns (all-time)
+  if (allTrades.length >= 5) {
+    const patterns = await buildHistoricalPatterns(userId, allTrades);
+    if (patterns) context += patterns;
   }
 
   // Diary entries
@@ -429,8 +503,8 @@ ${traderProfile.motivation ? `- **Motivação:** ${traderProfile.motivation}` : 
     const knowledge = getRelevantKnowledge(message || "");
     if (knowledge) systemContent += `\n\n${knowledge}`;
 
-    // Inject mentor memories from past conversations
-    const memories = await getRecentMemories(15);
+    // Inject mentor memories from past conversations (scoped to this user)
+    const memories = await getRecentMemories(15, session.userId);
     if (memories) systemContent += `\n\n${memories}`;
 
     // Inject economic calendar for pre-market and context
