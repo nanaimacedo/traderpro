@@ -19,6 +19,7 @@ const pageTitles: Record<string, { title: string; description: string }> = {
   "/trades/import": { title: "Importar Trades", description: "CSV do Profit, Tryd ou MetaTrader" },
   "/leaderboard": { title: "Leaderboard", description: "Ranking anonimo por Sharpe Ratio" },
   "/mentor": { title: "Gemini", description: "Seu mentor pessoal de trading" },
+  "/chart": { title: "Gráfico IA", description: "TradingView ao vivo + análise Gemini de entrada e saída" },
   "/pricing": { title: "Planos", description: "Free vs Pro — escolha seu plano" },
 };
 

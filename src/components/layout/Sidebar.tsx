@@ -21,11 +21,13 @@ import {
   Crown,
   Medal,
   X,
+  TrendingUp,
 } from "lucide-react";
 
 const navigation = [
   { name: "Dashboard", href: "/", icon: LayoutDashboard },
   { name: "Gemini", href: "/mentor", icon: Brain },
+  { name: "Gráfico IA", href: "/chart", icon: TrendingUp },
   { name: "Nova Operação", href: "/trades/new", icon: Plus },
   // { name: "Diário", href: "/diary", icon: BookOpen },
   { name: "Replays", href: "/replays", icon: PlayCircle },
