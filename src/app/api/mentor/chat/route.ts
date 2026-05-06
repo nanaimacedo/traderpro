@@ -557,8 +557,8 @@ ${traderProfile.motivation ? `- **Motivação:** ${traderProfile.motivation}` : 
     }
 
     const convId = conversation.id;
-    const isProtocol = /\b(bom dia|fechei|acabou|review|p[oó]s.?mercado)\b/i.test(msgLower);
-    const maxTokens = isProtocol || hasImage ? 4096 : 2048;
+    const isProtocol = /\b(bom dia|fechei|acabou|review|p[oó]s.?mercado|o que acha|analisa|destaque|relatorio|relat[oó]rio|como foi|avalia)\b/i.test(msgLower);
+    const maxTokens = hasImage ? 8192 : isProtocol || needsContext ? 16384 : 4096;
 
     // Try Gemini first, then Groq as fallback
     let providerResponse: Response | null = null;
