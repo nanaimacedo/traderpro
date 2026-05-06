@@ -14,6 +14,7 @@ model User {
   email     String   @unique
   password  String // bcrypt hash
   plan      String   @default("free") // free | pro
+  role      String   @default("trader") // trader | owner
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 

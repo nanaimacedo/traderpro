@@ -7,12 +7,14 @@ export async function GET() {
     const session = await getSession();
     if (!session) return NextResponse.json({ onboarded: false, profile: null });
 
-    const profile = await prisma.traderProfile.findUnique({
-      where: { userId: session.userId },
-    });
+    const [profile, user] = await Promise.all([
+      prisma.traderProfile.findUnique({ where: { userId: session.userId } }),
+      prisma.user.findUnique({ where: { id: session.userId }, select: { role: true } }),
+    ]);
     return NextResponse.json({
       onboarded: profile?.onboarded ?? false,
       profile: profile ?? null,
+      role: user?.role ?? "trader",
     });
   } catch {
     return NextResponse.json({ onboarded: false, profile: null }, { status: 500 });

@@ -24,10 +24,9 @@ import {
   TrendingUp,
 } from "lucide-react";
 
-const navigation = [
+const baseNavigation = [
   { name: "Dashboard", href: "/", icon: LayoutDashboard },
   { name: "Gemini", href: "/mentor", icon: Brain },
-  { name: "Gráfico IA", href: "/chart", icon: TrendingUp },
   { name: "Nova Operação", href: "/trades/new", icon: Plus },
   // { name: "Diário", href: "/diary", icon: BookOpen },
   { name: "Replays", href: "/replays", icon: PlayCircle },
@@ -54,15 +53,22 @@ const ASSET_LABELS: Record<string, { name: string; exchange: string }> = {
 export function Sidebar({ open, onClose }: SidebarProps) {
   const pathname = usePathname();
   const [asset, setAsset] = useState("WIN");
+  const [role, setRole] = useState("trader");
 
   useEffect(() => {
     fetch("/api/profile/check")
       .then((res) => res.json())
       .then((data) => {
         if (data.profile?.asset) setAsset(data.profile.asset);
+        if (data.role) setRole(data.role);
       })
       .catch(() => {});
   }, []);
+
+  const navigation = [
+    ...baseNavigation,
+    ...(role === "owner" ? [{ name: "Gráfico IA", href: "/chart", icon: TrendingUp }] : []),
+  ];
 
   return (
     <>
