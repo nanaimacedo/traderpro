@@ -62,51 +62,75 @@ function buildPrompt(asset: string, interval: string, candles: any[], currentPri
   const sessionHigh = Math.max(...highs);
   const sessionLow = Math.min(...lows);
 
-  return `Você é um analista técnico especialista. Analise o mercado e sugira operações com base nos dados abaixo.
+  return `Você é um analista técnico especialista em day trade. Analise os dados OHLCV e retorne um JSON com setup operacional.
 
 ## METODOLOGIA ATIVA
 ${methodCtx}
 
-## ATIVO: ${asset} | TIMEFRAME: ${interval}
+## CONTEXTO DO MERCADO
+Ativo: ${asset} | Timeframe: ${interval}
 Preço atual: ${currentPrice}
-Abertura da sessão: ${firstCandle?.open ?? "N/A"}
-Máxima da sessão: ${sessionHigh}
-Mínima da sessão: ${sessionLow}
+Máxima do período: ${sessionHigh}
+Mínima do período: ${sessionLow}
 Variação: ${lastCandle && firstCandle ? ((lastCandle.close - firstCandle.open) / firstCandle.open * 100).toFixed(2) : "N/A"}%
 
-## DADOS OHLCV (últimos ${Math.min(candles.length, 100)} candles)
+## DADOS OHLCV (últimos ${Math.min(candles.length, 100)} candles — mais recente é o último)
 ${formatCandles(candles)}
 
-## TAREFA
-Com base na metodologia acima e nos dados OHLCV fornecidos, execute uma análise técnica completa e retorne APENAS um JSON válido (sem markdown, sem texto extra):
+## REGRAS OBRIGATÓRIAS (violá-las invalida a análise)
+1. price_zone_min e price_zone_max DEVEM estar próximos ao preço atual (${currentPrice}) — nunca mais de 1% de distância
+2. Para COMPRA: stop ABAIXO de price_zone_min; target1 e target2 ACIMA de price_zone_max
+3. Para VENDA: stop ACIMA de price_zone_max; target1 e target2 ABAIXO de price_zone_min
+4. rr_ratio = distância até target1 / distância até stop (mínimo 1.5)
+5. Todos os níveis devem ser baseados nos dados OHLCV fornecidos — não invente níveis
+6. Se não houver setup claro, use direction: "AGUARDAR"
+
+## RESPOSTA
+Retorne APENAS JSON válido, sem markdown, sem texto extra:
 
 {
   "trend": "alta" | "baixa" | "lateral",
   "strength": "forte" | "moderada" | "fraca",
-  "market_structure": "descrição da estrutura de mercado atual em 1-2 frases",
-  "key_support": número (suporte mais relevante),
-  "key_resistance": número (resistência mais relevante),
+  "market_structure": "descrição em 1-2 frases",
+  "key_support": número,
+  "key_resistance": número,
   "entry": {
     "direction": "COMPRA" | "VENDA" | "AGUARDAR",
     "price_zone_min": número,
     "price_zone_max": número,
-    "trigger": "descrição do gatilho de entrada em 1 frase"
+    "trigger": "gatilho em 1 frase"
   },
   "stop": número,
   "target1": número,
   "target2": número,
-  "rr_ratio": número (relação risco/retorno arredondada para 1 casa decimal),
-  "confidence": número (0 a 100),
-  "reasoning": "análise detalhada em 3-5 frases explicando a leitura do mercado",
-  "alerts": ["alerta 1", "alerta 2"] (máx 3 alertas importantes)
+  "rr_ratio": número,
+  "confidence": número (0-100),
+  "reasoning": "análise em 3-5 frases",
+  "alerts": ["alerta 1", "alerta 2"]
 }`;
 }
 
-async function parseAnalysis(text: string): Promise<any | null> {
+function parseAnalysis(text: string): any | null {
   try { return JSON.parse(text.trim()); } catch { /* */ }
   const match = text.match(/\{[\s\S]*\}/);
   if (!match) return null;
   try { return JSON.parse(match[0]); } catch { return null; }
+}
+
+function validateAnalysis(a: any): boolean {
+  if (!a || !a.entry) return false;
+  const dir = a.entry.direction;
+  if (dir === "AGUARDAR") return true;
+  const entryMin = a.entry.price_zone_min;
+  const entryMax = a.entry.price_zone_max;
+  if (!entryMin || !entryMax || !a.stop || !a.target1) return false;
+  if (dir === "COMPRA") {
+    return a.stop < entryMin && a.target1 > entryMax;
+  }
+  if (dir === "VENDA") {
+    return a.stop > entryMax && a.target1 < entryMin;
+  }
+  return false;
 }
 
 export async function POST(req: NextRequest) {
@@ -151,8 +175,8 @@ export async function POST(req: NextRequest) {
         const text = data.candidates?.[0]?.content?.parts?.[0]?.text ?? "";
         if (!text) continue;
 
-        const analysis = await parseAnalysis(text);
-        if (!analysis) continue;
+        const analysis = parseAnalysis(text);
+        if (!analysis || !validateAnalysis(analysis)) { console.error("[chart-analysis] Gemini invalid analysis", text.slice(0, 200)); continue; }
         return NextResponse.json({ ok: true, analysis, model });
       } catch {
         continue;
@@ -178,8 +202,8 @@ export async function POST(req: NextRequest) {
       if (res.ok) {
         const data = await res.json();
         const text = data.choices?.[0]?.message?.content ?? "";
-        const analysis = await parseAnalysis(text);
-        if (analysis) return NextResponse.json({ ok: true, analysis, model: "groq/llama-3.3-70b" });
+        const analysis = parseAnalysis(text);
+        if (analysis && validateAnalysis(analysis)) return NextResponse.json({ ok: true, analysis, model: "groq/llama-3.3-70b" });
       } else {
         const err = await res.json().catch(() => ({}));
         console.error("[chart-analysis] Groq error", res.status, JSON.stringify(err));
