@@ -60,7 +60,7 @@ export function calculateMetrics(trades: TradeData[]) {
 
   const totalPoints = trades.reduce((sum, t) => sum + t.points, 0);
   const avgPointsPerTrade = totalPoints / total;
-  const totalContracts = trades.reduce((sum, t) => sum + t.contracts, 0);
+  const totalContracts = total > 0 ? Math.round(trades.reduce((sum, t) => sum + t.contracts, 0) / total) : 0;
 
   // Streaks
   let maxWinStreak = 0;

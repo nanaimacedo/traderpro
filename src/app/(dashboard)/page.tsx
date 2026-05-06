@@ -115,7 +115,7 @@ export default async function Dashboard({ searchParams }: PageProps) {
           <MetricCard
             title="Contratos"
             value={metrics.totalContracts.toString()}
-            subtitle="Operados no mês"
+            subtitle="Média por operação"
             icon={Layers}
           />
           <MetricCard
