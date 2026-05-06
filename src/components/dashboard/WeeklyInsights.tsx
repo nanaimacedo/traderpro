@@ -98,7 +98,7 @@ export function WeeklyInsights() {
           className="flex items-center gap-1 rounded-lg bg-amber-50 dark:bg-amber-950 px-2.5 py-1.5 text-[10px] font-semibold text-amber-700 dark:text-amber-400 hover:bg-amber-100 dark:hover:bg-amber-900 transition-colors uppercase tracking-wider"
         >
           <Brain className="h-3 w-3" />
-          Gemini
+          Mentor
         </Link>
       </CardHeader>
 

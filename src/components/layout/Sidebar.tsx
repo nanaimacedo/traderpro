@@ -26,15 +26,15 @@ import {
 
 const baseNavigation = [
   { name: "Dashboard", href: "/", icon: LayoutDashboard },
-  { name: "Gemini", href: "/mentor", icon: Brain },
+  { name: "Mentor", href: "/mentor", icon: Brain },
   { name: "Nova Operação", href: "/trades/new", icon: Plus },
+  { name: "Histórico", href: "/trades", icon: History },
   // { name: "Diário", href: "/diary", icon: BookOpen },
   { name: "Replays", href: "/replays", icon: PlayCircle },
   { name: "Insights", href: "/insights", icon: Lightbulb },
   { name: "Analytics", href: "/analytics", icon: BarChart3 },
   { name: "Importar", href: "/trades/import", icon: Upload },
   // { name: "Leaderboard", href: "/leaderboard", icon: Medal },
-  { name: "Histórico", href: "/trades", icon: History },
   { name: "Relatórios", href: "/reports", icon: FileBarChart },
   // { name: "Conquistas", href: "/achievements", icon: Trophy },
   // { name: "Planos", href: "/pricing", icon: Crown },

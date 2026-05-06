@@ -250,7 +250,7 @@ export function MentorChat() {
             <Brain className="h-4 w-4 lg:h-5 lg:w-5 text-white" />
           </div>
           <div>
-            <h2 className="text-sm font-semibold text-zinc-900 dark:text-zinc-100">Gemini</h2>
+            <h2 className="text-sm font-semibold text-zinc-900 dark:text-zinc-100">Mentor</h2>
             <p className="hidden sm:block text-xs text-zinc-500">
               PNL, Oliver Velez, Psicologia de Mercado
             </p>
@@ -265,7 +265,7 @@ export function MentorChat() {
                 <Brain className="h-7 w-7 lg:h-8 lg:w-8 text-amber-500" />
               </div>
               <h3 className="mt-4 text-base lg:text-lg font-semibold text-zinc-900 dark:text-zinc-100">
-                Gemini — Seu Mentor de Trading
+                Mentor — Seu Mentor de Trading
               </h3>
 
               <p className="mt-2 max-w-md text-sm text-zinc-500">

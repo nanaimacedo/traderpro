@@ -252,7 +252,7 @@ export default function ChartPage() {
           {loading && (
             <div className="rounded-xl border border-violet-200 dark:border-violet-800 bg-violet-50 dark:bg-violet-950/30 p-6 text-center">
               <RefreshCw className="h-8 w-8 text-violet-500 mx-auto mb-3 animate-spin" />
-              <p className="text-sm text-violet-600 dark:text-violet-400">Gemini analisando {asset} no {interval}...</p>
+              <p className="text-sm text-violet-600 dark:text-violet-400">Mentor analisando {asset} no {interval}...</p>
             </div>
           )}
 
