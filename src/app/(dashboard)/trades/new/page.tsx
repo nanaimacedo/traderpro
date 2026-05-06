@@ -72,7 +72,7 @@ function normalizeOcrTrade(t: any): OcrTrade {
     exitPrice: t.exitPrice != null ? String(t.exitPrice) : "",
     contracts: t.contracts != null ? String(t.contracts) : "1",
     durationMinutes: t.durationMinutes != null ? String(t.durationMinutes) : "",
-    financialResult: t.financialResult != null ? String(t.financialResult) : "",
+    financialResult: t.financialResult != null ? parseFloat(t.financialResult).toFixed(2) : "",
     confidence: t.confidence ?? "medium",
   };
 }
@@ -233,7 +233,8 @@ export default function NewTradePage() {
         const t = batchTrades[i];
         const s = batchSubjective[i];
         const fd = new FormData();
-        fd.set("date", t.date); fd.set("time", t.time);
+        fd.set("date", t.date || new Date().toISOString().split("T")[0]);
+        fd.set("time", t.time || new Date().toTimeString().slice(0, 8));
         fd.set("asset", t.asset); fd.set("direction", t.direction);
         fd.set("entryPrice", t.entryPrice); fd.set("exitPrice", t.exitPrice);
         fd.set("contracts", t.contracts);
