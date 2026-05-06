@@ -3,12 +3,12 @@ import { prisma } from "@/lib/prisma";
 export const PLANS = {
   free: {
     name: "Free",
-    maxTradesPerDay: 2,
-    mentorMessagesPerDay: 5,
-    analyticsAccess: false,
-    exportAccess: false,
-    pdfReports: false,
-    leaderboard: false,
+    maxTradesPerDay: Infinity,
+    mentorMessagesPerDay: Infinity,
+    analyticsAccess: true,
+    exportAccess: true,
+    pdfReports: true,
+    leaderboard: true,
     price: 0,
   },
   pro: {

@@ -6,19 +6,8 @@ export async function GET() {
   const session = await getSession();
   if (!session) return NextResponse.json({ error: "Nao autenticado" }, { status: 401 });
 
-  // Check if user is Pro
-  const user = await prisma.user.findUnique({
-    where: { id: session.userId },
-    select: { plan: true },
-  });
-
-  if (user?.plan !== "pro") {
-    return NextResponse.json({ error: "Recurso exclusivo do plano Pro" }, { status: 403 });
-  }
-
-  // Get all users who opted into leaderboard (Pro users)
+  // Get all users for leaderboard
   const proUsers = await prisma.user.findMany({
-    where: { plan: "pro" },
     select: { id: true, name: true },
   });
 

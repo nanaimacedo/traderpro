@@ -43,8 +43,6 @@ const replaySchema = z.object({
   points: z.number(),
 });
 
-const MAX_TRADES_PER_DAY = 4;
-
 export async function createTrade(formData: FormData) {
   const userId = await requireUserId();
 
@@ -72,20 +70,6 @@ export async function createTrade(formData: FormData) {
   const assetCfg = ASSET_CONFIG[asset] || ASSET_CONFIG.WIN;
 
   const profile = await prisma.traderProfile.findUnique({ where: { userId } });
-  const maxEntries = profile?.maxEntries || MAX_TRADES_PER_DAY;
-
-  const dayStart = new Date(tradeDate);
-  dayStart.setHours(0, 0, 0, 0);
-  const dayEnd = new Date(tradeDate);
-  dayEnd.setHours(23, 59, 59, 999);
-
-  const todayCount = await prisma.trade.count({
-    where: { userId, date: { gte: dayStart, lte: dayEnd } },
-  });
-
-  if (todayCount >= maxEntries) {
-    throw new Error(`Limite de ${maxEntries} operações por dia atingido`);
-  }
 
   const points = direction === "COMPRA"
     ? exitPrice - entryPrice
@@ -97,6 +81,8 @@ export async function createTrade(formData: FormData) {
 
   // Circuit breaker: check daily loss limit
   if (profile?.dailyLossLimit) {
+    const dayStart = new Date(tradeDate); dayStart.setHours(0, 0, 0, 0);
+    const dayEnd = new Date(tradeDate); dayEnd.setHours(23, 59, 59, 999);
     const todayTrades = await prisma.trade.findMany({
       where: { userId, date: { gte: dayStart, lte: dayEnd } },
       select: { financialResult: true },
@@ -156,13 +142,6 @@ export async function createTradeWithDiary(formData: FormData) {
   const assetCfg = ASSET_CONFIG[asset] || ASSET_CONFIG.WIN;
 
   const profile = await prisma.traderProfile.findUnique({ where: { userId } });
-  const maxEntries = profile?.maxEntries || MAX_TRADES_PER_DAY;
-
-  const dayStart = new Date(tradeDate); dayStart.setHours(0, 0, 0, 0);
-  const dayEnd = new Date(tradeDate); dayEnd.setHours(23, 59, 59, 999);
-
-  const todayCount = await prisma.trade.count({ where: { userId, date: { gte: dayStart, lte: dayEnd } } });
-  if (todayCount >= maxEntries) throw new Error(`Limite de ${maxEntries} operações por dia atingido`);
 
   const points = direction === "COMPRA" ? exitPrice - entryPrice : entryPrice - exitPrice;
   const pointValue = assetCfg.pointValue;
@@ -174,6 +153,8 @@ export async function createTradeWithDiary(formData: FormData) {
   const result = financialResult > 0 ? "GAIN" : financialResult < 0 ? "LOSS" : "ZERO";
 
   if (profile?.dailyLossLimit) {
+    const dayStart = new Date(tradeDate); dayStart.setHours(0, 0, 0, 0);
+    const dayEnd = new Date(tradeDate); dayEnd.setHours(23, 59, 59, 999);
     const todayTrades = await prisma.trade.findMany({ where: { userId, date: { gte: dayStart, lte: dayEnd } }, select: { financialResult: true } });
     const todayResult = todayTrades.reduce((s, t) => s + t.financialResult, 0);
     if (todayResult + financialResult < -profile.dailyLossLimit) {
