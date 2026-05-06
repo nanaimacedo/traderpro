@@ -238,6 +238,7 @@ export default function NewTradePage() {
         fd.set("entryPrice", t.entryPrice); fd.set("exitPrice", t.exitPrice);
         fd.set("contracts", t.contracts);
         if (t.durationMinutes) fd.set("durationMinutes", t.durationMinutes);
+        if (t.financialResult) fd.set("financialResultOverride", t.financialResult);
         fd.set("setup", s.setup);
         fd.set("emotions", JSON.stringify(s.emotions));
         fd.set("notes", s.relato);
@@ -351,6 +352,20 @@ export default function NewTradePage() {
                 <label className="text-sm font-medium text-zinc-700 dark:text-zinc-300">Duração (min)</label>
                 <Input type="number" min="0" value={cur.durationMinutes} onChange={(e) => updateBatchTrade("durationMinutes", e.target.value)} placeholder="Opcional" />
               </div>
+            </div>
+
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-zinc-700 dark:text-zinc-300">
+                Resultado (R$)
+                <span className="ml-1.5 text-xs font-normal text-zinc-400">da corretora</span>
+              </label>
+              <Input
+                type="number"
+                step="0.01"
+                placeholder="Ex: -45.80 ou 120.00"
+                value={cur.financialResult}
+                onChange={(e) => updateBatchTrade("financialResult", e.target.value)}
+              />
             </div>
 
             {/* Subjective layer */}
