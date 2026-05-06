@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getSession } from "@/lib/auth";
 
 const GEMINI_KEYS = (process.env.GEMINI_API_KEYS || process.env.GEMINI_API_KEY || "").split(",").filter(Boolean);
-const MODELS = ["gemini-2.5-flash", "gemini-2.0-flash"];
+const MODELS = ["gemini-2.5-flash-preview-04-17", "gemini-2.0-flash", "gemini-1.5-flash"];
 
 const METHODOLOGY_CONTEXT: Record<string, string> = {
   "oliver-velez": `Metodologia Oliver Velez — Tape Reading e Price Action puro:
@@ -136,9 +136,8 @@ export async function POST(req: NextRequest) {
 
         if (!res.ok) {
           const errBody = await res.json().catch(() => ({}));
-          console.error(`[chart-analysis] Gemini ${model} key[...] status=${res.status}`, errBody);
-          if (res.status === 429 || res.status >= 500) continue;
-          break;
+          console.error(`[chart-analysis] Gemini ${model} status=${res.status}`, JSON.stringify(errBody));
+          continue; // try next key/model regardless of error type
         }
 
         const data = await res.json();
