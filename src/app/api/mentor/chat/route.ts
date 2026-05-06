@@ -186,7 +186,10 @@ async function buildTradesContext(userId: string): Promise<string> {
   endOfWeek.setDate(startOfWeek.getDate() + 4);
   endOfWeek.setHours(23, 59, 59, 999);
 
-  const [monthTrades, lastTrades, diaryEntries, replays, reports, profile] = await Promise.all([
+  const todayStart = new Date(now); todayStart.setHours(0, 0, 0, 0);
+  const todayEnd = new Date(now); todayEnd.setHours(23, 59, 59, 999);
+
+  const [monthTrades, lastTrades, todayTrades, diaryEntries, replays, reports, profile] = await Promise.all([
     prisma.trade.findMany({
       where: { userId, date: { gte: startOfMonth, lte: endOfMonth } },
       orderBy: { date: "asc" },
@@ -195,6 +198,10 @@ async function buildTradesContext(userId: string): Promise<string> {
       where: { userId },
       orderBy: [{ date: "desc" }, { time: "desc" }],
       take: 12,
+    }),
+    prisma.trade.findMany({
+      where: { userId, date: { gte: todayStart, lte: todayEnd } },
+      orderBy: { time: "asc" },
     }),
     prisma.diaryEntry.findMany({
       where: { userId },
@@ -219,6 +226,25 @@ async function buildTradesContext(userId: string): Promise<string> {
   );
 
   let context = "";
+
+  // Today's trades — always first, explicit and unambiguous
+  const todayLabel = now.toLocaleDateString("pt-BR", { weekday: "long", day: "2-digit", month: "long" });
+  if (todayTrades.length === 0) {
+    context += `## OPERAÇÕES DE HOJE (${todayLabel})\nNenhuma operação registrada hoje ainda.\n\n`;
+  } else {
+    const todayNet = todayTrades.reduce((s, t) => s + t.financialResult, 0);
+    const todayPts = todayTrades.reduce((s, t) => s + t.points, 0);
+    const todayGains = todayTrades.filter((t) => t.result === "GAIN").length;
+    const todayLosses = todayTrades.filter((t) => t.result === "LOSS").length;
+    context += `## OPERAÇÕES DE HOJE (${todayLabel})\n`;
+    context += `- Total: ${todayTrades.length} operação${todayTrades.length > 1 ? "ões" : ""} | Gains: ${todayGains} | Losses: ${todayLosses}\n`;
+    context += `- Resultado do dia: ${formatCurrency(Math.round(todayNet * 100) / 100)} | Pontos: ${todayPts > 0 ? "+" : ""}${todayPts.toFixed(1)}\n`;
+    for (const t of todayTrades) {
+      context += `  • ${t.time} | ${t.asset} ${t.direction} ${t.contracts}ct | E:${t.entryPrice}→${t.exitPrice} | ${t.result} ${t.points > 0 ? "+" : ""}${t.points.toFixed(1)}pts ${formatCurrency(t.financialResult)}${t.setup ? ` | ${t.setup}` : ""}\n`;
+      if (t.notes) context += `    Relato: "${t.notes.slice(0, 120)}"\n`;
+    }
+    context += "\n";
+  }
 
   // Monthly metrics
   if (monthTrades.length > 0) {
@@ -417,7 +443,7 @@ ${traderProfile.motivation ? `- **Motivação:** ${traderProfile.motivation}` : 
     const needsContext =
       isFirstMessage ||
       hasImage ||
-      /\b(bom dia|fechei|acabou|resultado|meta|trade|operac|semana|m[eê]s|win rate|payoff|como (foi|estou|ta|tá)|review|p[oó]s.?mercado|diario|diary|replay|relat[oó]rio)\b/i.test(msgLower);
+      /\b(bom dia|fechei|acabou|resultado|meta|trade|operac|semana|m[eê]s|win rate|payoff|como (foi|estou|ta|tá)|review|p[oó]s.?mercado|diario|diary|replay|relat[oó]rio|quantas|hoje|hj|sess[aã]o|fiz|perdi|ganhei|lucr|prejuiz)\b/i.test(msgLower);
 
     if (needsContext) {
       const tradesContext = await buildTradesContext(session.userId);
