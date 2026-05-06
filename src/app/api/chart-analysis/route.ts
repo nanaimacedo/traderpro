@@ -2,7 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { getSession } from "@/lib/auth";
 
 const GEMINI_KEYS = (process.env.GEMINI_API_KEYS || process.env.GEMINI_API_KEY || "").split(",").filter(Boolean);
-const MODELS = ["gemini-2.5-flash-preview-04-17", "gemini-2.0-flash", "gemini-1.5-flash"];
+const GROQ_KEY = process.env.GROQ_API_KEY || "";
+const MODELS = ["gemini-2.0-flash", "gemini-2.5-flash-preview-04-17", "gemini-1.5-flash"];
 
 const METHODOLOGY_CONTEXT: Record<string, string> = {
   "oliver-velez": `Metodologia Oliver Velez — Tape Reading e Price Action puro:
@@ -101,12 +102,19 @@ Com base na metodologia acima e nos dados OHLCV fornecidos, execute uma análise
 }`;
 }
 
+async function parseAnalysis(text: string): Promise<any | null> {
+  try { return JSON.parse(text.trim()); } catch { /* */ }
+  const match = text.match(/\{[\s\S]*\}/);
+  if (!match) return null;
+  try { return JSON.parse(match[0]); } catch { return null; }
+}
+
 export async function POST(req: NextRequest) {
   const session = await getSession();
   if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-  if (!GEMINI_KEYS.length) {
-    return NextResponse.json({ error: "GEMINI_API_KEYS não configurada" }, { status: 500 });
+  if (!GEMINI_KEYS.length && !GROQ_KEY) {
+    return NextResponse.json({ error: "Nenhuma API key configurada (GEMINI_API_KEYS ou GROQ_API_KEY)" }, { status: 500 });
   }
 
   const { asset, interval, candles, currentPrice, methodology } = await req.json();
@@ -117,45 +125,67 @@ export async function POST(req: NextRequest) {
 
   const prompt = buildPrompt(asset, interval, candles, currentPrice, methodology || "oliver-velez");
 
+  // Try Gemini keys first
   for (const model of MODELS) {
     for (const key of GEMINI_KEYS) {
       try {
-        const body = {
-          contents: [{ parts: [{ text: prompt }] }],
-          generationConfig: {
-            temperature: 0.2,
-            maxOutputTokens: 1024,
-          },
-        };
-
         const res = await fetch(
           `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${key}`,
-          { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) }
+          {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              contents: [{ parts: [{ text: prompt }] }],
+              generationConfig: { temperature: 0.2, maxOutputTokens: 1024 },
+            }),
+          }
         );
 
         if (!res.ok) {
           const errBody = await res.json().catch(() => ({}));
           console.error(`[chart-analysis] Gemini ${model} status=${res.status}`, JSON.stringify(errBody));
-          continue; // try next key/model regardless of error type
+          continue;
         }
 
         const data = await res.json();
         const text = data.candidates?.[0]?.content?.parts?.[0]?.text ?? "";
-        if (!text) { console.error("[chart-analysis] Gemini returned empty text", data); continue; }
+        if (!text) continue;
 
-        let analysis: any;
-        try {
-          analysis = JSON.parse(text.trim());
-        } catch {
-          const match = text.match(/\{[\s\S]*\}/);
-          if (!match) continue;
-          analysis = JSON.parse(match[0]);
-        }
-
+        const analysis = await parseAnalysis(text);
+        if (!analysis) continue;
         return NextResponse.json({ ok: true, analysis, model });
       } catch {
         continue;
       }
+    }
+  }
+
+  // Fallback: Groq (llama-3.3-70b)
+  if (GROQ_KEY) {
+    try {
+      console.log("[chart-analysis] Gemini unavailable, falling back to Groq");
+      const res = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${GROQ_KEY}` },
+        body: JSON.stringify({
+          model: "llama-3.3-70b-versatile",
+          messages: [{ role: "user", content: prompt }],
+          temperature: 0.2,
+          max_tokens: 1024,
+        }),
+      });
+
+      if (res.ok) {
+        const data = await res.json();
+        const text = data.choices?.[0]?.message?.content ?? "";
+        const analysis = await parseAnalysis(text);
+        if (analysis) return NextResponse.json({ ok: true, analysis, model: "groq/llama-3.3-70b" });
+      } else {
+        const err = await res.json().catch(() => ({}));
+        console.error("[chart-analysis] Groq error", res.status, JSON.stringify(err));
+      }
+    } catch (e) {
+      console.error("[chart-analysis] Groq exception", e);
     }
   }
 
