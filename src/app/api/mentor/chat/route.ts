@@ -237,20 +237,28 @@ async function buildHistoricalPatterns(userId: string, allTrades: any[]): Promis
 // --- Trade context builder (always fresh, server-side) ---
 
 async function buildTradesContext(userId: string): Promise<string> {
-  const now = new Date();
-  const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
-  const endOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59);
+  // Always use Brazil timezone (UTC-3) to determine "today"
+  const nowUtc = new Date();
+  const BRT_OFFSET_MS = -3 * 60 * 60 * 1000;
+  const now = new Date(nowUtc.getTime() + BRT_OFFSET_MS);
 
-  const dayOfWeek = now.getDay();
+  const startOfMonth = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), 1) - BRT_OFFSET_MS);
+  const endOfMonth = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth() + 1, 0, 23, 59, 59) - BRT_OFFSET_MS);
+
+  const dayOfWeek = now.getUTCDay();
   const startOfWeek = new Date(now);
-  startOfWeek.setDate(now.getDate() - (dayOfWeek === 0 ? 6 : dayOfWeek - 1));
-  startOfWeek.setHours(0, 0, 0, 0);
+  startOfWeek.setUTCDate(now.getUTCDate() - (dayOfWeek === 0 ? 6 : dayOfWeek - 1));
+  startOfWeek.setUTCHours(0, 0, 0, 0);
+  const startOfWeekUtc = new Date(startOfWeek.getTime() - BRT_OFFSET_MS);
   const endOfWeek = new Date(startOfWeek);
-  endOfWeek.setDate(startOfWeek.getDate() + 4);
-  endOfWeek.setHours(23, 59, 59, 999);
+  endOfWeek.setUTCDate(startOfWeek.getUTCDate() + 4);
+  endOfWeek.setUTCHours(23, 59, 59, 999);
+  const endOfWeekUtc = new Date(endOfWeek.getTime() - BRT_OFFSET_MS);
 
-  const todayStart = new Date(now); todayStart.setHours(0, 0, 0, 0);
-  const todayEnd = new Date(now); todayEnd.setHours(23, 59, 59, 999);
+  // today in BRT: midnight to 23:59:59 converted to UTC for DB query
+  const todayBrtY = now.getUTCFullYear(), todayBrtM = now.getUTCMonth(), todayBrtD = now.getUTCDate();
+  const todayStart = new Date(Date.UTC(todayBrtY, todayBrtM, todayBrtD, 0, 0, 0) - BRT_OFFSET_MS);
+  const todayEnd = new Date(Date.UTC(todayBrtY, todayBrtM, todayBrtD, 23, 59, 59) - BRT_OFFSET_MS);
 
   const [monthTrades, lastTrades, todayTrades, allTrades, diaryEntries, replays, reports, profile] = await Promise.all([
     prisma.trade.findMany({
@@ -290,13 +298,13 @@ async function buildTradesContext(userId: string): Promise<string> {
   ]);
 
   const weekTrades = monthTrades.filter(
-    (t) => new Date(t.date) >= startOfWeek && new Date(t.date) <= endOfWeek
+    (t) => new Date(t.date) >= startOfWeekUtc && new Date(t.date) <= endOfWeekUtc
   );
 
   let context = "";
 
   // Today's trades — always first, explicit and unambiguous
-  const todayLabel = now.toLocaleDateString("pt-BR", { weekday: "long", day: "2-digit", month: "long" });
+  const todayLabel = now.toLocaleDateString("pt-BR", { weekday: "long", day: "2-digit", month: "long", timeZone: "America/Sao_Paulo" });
   if (todayTrades.length === 0) {
     context += `## OPERAÇÕES DE HOJE (${todayLabel})\nNenhuma operação registrada hoje ainda.\n\n`;
   } else {
@@ -414,7 +422,7 @@ async function buildTradesContext(userId: string): Promise<string> {
   }
 
   context += `## SITUAÇÃO ATUAL\n`;
-  context += `- Data/hora: ${now.toLocaleDateString("pt-BR", { weekday: "long", day: "2-digit", month: "long", year: "numeric" })} ${now.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" })}\n`;
+  context += `- Data/hora: ${nowUtc.toLocaleDateString("pt-BR", { weekday: "long", day: "2-digit", month: "long", year: "numeric", timeZone: "America/Sao_Paulo" })} ${nowUtc.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit", timeZone: "America/Sao_Paulo" })} (horário de Brasília)\n`;
   context += `- Replays realizados: ${replays.length} | Entradas no diário: ${diaryEntries.length}\n`;
 
   return context;
