@@ -92,7 +92,7 @@ export async function createTrade(formData: FormData) {
     : entryPrice - exitPrice;
 
   const pointValue = assetCfg.pointValue;
-  const financialResult = points * pointValue * contracts;
+  const financialResult = Math.round(points * pointValue * contracts * 100) / 100;
   const result = points > 0 ? "GAIN" : points < 0 ? "LOSS" : "ZERO";
 
   // Circuit breaker: check daily loss limit
@@ -168,9 +168,9 @@ export async function createTradeWithDiary(formData: FormData) {
   const pointValue = assetCfg.pointValue;
   const financialResultOverrideRaw = (formData.get("financialResultOverride") as string)?.trim();
   const financialResultOverride = financialResultOverrideRaw ? parseFloat(financialResultOverrideRaw) : null;
-  const financialResult = (financialResultOverride != null && !isNaN(financialResultOverride))
+  const financialResult = Math.round(((financialResultOverride != null && !isNaN(financialResultOverride))
     ? financialResultOverride
-    : points * pointValue * contracts;
+    : points * pointValue * contracts) * 100) / 100;
   const result = financialResult > 0 ? "GAIN" : financialResult < 0 ? "LOSS" : "ZERO";
 
   if (profile?.dailyLossLimit) {
@@ -206,6 +206,19 @@ export async function deleteTrade(id: string) {
   await prisma.trade.deleteMany({ where: { id, userId } });
   revalidatePath("/");
   revalidatePath("/trades");
+}
+
+export async function updateTradeFinancialResult(id: string, financialResult: number) {
+  const userId = await requireUserId();
+  const rounded = Math.round(financialResult * 100) / 100;
+  const result = rounded > 0 ? "GAIN" : rounded < 0 ? "LOSS" : "ZERO";
+  await prisma.trade.updateMany({
+    where: { id, userId },
+    data: { financialResult: rounded, result },
+  });
+  revalidatePath("/");
+  revalidatePath("/trades");
+  revalidatePath(`/trades/${id}`);
 }
 
 export async function getTrades(month?: number, year?: number) {

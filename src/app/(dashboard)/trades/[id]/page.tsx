@@ -9,6 +9,7 @@ import ReactMarkdown from "react-markdown";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { DeleteTradeButton } from "@/components/trades/DeleteTradeButton";
+import { EditFinancialResult } from "@/components/trades/EditFinancialResult";
 
 interface PageProps {
   params: Promise<{ id: string }>;
@@ -62,9 +63,12 @@ export default async function TradeDetailPage({ params }: PageProps) {
               </div>
             </div>
             <div className="text-right shrink-0">
-              <p className={`text-2xl font-bold ${resultColor}`}>
-                {trade.financialResult > 0 ? "+" : ""}{formatCurrency(trade.financialResult)}
-              </p>
+              <div className="flex items-center justify-end gap-1">
+                <p className={`text-2xl font-bold ${resultColor}`}>
+                  {trade.financialResult > 0 ? "+" : ""}{formatCurrency(trade.financialResult)}
+                </p>
+                <EditFinancialResult tradeId={trade.id} current={trade.financialResult} />
+              </div>
               <p className={`text-sm font-medium ${resultColor}`}>
                 {trade.points > 0 ? "+" : ""}{trade.points.toFixed(1)} pts
               </p>
