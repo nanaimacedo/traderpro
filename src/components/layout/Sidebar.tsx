@@ -67,7 +67,7 @@ export function Sidebar({ open, onClose }: SidebarProps) {
 
   const navigation = [
     ...baseNavigation,
-    ...(role === "owner" ? [{ name: "Gráfico IA", href: "/chart", icon: TrendingUp }] : []),
+    { name: "Gráfico IA", href: "/chart", icon: TrendingUp },
   ];
 
   return (
