@@ -2,8 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { getSession } from "@/lib/auth";
 
 const SYMBOL_MAP: Record<string, string> = {
-  WIN: "WINM26.SA",
-  WDO: "WDOM26.SA",
+  WIN: "%5EBVSP",
+  WDO: "USDBRL=X",
   PETR4: "PETR4.SA",
   VALE3: "VALE3.SA",
   ITUB4: "ITUB4.SA",

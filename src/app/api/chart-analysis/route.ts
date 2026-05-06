@@ -135,13 +135,15 @@ export async function POST(req: NextRequest) {
         );
 
         if (!res.ok) {
+          const errBody = await res.json().catch(() => ({}));
+          console.error(`[chart-analysis] Gemini ${model} key[...] status=${res.status}`, errBody);
           if (res.status === 429 || res.status >= 500) continue;
           break;
         }
 
         const data = await res.json();
         const text = data.candidates?.[0]?.content?.parts?.[0]?.text ?? "";
-        if (!text) continue;
+        if (!text) { console.error("[chart-analysis] Gemini returned empty text", data); continue; }
 
         let analysis: any;
         try {
