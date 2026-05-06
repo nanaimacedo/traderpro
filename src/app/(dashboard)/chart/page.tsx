@@ -164,9 +164,9 @@ export default function ChartPage() {
     dir === "VENDA" ? "text-rose-500" : "text-amber-500";
 
   return (
-    <div className="flex flex-col gap-4 h-full">
+    <div className="flex flex-col gap-3 h-[calc(100dvh-5rem)]">
       {/* Controls */}
-      <div className="flex flex-wrap items-center gap-3">
+      <div className="flex flex-wrap items-center gap-3 shrink-0">
         {/* Asset */}
         <select
           value={asset}
