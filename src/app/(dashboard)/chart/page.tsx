@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, useCallback, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
+import Script from "next/script";
 import { Brain, RefreshCw, TrendingUp, TrendingDown, Minus, AlertTriangle, Target, Shield, Zap, BarChart2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -86,10 +87,38 @@ export default function ChartPage() {
   const selectedAsset = ASSETS.find(a => a.value === asset) || ASSETS[0];
   const tvSymbol = selectedAsset.tv;
   const tvInterval = TV_INTERVAL_MAP[interval] || "5";
+  const widgetRef = useRef<any>(null);
+  const containerId = "tv_chart_container";
 
-  const tvSrc = `https://www.tradingview.com/widgetsnippet/symbol-overview/?symbols=${tvSymbol}&interval=${tvInterval}&theme=dark&style=1&locale=br&timezone=America%2FSao_Paulo&hide_side_toolbar=0&allow_symbol_change=0&save_image=1&details=1&hotlist=0&calendar=0`;
+  function createWidget() {
+    if (typeof window === "undefined" || !(window as any).TradingView) return;
+    const container = document.getElementById(containerId);
+    if (!container) return;
+    container.innerHTML = "";
+    widgetRef.current = new (window as any).TradingView.widget({
+      container_id: containerId,
+      width: "100%",
+      height: "100%",
+      autosize: true,
+      symbol: tvSymbol,
+      interval: tvInterval,
+      timezone: "America/Sao_Paulo",
+      theme: "dark",
+      style: "1",
+      locale: "br",
+      toolbar_bg: "#18181b",
+      enable_publishing: false,
+      hide_top_toolbar: false,
+      hide_legend: false,
+      save_image: false,
+      studies: ["RSI@tv-basicstudies", "MASimple@tv-basicstudies"],
+    });
+  }
 
-  const chartSrc = `https://www.tradingview.com/chart/?symbol=${tvSymbol}&interval=${tvInterval}&theme=dark&style=1&timezone=America%2FSao_Paulo`;
+  // Recreate widget when symbol or interval changes
+  useEffect(() => {
+    createWidget();
+  }, [tvSymbol, tvInterval]);
 
   async function analyze() {
     setLoading(true);
@@ -194,13 +223,12 @@ export default function ChartPage() {
       {/* Main layout */}
       <div className="flex flex-col xl:flex-row gap-4 flex-1 min-h-0">
         {/* TradingView Chart */}
-        <div className="flex-1 min-h-[480px] xl:min-h-0 rounded-xl overflow-hidden border border-zinc-200 dark:border-zinc-800">
-          <iframe
-            key={`${tvSymbol}-${tvInterval}`}
-            src={chartSrc}
-            className="w-full h-full min-h-[480px]"
-            allowFullScreen
-            title={`Gráfico ${asset}`}
+        <div className="flex-1 min-h-[480px] xl:min-h-0 rounded-xl overflow-hidden border border-zinc-200 dark:border-zinc-800 bg-zinc-950">
+          <div id={containerId} className="w-full h-full min-h-[480px]" />
+          <Script
+            src="https://s3.tradingview.com/tv.js"
+            strategy="afterInteractive"
+            onLoad={createWidget}
           />
         </div>
 
