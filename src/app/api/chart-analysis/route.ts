@@ -1,9 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getSession } from "@/lib/auth";
 
-const GEMINI_KEYS = (process.env.GEMINI_API_KEYS || process.env.GEMINI_API_KEY || "").split(",").filter(Boolean);
 const GROQ_KEY = process.env.GROQ_API_KEY || "";
-const MODELS = ["gemini-2.0-flash", "gemini-2.5-flash-preview-04-17", "gemini-1.5-flash"];
 
 const METHODOLOGY_CONTEXT: Record<string, string> = {
   "oliver-velez": `Metodologia Oliver Velez — Tape Reading e Price Action puro:
@@ -62,7 +60,9 @@ function buildPrompt(asset: string, interval: string, candles: any[], currentPri
   const sessionHigh = Math.max(...highs);
   const sessionLow = Math.min(...lows);
 
-  return `Você é um analista técnico especialista em day trade. Analise os dados OHLCV e retorne um JSON com setup operacional.
+  return `Você é o Mentor de Trading pessoal deste trader — estrategista, coach operacional e psicólogo de performance especializado em day trade na B3. Você não é um robô: é direto, firme, humano e fala português brasileiro.
+
+Sua tarefa agora é ler o gráfico abaixo e devolver uma análise técnica no formato JSON. Os campos de texto (market_structure, trigger, reasoning, alerts) devem ser escritos na sua voz de mentor — clara, objetiva, sem rodeios, como se estivesse falando diretamente com o trader.
 
 ## METODOLOGIA ATIVA
 ${methodCtx}
@@ -74,39 +74,44 @@ Máxima do período: ${sessionHigh}
 Mínima do período: ${sessionLow}
 Variação: ${lastCandle && firstCandle ? ((lastCandle.close - firstCandle.open) / firstCandle.open * 100).toFixed(2) : "N/A"}%
 
-## DADOS OHLCV (últimos ${Math.min(candles.length, 100)} candles — mais recente é o último)
+## DADOS OHLCV (últimos ${Math.min(candles.length, 100)} candles — o mais recente é o último)
 ${formatCandles(candles)}
 
-## REGRAS OBRIGATÓRIAS (violá-las invalida a análise)
-1. price_zone_min e price_zone_max DEVEM estar próximos ao preço atual (${currentPrice}) — nunca mais de 1% de distância
-2. Para COMPRA: stop ABAIXO de price_zone_min; target1 e target2 ACIMA de price_zone_max
-3. Para VENDA: stop ACIMA de price_zone_max; target1 e target2 ABAIXO de price_zone_min
-4. rr_ratio = distância até target1 / distância até stop (mínimo 1.5)
-5. Todos os níveis devem ser baseados nos dados OHLCV fornecidos — não invente níveis
-6. Se não houver setup claro, use direction: "AGUARDAR"
+## REGRAS DE ANÁLISE (violá-las invalida o setup)
+1. price_zone_min e price_zone_max DEVEM estar próximos ao preço atual (${currentPrice}) — máximo 1% de distância
+2. COMPRA: stop ABAIXO de price_zone_min; target1 e target2 ACIMA de price_zone_max
+3. VENDA: stop ACIMA de price_zone_max; target1 e target2 ABAIXO de price_zone_min
+4. rr_ratio = distância até target1 / distância até stop — mínimo 1.5
+5. Todos os níveis saem dos dados OHLCV reais — sem inventar
+6. Sem setup claro → direction: "AGUARDAR"
 
-## RESPOSTA
-Retorne APENAS JSON válido, sem markdown, sem texto extra:
+## TOM DOS CAMPOS DE TEXTO
+- market_structure: leitura direta do que o mercado está fazendo agora ("Mercado lateralizando abaixo da MM20, sem força compradora clara.")
+- trigger: gatilho objetivo ("Rompimento com fechamento acima de X com volume.")
+- reasoning: 3 a 5 frases como mentor falando com o trader — o que vê, o que pensa, o que recomenda. Sem blá-blá-blá.
+- alerts: avisos curtos e diretos, máx 3 ("Não antecipe. Espera o candle fechar.")
+
+## RESPOSTA — apenas JSON válido, sem markdown, sem texto extra:
 
 {
   "trend": "alta" | "baixa" | "lateral",
   "strength": "forte" | "moderada" | "fraca",
-  "market_structure": "descrição em 1-2 frases",
+  "market_structure": "string",
   "key_support": número,
   "key_resistance": número,
   "entry": {
     "direction": "COMPRA" | "VENDA" | "AGUARDAR",
     "price_zone_min": número,
     "price_zone_max": número,
-    "trigger": "gatilho em 1 frase"
+    "trigger": "string"
   },
   "stop": número,
   "target1": número,
   "target2": número,
   "rr_ratio": número,
   "confidence": número (0-100),
-  "reasoning": "análise em 3-5 frases",
-  "alerts": ["alerta 1", "alerta 2"]
+  "reasoning": "string",
+  "alerts": ["string"]
 }`;
 }
 
@@ -137,8 +142,8 @@ export async function POST(req: NextRequest) {
   const session = await getSession();
   if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-  if (!GEMINI_KEYS.length && !GROQ_KEY) {
-    return NextResponse.json({ error: "Nenhuma API key configurada (GEMINI_API_KEYS ou GROQ_API_KEY)" }, { status: 500 });
+  if (!GROQ_KEY) {
+    return NextResponse.json({ error: "GROQ_API_KEY não configurada" }, { status: 500 });
   }
 
   const { asset, interval, candles, currentPrice, methodology } = await req.json();
@@ -149,42 +154,7 @@ export async function POST(req: NextRequest) {
 
   const prompt = buildPrompt(asset, interval, candles, currentPrice, methodology || "oliver-velez");
 
-  // Try Gemini keys first
-  for (const model of MODELS) {
-    for (const key of GEMINI_KEYS) {
-      try {
-        const res = await fetch(
-          `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${key}`,
-          {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              contents: [{ parts: [{ text: prompt }] }],
-              generationConfig: { temperature: 0.2, maxOutputTokens: 1024 },
-            }),
-          }
-        );
-
-        if (!res.ok) {
-          const errBody = await res.json().catch(() => ({}));
-          console.error(`[chart-analysis] Gemini ${model} status=${res.status}`, JSON.stringify(errBody));
-          continue;
-        }
-
-        const data = await res.json();
-        const text = data.candidates?.[0]?.content?.parts?.[0]?.text ?? "";
-        if (!text) continue;
-
-        const analysis = parseAnalysis(text);
-        if (!analysis || !validateAnalysis(analysis)) { console.error("[chart-analysis] Gemini invalid analysis", text.slice(0, 200)); continue; }
-        return NextResponse.json({ ok: true, analysis, model });
-      } catch {
-        continue;
-      }
-    }
-  }
-
-  // Fallback: Groq (llama-3.3-70b)
+  // Usa apenas Groq para não consumir quota Gemini do mentor
   if (GROQ_KEY) {
     try {
       console.log("[chart-analysis] Gemini unavailable, falling back to Groq");
