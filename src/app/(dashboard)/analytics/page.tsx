@@ -203,13 +203,13 @@ export default async function AnalyticsPage({ searchParams }: PageProps) {
           </div>
           {monthBasic.maxDurationTrade && (
             <div>
-              <p className="text-sm font-bold text-zinc-700 dark:text-zinc-300">{formatDuration(monthBasic.maxDurationTrade.minutes)}</p>
+              <p className="text-sm font-bold text-zinc-700 dark:text-zinc-300">{formatDuration(monthBasic.maxDurationTrade.seconds)}</p>
               <p className="text-[10px] text-zinc-400 uppercase">Dur. Máx.</p>
             </div>
           )}
           {monthBasic.minDurationTrade && (
             <div>
-              <p className="text-sm font-bold text-zinc-700 dark:text-zinc-300">{formatDuration(monthBasic.minDurationTrade.minutes)}</p>
+              <p className="text-sm font-bold text-zinc-700 dark:text-zinc-300">{formatDuration(monthBasic.minDurationTrade.seconds)}</p>
               <p className="text-[10px] text-zinc-400 uppercase">Dur. Mín.</p>
             </div>
           )}

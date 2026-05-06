@@ -372,7 +372,10 @@ async function buildTradesContext(userId: string): Promise<string> {
       context += ` | E:${t.entryPrice}→${t.exitPrice}`;
       context += ` | ${t.result} ${t.points > 0 ? "+" : ""}${t.points.toFixed(1)}pts ${formatCurrency(t.financialResult)}`;
       if (t.setup) context += ` | Setup:${t.setup}`;
-      if (t.durationMinutes) context += ` | ${t.durationMinutes}min`;
+      if (t.durationMinutes) {
+        const m = Math.floor(t.durationMinutes / 60), s = t.durationMinutes % 60;
+        context += ` | ${m > 0 ? `${m}m ` : ""}${s}s`.trimEnd();
+      }
       if (emotions) context += ` | Emocoes:[${emotions}]`;
       context += "\n";
       if (t.notes) context += `  Relato: "${t.notes}"\n`;

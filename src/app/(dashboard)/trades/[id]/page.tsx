@@ -2,6 +2,7 @@ export const revalidate = 0;
 
 import { getTradeById } from "@/lib/actions";
 import { formatCurrency, formatDate } from "@/lib/utils";
+import { formatDuration as formatDurationSecs } from "@/lib/calculations";
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { ArrowLeft, TrendingUp, TrendingDown, Minus, Clock, BarChart2, Camera } from "lucide-react";
@@ -83,7 +84,7 @@ export default async function TradeDetailPage({ params }: PageProps) {
           { label: "Entrada", value: trade.entryPrice.toLocaleString("pt-BR") },
           { label: "Saída", value: trade.exitPrice.toLocaleString("pt-BR") },
           { label: "Contratos", value: String(trade.contracts) },
-          { label: "Duração", value: trade.durationMinutes ? `${trade.durationMinutes}min` : "—" },
+          { label: "Duração", value: trade.durationMinutes ? formatDurationSecs(trade.durationMinutes) : "—" },
         ].map(({ label, value }) => (
           <Card key={label}>
             <CardContent className="pt-4 pb-3">

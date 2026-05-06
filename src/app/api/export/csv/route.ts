@@ -11,7 +11,7 @@ export async function GET() {
     orderBy: [{ date: "asc" }, { time: "asc" }],
   });
 
-  const header = "Data,Hora,Ativo,Direcao,Entrada,Saida,Contratos,Resultado,Pontos,Financeiro,Setup,Duracao(min),Notas";
+  const header = "Data,Hora,Ativo,Direcao,Entrada,Saida,Contratos,Resultado,Pontos,Financeiro,Setup,Duracao(seg),Notas";
   const rows = trades.map(t => {
     const date = new Date(t.date).toLocaleDateString("pt-BR");
     const notes = (t.notes || "").replace(/,/g, ";").replace(/\n/g, " ");

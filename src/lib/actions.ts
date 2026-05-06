@@ -20,7 +20,7 @@ const tradeSchema = z.object({
   entryPrice: z.number().positive(),
   exitPrice: z.number().positive(),
   contracts: z.number().int().min(1).max(100),
-  durationMinutes: z.number().int().positive().nullable(),
+  durationMinutes: z.number().int().min(0).nullable(),
   setup: z.string().max(50).nullable(),
   notes: z.string().nullable(),
 });

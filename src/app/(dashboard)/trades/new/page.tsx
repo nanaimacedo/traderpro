@@ -71,7 +71,7 @@ function normalizeOcrTrade(t: any): OcrTrade {
     entryPrice: t.entryPrice != null ? String(t.entryPrice) : "",
     exitPrice: t.exitPrice != null ? String(t.exitPrice) : "",
     contracts: t.contracts != null ? String(t.contracts) : "1",
-    durationMinutes: t.durationMinutes != null ? String(t.durationMinutes) : "",
+    durationMinutes: t.durationSeconds != null ? String(t.durationSeconds) : t.durationMinutes != null ? String(t.durationMinutes * 60) : "",
     financialResult: t.financialResult != null ? parseFloat(t.financialResult).toFixed(2) : "",
     confidence: t.confidence ?? "medium",
   };
@@ -204,7 +204,7 @@ export default function NewTradePage() {
       if (!durationMinutes) {
         const calcSecs = calcDurationSecs(time, exitTime);
         if (calcSecs != null) {
-          formData.set("durationMinutes", String(Math.max(1, Math.round(calcSecs / 60))));
+          formData.set("durationMinutes", String(calcSecs));
         }
       }
       await createTradeWithDiary(formData);
@@ -350,7 +350,7 @@ export default function NewTradePage() {
                 <Input type="number" min="1" value={cur.contracts} onChange={(e) => updateBatchTrade("contracts", e.target.value)} />
               </div>
               <div className="space-y-2">
-                <label className="text-sm font-medium text-zinc-700 dark:text-zinc-300">Duração (min)</label>
+                <label className="text-sm font-medium text-zinc-700 dark:text-zinc-300">Duração (seg)</label>
                 <Input type="number" min="0" value={cur.durationMinutes} onChange={(e) => updateBatchTrade("durationMinutes", e.target.value)} placeholder="Opcional" />
               </div>
             </div>
@@ -539,14 +539,14 @@ export default function NewTradePage() {
                 <label className="text-sm font-medium text-zinc-700 dark:text-zinc-300">Duração</label>
                 {(() => {
                   const calcSecs = calcDurationSecs(time, exitTime);
-                  const autoVal = calcSecs != null ? String(Math.max(1, Math.round(calcSecs / 60))) : "";
+                  const autoVal = calcSecs != null ? String(calcSecs) : "";
                   return (
                     <div className="relative">
                       <Input
                         type="number"
                         name="durationMinutes"
                         min="0"
-                        placeholder={calcSecs != null ? formatDuration(calcSecs) : "min"}
+                        placeholder={calcSecs != null ? formatDuration(calcSecs) : "seg"}
                         value={durationMinutes || autoVal}
                         onChange={(e) => setDurationMinutes(e.target.value)}
                         className={calcSecs != null && !durationMinutes ? "text-zinc-400" : ""}

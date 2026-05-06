@@ -62,10 +62,10 @@ export default async function Dashboard({ searchParams }: PageProps) {
         maxGainPerOp:     brokerReport.maxGainPerOp     ?? calculatedMetrics.maxGainPerOp,
         maxLossPerOp:     brokerReport.maxLossPerOp     ?? calculatedMetrics.maxLossPerOp,
         maxDurationTrade: brokerReport.maxDurationMinutes != null
-          ? { minutes: brokerReport.maxDurationMinutes, financialResult: brokerReport.maxDurationResult ?? 0 }
+          ? { seconds: brokerReport.maxDurationMinutes * 60, financialResult: brokerReport.maxDurationResult ?? 0 }
           : calculatedMetrics.maxDurationTrade,
         minDurationTrade: brokerReport.minDurationMinutes != null
-          ? { minutes: brokerReport.minDurationMinutes, financialResult: brokerReport.minDurationResult ?? 0 }
+          ? { seconds: brokerReport.minDurationMinutes * 60, financialResult: brokerReport.minDurationResult ?? 0 }
           : calculatedMetrics.minDurationTrade,
       }
     : calculatedMetrics;
@@ -228,7 +228,7 @@ export default async function Dashboard({ searchParams }: PageProps) {
                 <span className="text-xs text-zinc-500 flex items-center gap-1"><Clock className="h-3 w-3" /> Maior Tempo</span>
                 <div className="text-right">
                   <span className="text-sm font-semibold tabular-nums text-zinc-900 dark:text-zinc-100">
-                    {metrics.maxDurationTrade ? formatDuration(metrics.maxDurationTrade.minutes) : "—"}
+                    {metrics.maxDurationTrade ? formatDuration(metrics.maxDurationTrade.seconds) : "—"}
                   </span>
                   {metrics.maxDurationTrade && (
                     <span className={cn("text-xs ml-2", metrics.maxDurationTrade.financialResult >= 0 ? "text-emerald-600 dark:text-emerald-400" : "text-rose-500")}>
@@ -241,7 +241,7 @@ export default async function Dashboard({ searchParams }: PageProps) {
                 <span className="text-xs text-zinc-500 flex items-center gap-1"><Clock className="h-3 w-3" /> Menor Tempo</span>
                 <div className="text-right">
                   <span className="text-sm font-semibold tabular-nums text-zinc-900 dark:text-zinc-100">
-                    {metrics.minDurationTrade ? formatDuration(metrics.minDurationTrade.minutes) : "—"}
+                    {metrics.minDurationTrade ? formatDuration(metrics.minDurationTrade.seconds) : "—"}
                   </span>
                   {metrics.minDurationTrade && (
                     <span className={cn("text-xs ml-2", metrics.minDurationTrade.financialResult >= 0 ? "text-emerald-600 dark:text-emerald-400" : "text-rose-500")}>

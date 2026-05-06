@@ -10,7 +10,7 @@ Analise a imagem (screenshot do Profit/Nelogica, MT5, Tryd ou similar) e extraia
 REGRAS CRÍTICAS:
 - Preserve TODOS os dígitos dos preços. Ex: 128.500 → 128500, nunca 12850 ou 1285.
 - Preços de futuros brasileiros (WIN, WDO) têm 5-6 dígitos. Se parece pouco, revise.
-- Duração: se mostrada em segundos (ex: "125s"), converta para minutos arredondando (125s → 2). Se em HH:MM, converta para minutos totais.
+- Duração: extraia sempre em SEGUNDOS TOTAIS. "51s" → 51, "42s" → 42, "3min1s" → 181, "12min3s" → 723, "1:30" → 90, "0:26" → 26. NUNCA converta para minutos.
 - Direção: "C" ou "Compra" → "COMPRA". "V" ou "Venda" → "VENDA".
 - Data: use a data do header/título da tela se não estiver por operação.
 - Resultado financeiro: procure colunas chamadas "Res. Intervalo Bruto", "Res. Intervalo", "Resultado", "Resultado Bruto", "Lucro", "P&L", "Ganho", "Prejuízo" ou similar. O valor em R$ usa vírgula como decimal (ex: "R$ 56,00" → 56.00, "R$ -45,80" → -45.80). Converta sempre para número decimal com ponto. Se a tela mostrar apenas pontos (ex: "93 pts") sem R$, use null.
@@ -25,7 +25,7 @@ Retorne APENAS um JSON array válido, sem markdown, sem texto extra:
     "entryPrice": número inteiro ou decimal (ex: 128500),
     "exitPrice": número inteiro ou decimal,
     "contracts": número inteiro,
-    "durationMinutes": número inteiro ou null,
+    "durationSeconds": número inteiro de segundos totais ou null,
     "financialResult": número decimal (resultado líquido em R$ como aparece na tela, ex: -45.80 ou 120.00) ou null,
     "confidence": "high" | "medium" | "low"
   }

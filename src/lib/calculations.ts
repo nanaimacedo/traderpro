@@ -7,12 +7,14 @@ interface TradeData {
   durationMinutes?: number | null;
 }
 
-export function formatDuration(minutes: number): string {
-  if (minutes < 1) return "< 1 min";
-  if (minutes < 60) return `${minutes} min`;
-  const h = Math.floor(minutes / 60);
-  const m = minutes % 60;
-  return m > 0 ? `${h}h${m}min` : `${h}h`;
+export function formatDuration(seconds: number): string {
+  if (seconds < 60) return `${seconds}s`;
+  const m = Math.floor(seconds / 60);
+  const s = seconds % 60;
+  if (m < 60) return s > 0 ? `${m}m ${s}s` : `${m}m`;
+  const h = Math.floor(m / 60);
+  const rem = m % 60;
+  return rem > 0 ? `${h}h ${rem}m` : `${h}h`;
 }
 
 export function calculateMetrics(trades: TradeData[]) {
@@ -38,8 +40,8 @@ export function calculateMetrics(trades: TradeData[]) {
       maxDailyLoss: 0,
       maxGainPerOp: 0,
       maxLossPerOp: 0,
-      maxDurationTrade: null as { minutes: number; financialResult: number } | null,
-      minDurationTrade: null as { minutes: number; financialResult: number } | null,
+      maxDurationTrade: null as { seconds: number; financialResult: number } | null,
+      minDurationTrade: null as { seconds: number; financialResult: number } | null,
     };
   }
 
@@ -115,13 +117,13 @@ export function calculateMetrics(trades: TradeData[]) {
 
   // Duration extremes
   const tradesWithDuration = trades.filter((t) => t.durationMinutes != null && t.durationMinutes > 0);
-  let maxDurationTrade: { minutes: number; financialResult: number } | null = null;
-  let minDurationTrade: { minutes: number; financialResult: number } | null = null;
+  let maxDurationTrade: { seconds: number; financialResult: number } | null = null;
+  let minDurationTrade: { seconds: number; financialResult: number } | null = null;
   if (tradesWithDuration.length > 0) {
     const maxDur = tradesWithDuration.reduce((a, b) => (a.durationMinutes! > b.durationMinutes! ? a : b));
     const minDur = tradesWithDuration.reduce((a, b) => (a.durationMinutes! < b.durationMinutes! ? a : b));
-    maxDurationTrade = { minutes: maxDur.durationMinutes!, financialResult: maxDur.financialResult };
-    minDurationTrade = { minutes: minDur.durationMinutes!, financialResult: minDur.financialResult };
+    maxDurationTrade = { seconds: maxDur.durationMinutes!, financialResult: maxDur.financialResult };
+    minDurationTrade = { seconds: minDur.durationMinutes!, financialResult: minDur.financialResult };
   }
 
   return {

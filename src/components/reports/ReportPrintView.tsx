@@ -46,8 +46,8 @@ interface ReportData {
     maxDailyLoss: number;
     maxGainPerOp: number;
     maxLossPerOp: number;
-    maxDurationTrade: { minutes: number; financialResult: number } | null;
-    minDurationTrade: { minutes: number; financialResult: number } | null;
+    maxDurationTrade: { seconds: number; financialResult: number } | null;
+    minDurationTrade: { seconds: number; financialResult: number } | null;
   };
   payoffRatio: number;
   trades: Trade[];
@@ -347,12 +347,12 @@ export function ReportPrintView({ data }: { data: ReportData }) {
               <tr className="stat-separator"><td colSpan={3}></td></tr>
               <tr>
                 <td className="stat-label">Maior Tempo por Op.</td>
-                <td className="stat-value">{m.maxDurationTrade ? formatDuration(m.maxDurationTrade.minutes) : "—"}</td>
+                <td className="stat-value">{m.maxDurationTrade ? formatDuration(m.maxDurationTrade.seconds) : "—"}</td>
                 <td className="stat-sub">{m.maxDurationTrade ? formatCurrency(m.maxDurationTrade.financialResult) : ""}</td>
               </tr>
               <tr>
                 <td className="stat-label">Menor Tempo por Op.</td>
-                <td className="stat-value">{m.minDurationTrade ? formatDuration(m.minDurationTrade.minutes) : "—"}</td>
+                <td className="stat-value">{m.minDurationTrade ? formatDuration(m.minDurationTrade.seconds) : "—"}</td>
                 <td className="stat-sub">{m.minDurationTrade ? formatCurrency(m.minDurationTrade.financialResult) : ""}</td>
               </tr>
             </tbody>
