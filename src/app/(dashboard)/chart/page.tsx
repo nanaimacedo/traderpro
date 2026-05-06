@@ -6,8 +6,8 @@ import { Brain, RefreshCw, TrendingUp, TrendingDown, Minus, AlertTriangle, Targe
 import { cn } from "@/lib/utils";
 
 const ASSETS = [
-  { value: "WIN", label: "WIN — Mini Índice", tv: "BMFBOVESPA:WINM26" },
-  { value: "WDO", label: "WDO — Mini Dólar", tv: "BMFBOVESPA:WDOM26" },
+  { value: "WIN", label: "WIN — Mini Índice", tv: "BMFBOVESPA:WIN1!" },
+  { value: "WDO", label: "WDO — Mini Dólar", tv: "BMFBOVESPA:WDO1!" },
   { value: "PETR4", label: "PETR4", tv: "BMFBOVESPA:PETR4" },
   { value: "VALE3", label: "VALE3", tv: "BMFBOVESPA:VALE3" },
   { value: "ITUB4", label: "ITUB4", tv: "BMFBOVESPA:ITUB4" },
