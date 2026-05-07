@@ -347,32 +347,35 @@ async function buildTradesContext(userId: string): Promise<string> {
       return rd.getUTCFullYear() === yY && rd.getUTCMonth() === yM && rd.getUTCDate() === yD;
     }) : null;
 
-    if (yesterdayTrades.length === 0 && !yesterdayHadReplay) {
-      context += `## ONTEM (${yesterdayLabel})\nNenhuma operação registrada. Nenhum replay realizado.\n\n`;
+    context += `## ONTEM (${yesterdayLabel})\n`;
+
+    // Block 1: real trades (completely independent from replays)
+    context += `### Operações reais de ontem:\n`;
+    if (yesterdayTrades.length === 0) {
+      context += `Nenhuma operação real registrada ontem.\n`;
     } else {
       const yNet = yesterdayTrades.reduce((s, t) => s + t.financialResult, 0);
       const yPts = yesterdayTrades.reduce((s, t) => s + t.points, 0);
       const yGains = yesterdayTrades.filter((t) => t.result === "GAIN").length;
       const yLosses = yesterdayTrades.filter((t) => t.result === "LOSS").length;
-      context += `## ONTEM (${yesterdayLabel})\n`;
-      if (yesterdayTrades.length > 0) {
-        context += `- Total: ${yesterdayTrades.length} operação${yesterdayTrades.length > 1 ? "ões" : ""} | Gains: ${yGains} | Losses: ${yLosses}\n`;
-        context += `- Resultado: ${formatCurrency(Math.round(yNet * 100) / 100)} | Pontos: ${yPts > 0 ? "+" : ""}${yPts.toFixed(1)}\n`;
-        for (const t of yesterdayTrades) {
-          context += `  • ${t.time} | ${t.asset} ${t.direction} ${t.contracts}ct | E:${t.entryPrice}→${t.exitPrice} | ${t.result} ${t.points > 0 ? "+" : ""}${t.points.toFixed(1)}pts ${formatCurrency(t.financialResult)}${t.setup ? ` | ${t.setup}` : ""}\n`;
-          if (t.notes) context += `    Relato: "${t.notes.slice(0, 120)}"\n`;
-        }
-      } else {
-        context += `- Nenhuma operação registrada.\n`;
+      context += `Total: ${yesterdayTrades.length} operação${yesterdayTrades.length > 1 ? "ões" : ""} | Gains: ${yGains} | Losses: ${yLosses} | Resultado: ${formatCurrency(Math.round(yNet * 100) / 100)} | Pontos: ${yPts > 0 ? "+" : ""}${yPts.toFixed(1)}\n`;
+      for (const t of yesterdayTrades) {
+        context += `  • ${t.time} | ${t.asset} ${t.direction} ${t.contracts}ct | E:${t.entryPrice}→${t.exitPrice} | ${t.result} ${t.points > 0 ? "+" : ""}${t.points.toFixed(1)}pts ${formatCurrency(t.financialResult)}${t.setup ? ` | ${t.setup}` : ""}\n`;
+        if (t.notes) context += `    Relato: "${t.notes.slice(0, 120)}"\n`;
       }
-      if (yesterdayReplay) {
-        const wr = yesterdayReplay.entries > 0 ? ((yesterdayReplay.gains / yesterdayReplay.entries) * 100).toFixed(0) : "0";
-        context += `- Replay realizado: "${yesterdayReplay.title}" | ${yesterdayReplay.entries} ent | ${yesterdayReplay.gains}G/${yesterdayReplay.losses}L | WR:${wr}% | ${yesterdayReplay.points > 0 ? "+" : ""}${yesterdayReplay.points.toFixed(1)}pts\n`;
-      } else {
-        context += `- Nenhum replay realizado ontem.\n`;
-      }
-      context += "\n";
     }
+
+    // Block 2: replay study (completely independent from real trades)
+    context += `### Replay/estudo de ontem:\n`;
+    if (yesterdayReplay) {
+      const wr = yesterdayReplay.entries > 0 ? ((yesterdayReplay.gains / yesterdayReplay.entries) * 100).toFixed(0) : "0";
+      context += `"${yesterdayReplay.title}" | ${yesterdayReplay.entries} ent | ${yesterdayReplay.gains}G/${yesterdayReplay.losses}L | WR:${wr}% | ${yesterdayReplay.points > 0 ? "+" : ""}${yesterdayReplay.points.toFixed(1)}pts\n`;
+      if (yesterdayReplay.content) context += `  ${yesterdayReplay.content}\n`;
+    } else {
+      context += `Nenhum replay/estudo realizado ontem.\n`;
+    }
+
+    context += "\n";
   }
 
   // Monthly metrics
