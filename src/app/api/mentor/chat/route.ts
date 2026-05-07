@@ -260,7 +260,14 @@ async function buildTradesContext(userId: string): Promise<string> {
   const todayStart = new Date(Date.UTC(todayBrtY, todayBrtM, todayBrtD, 0, 0, 0) - BRT_OFFSET_MS);
   const todayEnd = new Date(Date.UTC(todayBrtY, todayBrtM, todayBrtD, 23, 59, 59) - BRT_OFFSET_MS);
 
-  const [monthTrades, lastTrades, todayTrades, allTrades, diaryEntries, replays, reports, profile] = await Promise.all([
+  // yesterday in BRT
+  const yesterdayBrt = new Date(now);
+  yesterdayBrt.setUTCDate(now.getUTCDate() - 1);
+  const yY = yesterdayBrt.getUTCFullYear(), yM = yesterdayBrt.getUTCMonth(), yD = yesterdayBrt.getUTCDate();
+  const yesterdayStart = new Date(Date.UTC(yY, yM, yD, 0, 0, 0) - BRT_OFFSET_MS);
+  const yesterdayEnd = new Date(Date.UTC(yY, yM, yD, 23, 59, 59) - BRT_OFFSET_MS);
+
+  const [monthTrades, lastTrades, todayTrades, yesterdayTrades, allTrades, diaryEntries, replays, reports, profile] = await Promise.all([
     prisma.trade.findMany({
       where: { userId, date: { gte: startOfMonth, lte: endOfMonth } },
       orderBy: { date: "asc" },
@@ -272,6 +279,10 @@ async function buildTradesContext(userId: string): Promise<string> {
     }),
     prisma.trade.findMany({
       where: { userId, date: { gte: todayStart, lte: todayEnd } },
+      orderBy: { time: "asc" },
+    }),
+    prisma.trade.findMany({
+      where: { userId, date: { gte: yesterdayStart, lte: yesterdayEnd } },
       orderBy: { time: "asc" },
     }),
     prisma.trade.findMany({
@@ -320,6 +331,48 @@ async function buildTradesContext(userId: string): Promise<string> {
       if (t.notes) context += `    Relato: "${t.notes.slice(0, 120)}"\n`;
     }
     context += "\n";
+  }
+
+  // Yesterday's trades — explicit section to avoid mentor confusing past replays with yesterday's session
+  const yesterdayLabel = yesterdayBrt.toLocaleDateString("pt-BR", { weekday: "long", day: "2-digit", month: "long", timeZone: "America/Sao_Paulo" });
+  const yesterdayDayOfWeek = yesterdayBrt.getUTCDay(); // 0=Sun, 6=Sat
+  if (yesterdayDayOfWeek !== 0 && yesterdayDayOfWeek !== 6) {
+    // Check if there was a replay yesterday
+    const yesterdayHadReplay = replays.some((r) => {
+      const rd = new Date(r.date);
+      return rd.getUTCFullYear() === yY && rd.getUTCMonth() === yM && rd.getUTCDate() === yD;
+    });
+    const yesterdayReplay = yesterdayHadReplay ? replays.find((r) => {
+      const rd = new Date(r.date);
+      return rd.getUTCFullYear() === yY && rd.getUTCMonth() === yM && rd.getUTCDate() === yD;
+    }) : null;
+
+    if (yesterdayTrades.length === 0 && !yesterdayHadReplay) {
+      context += `## ONTEM (${yesterdayLabel})\nNenhuma operação registrada. Nenhum replay realizado.\n\n`;
+    } else {
+      const yNet = yesterdayTrades.reduce((s, t) => s + t.financialResult, 0);
+      const yPts = yesterdayTrades.reduce((s, t) => s + t.points, 0);
+      const yGains = yesterdayTrades.filter((t) => t.result === "GAIN").length;
+      const yLosses = yesterdayTrades.filter((t) => t.result === "LOSS").length;
+      context += `## ONTEM (${yesterdayLabel})\n`;
+      if (yesterdayTrades.length > 0) {
+        context += `- Total: ${yesterdayTrades.length} operação${yesterdayTrades.length > 1 ? "ões" : ""} | Gains: ${yGains} | Losses: ${yLosses}\n`;
+        context += `- Resultado: ${formatCurrency(Math.round(yNet * 100) / 100)} | Pontos: ${yPts > 0 ? "+" : ""}${yPts.toFixed(1)}\n`;
+        for (const t of yesterdayTrades) {
+          context += `  • ${t.time} | ${t.asset} ${t.direction} ${t.contracts}ct | E:${t.entryPrice}→${t.exitPrice} | ${t.result} ${t.points > 0 ? "+" : ""}${t.points.toFixed(1)}pts ${formatCurrency(t.financialResult)}${t.setup ? ` | ${t.setup}` : ""}\n`;
+          if (t.notes) context += `    Relato: "${t.notes.slice(0, 120)}"\n`;
+        }
+      } else {
+        context += `- Nenhuma operação registrada.\n`;
+      }
+      if (yesterdayReplay) {
+        const wr = yesterdayReplay.entries > 0 ? ((yesterdayReplay.gains / yesterdayReplay.entries) * 100).toFixed(0) : "0";
+        context += `- Replay realizado: "${yesterdayReplay.title}" | ${yesterdayReplay.entries} ent | ${yesterdayReplay.gains}G/${yesterdayReplay.losses}L | WR:${wr}% | ${yesterdayReplay.points > 0 ? "+" : ""}${yesterdayReplay.points.toFixed(1)}pts\n`;
+      } else {
+        context += `- Nenhum replay realizado ontem.\n`;
+      }
+      context += "\n";
+    }
   }
 
   // Monthly metrics
@@ -495,7 +548,7 @@ export async function POST(request: NextRequest) {
     // Inject dynamic profile data
     if (traderProfile) {
       systemContent += `\n\n## PERFIL DO TRADER (DADOS ATUAIS)
-- **Nome:** ${traderProfile.name}${traderProfile.nickname ? ` (pode chamá-lo de "${traderProfile.nickname}" em momentos de motivação)` : ""}
+- **Nome:** ${traderProfile.name}${traderProfile.nickname ? ` (apelido: "${traderProfile.nickname}" — use apenas o apelido quando for se referir a ele, NUNCA use "Meu ${traderProfile.nickname}" ou qualquer variante com prefixo "Meu". Se quiser usar um termo afetivo, prefira "meu amigo")` : " — se quiser usar um termo afetivo, prefira 'meu amigo'"}
 - **Ativo:** ${traderProfile.asset} — cada ponto vale R$ ${traderProfile.pointValue.toFixed(2)} por contrato
 ${traderProfile.currentJob ? `- **Profissão:** ${traderProfile.currentJob}` : ""}
 - **Meta mensal:** R$ ${traderProfile.monthlyGoal.toFixed(2)}
