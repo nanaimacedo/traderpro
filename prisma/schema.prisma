@@ -166,6 +166,7 @@ model TraderProfile {
   motivation     String? // por que faz trade (familia, liberdade, etc)
   mentoringSince DateTime @default(now())
   onboarded      Boolean  @default(false) // se ja completou onboarding
+  mentorRules    String?  // JSON: [{rule: string, date: string}] — preferencias/correcoes aprendidas
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
 }

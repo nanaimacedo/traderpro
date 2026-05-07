@@ -4,7 +4,7 @@ import { getSession } from "@/lib/auth";
 import { MENTOR_SYSTEM_PROMPT } from "@/lib/mentor-prompt";
 import { getRelevantKnowledge } from "@/lib/mentor-knowledge";
 import { getMethodologyPrompt } from "@/lib/methodology-plugins";
-import { getRecentMemories, generateConversationSummary } from "@/lib/mentor-memory";
+import { getRecentMemories, generateConversationSummary, extractAndSaveRules, getMentorRules } from "@/lib/mentor-memory";
 import { getTodayEvents, formatEventsForMentor } from "@/lib/economic-calendar";
 import { calculateMetrics } from "@/lib/calculations";
 import { generateWeeklyInsights } from "@/lib/insights";
@@ -546,7 +546,11 @@ export async function POST(request: NextRequest) {
       where: { userId: session.userId },
     });
 
-    let systemContent = MENTOR_SYSTEM_PROMPT;
+    // Inject learned rules at the very top — highest priority, inviolable
+    const mentorRules = await getMentorRules(session.userId);
+    let systemContent = mentorRules
+      ? `${mentorRules}\n\n${MENTOR_SYSTEM_PROMPT}`
+      : MENTOR_SYSTEM_PROMPT;
 
     // Inject dynamic profile data
     if (traderProfile) {
@@ -660,13 +664,14 @@ ${traderProfile.motivation ? `- **Motivação:** ${traderProfile.motivation}` : 
               data: { role: "assistant", content: fullContent, conversationId: convId },
             });
 
-            // Generate memory summary in background (don't block response)
+            // Generate memory summary + extract rules in background (don't block response)
             const allMessages = await prisma.mentorMessage.findMany({
               where: { conversationId: convId },
               orderBy: { createdAt: "asc" },
               select: { role: true, content: true },
             });
             generateConversationSummary(convId, allMessages).catch(() => {});
+            extractAndSaveRules(convId, allMessages, session.userId).catch(() => {});
           }
           controller.enqueue(encoder.encode(`data: [DONE]\n\n`));
           controller.close();
